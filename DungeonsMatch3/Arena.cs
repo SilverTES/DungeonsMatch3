@@ -7,6 +7,7 @@ using Mugen.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DungeonsMatch3
 {
@@ -14,9 +15,10 @@ namespace DungeonsMatch3
     {
         public enum States
         {
-            None,
-            Selected,
-            ExploseSelected,
+            Play,
+            SelectGems,
+            ExploseSelectedGems,
+            PushGemsDown,
         }
         public struct Dimension
         {
@@ -52,7 +54,7 @@ namespace DungeonsMatch3
         {
             _grid = new List2D<Gem>(GridSize.X, GridSize.Y);
 
-            SetState((int)States.None);
+            SetState((int)States.Play);
         }
         public void Setup(Dimension dimension)
         {
@@ -83,7 +85,7 @@ namespace DungeonsMatch3
         {
             switch ((States)_state)
             {
-                case States.None:
+                case States.Play:
 
                     if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 32))
                     {
@@ -97,23 +99,23 @@ namespace DungeonsMatch3
                                 SelectGem(gem);
                             }
                         }
-                        ChangeState((int)States.Selected);
+                        ChangeState((int)States.SelectGems);
                     }
 
                     break;
 
-                case States.Selected:
+                case States.SelectGems:
 
                     if (_mouse.LeftButton == ButtonState.Released)
                     {
                         if (_gemSelecteds.Count >= 3)
                         {
-                            ChangeState((int)States.ExploseSelected);
+                            ChangeState((int)States.ExploseSelectedGems);
                         }
                         else
                         {
-                            DeSelectAllGem();
-                            ChangeState((int)States.None);
+                            DeSelectAllGems();
+                            ChangeState((int)States.Play);
                         }
                         
                     }
@@ -144,15 +146,51 @@ namespace DungeonsMatch3
 
                     break;
 
-                case States.ExploseSelected:
+                case States.ExploseSelectedGems:
 
-                    ExploseSelectedGem();
-
-                    DeSelectAllGem();
-
-                    ChangeState((int)States.None);
+                    ExploseSelectedGems();
+                    DeSelectAllGems();
+                    ChangeState((int)States.PushGemsDown);
 
                     break;
+
+                case States.PushGemsDown:
+
+                    for (int row = 0; row < _grid._height - 1; row++)
+                    {
+                        for (int col = 0; col < _grid._width; col++)
+                        {
+                            var gem = _grid.Get(col, row);
+
+                            if (gem != null)
+                            {
+                                bool isFall = false;
+                                // scan vertical
+                                for (int scanY = row + 1; scanY < _grid._height; scanY++)
+                                {
+                                    var gemAtBottom = _grid.Get(col, scanY);
+
+                                    if (gemAtBottom != null)
+                                        break;
+
+                                    if (gemAtBottom == null)
+                                    {
+                                        isFall = true;
+                                        gem.DownPosition = new Point(col, scanY);
+                                    }
+                                }
+
+                                if (isFall)
+                                    gem.MoveTo(gem.DownPosition);
+
+                            }
+                        }
+                    }
+
+                    ChangeState((int)States.Play);
+
+                    break;
+
                 default:
                     break;
             }
@@ -197,7 +235,7 @@ namespace DungeonsMatch3
                 _gemSelecteds.Remove(gem);
             }
         }
-        public void DeSelectAllGem()
+        public void DeSelectAllGems()
         {
             var gems = GroupOf(UID.Get<Gem>());
             
@@ -209,7 +247,7 @@ namespace DungeonsMatch3
 
             _gemSelecteds.Clear();
         }
-        public void ExploseSelectedGem()
+        public void ExploseSelectedGems()
         {
             Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
 
@@ -218,7 +256,8 @@ namespace DungeonsMatch3
                 var gem = _gemSelecteds[i];
                 _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
 
-                gem.KillMe();
+                //gem.KillMe();
+                gem.ExploseMe();
             }
             _gemSelecteds.Clear();
 
@@ -297,13 +336,15 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.FillRectangle(AbsRectF, Color.DarkSlateBlue);
+                batch.FillRectangle(AbsRectF, Color.DarkSlateBlue * .5f);
                 //batch.Grid(AbsXY, AbsRectF.Width, AbsRectF.Height, CellSize.X, CellSize.Y, Color.Gray * .5f, 1);
 
                 if (IsInArena(_mousePos))
                     batch.Rectangle(_rectOver, Color.Cyan * .5f, 4f);
                 
                 batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
+
+                DrawGemsLink(batch);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -312,24 +353,17 @@ namespace DungeonsMatch3
                 batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
                 batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
-                //for (int i = 0; i < _grid._width; i++)
-                //{
-                //    for (int j = 0; j < _grid._height; j++)
-                //    {
-                //        int type = _grid.Get(i, j)._type;
-                //        batch.CenterStringXY(Game1._fontMain, type != Const.NoIndex ? type.ToString() : ".", AbsXY + MapPositionToVector2(i,j), Color.White);
-                //    }
-                //}
-
-                for (int i = 0; i < _gemSelecteds.Count-1; i++)
+                for (int i = 0; i < _grid._width; i++)
                 {
-                    batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition), AbsXY + MapPositionToVector2(_gemSelecteds[i+1].MapPosition), _currentColor, 15f);
-
-                    //batch.Circle(AbsXY + MapPositionToVector2(_selecteds[i].MapPosition), 40, 24, Color.White, 4);
+                    for (int j = 0; j < _grid._height; j++)
+                    {
+                        var gem = _grid.Get(i, j);
+                        if (gem != null) 
+                        { 
+                            batch.CenterStringXY(Game1._fontMain, $"{System.Array.IndexOf(Gem.Colors, gem.Color)}", AbsXY + MapPositionToVector2(i, j), Color.White);
+                        }
+                    }
                 }
-
-                if (_state == (int)States.Selected && _gemSelecteds.Count > 0)
-                    batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition), AbsXY + _mousePos, _currentColor, 15f);
 
                 batch.Point(_mapMouseOver, 4, Color.OrangeRed);
             }
@@ -337,6 +371,17 @@ namespace DungeonsMatch3
             DrawChilds(batch, gameTime, indexLayer);
 
             return base.Draw(batch, gameTime, indexLayer);
+        }
+
+        public void DrawGemsLink(SpriteBatch batch)
+        {
+            for (int i = 0; i < _gemSelecteds.Count - 1; i++)
+            {
+                batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition), AbsXY + MapPositionToVector2(_gemSelecteds[i + 1].MapPosition), _currentColor, 15f);
+            }
+
+            if (_state == (int)States.SelectGems && _gemSelecteds.Count > 0)
+                batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition), AbsXY + _mousePos, _currentColor, 15f);
         }
     }
 }

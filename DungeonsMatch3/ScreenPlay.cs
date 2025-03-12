@@ -69,7 +69,7 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.GraphicsDevice.Clear(HSV.ToRGB(200, 0.4f, 0.25f));
+                batch.GraphicsDevice.Clear(HSV.ToRGB(160, 0.5f, 0.25f));
 
                 batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Gray * .5f, 1f);
 
