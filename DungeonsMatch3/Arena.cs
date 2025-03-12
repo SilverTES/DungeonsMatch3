@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.GFX;
-using Mugen.Input;
 using Mugen.Physics;
 using System;
 using System.Collections.Generic;
@@ -18,15 +17,17 @@ namespace DungeonsMatch3
             Play,
             SelectGems,
             ExploseSelectedGems,
-            PushGemsDown,
-            AddNewGems,
+            PushGemsToDown,
+            AddNewGemsToDown,
+            PushGemsToUp,
+            AddNewGemsToUp,
         }
-        public struct Dimension
+        public struct Format
         {
             public Point GridSize;
             public Point CellSize;
 
-            public Dimension(int gridW, int gridH, int cellW, int cellH)
+            public Format(int gridW, int gridH, int cellW, int cellH)
             {
                 GridSize = new Point(gridW, gridH);
                 CellSize = new Point(cellW, cellH);
@@ -57,7 +58,7 @@ namespace DungeonsMatch3
 
             SetState((int)States.Play);
         }
-        public void Setup(Dimension dimension)
+        public void Setup(Format dimension)
         {
             GridSize = dimension.GridSize;
             CellSize = dimension.CellSize;
@@ -88,72 +89,13 @@ namespace DungeonsMatch3
             {
                 case States.Play:
 
-                    if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
-                    {
-                        var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
-                        if (gem != null)
-                        {
-                            gem.Shake(1);
-                        }
-                    }
-
-                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
-                    {
-                        var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
-
-                        if (gem != null)
-                        {
-                            if (!_gemSelecteds.Contains(gem))
-                            {
-                                _currentColor = gem.Color;
-                                SelectGem(gem);
-                            }
-                        }
-                        ChangeState((int)States.SelectGems);
-                    }
+                    Play();
 
                     break;
 
                 case States.SelectGems:
 
-                    if (_mouse.LeftButton == ButtonState.Released)
-                    {
-                        if (_gemSelecteds.Count >= 3)
-                        {
-                            ChangeState((int)States.ExploseSelectedGems);
-                        }
-                        else
-                        {
-                            DeSelectAllGems();
-                            ChangeState((int)States.Play);
-                        }
-                        
-                    }
-                    else
-                    {
-                        var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
-
-                        if (gem != null)
-                        {
-                            
-                            if (!_gemSelecteds.Contains(gem)) // Select a non selected gem
-                            {
-                                if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
-                                {
-                                    SelectGem(gem);
-                                    new FxExplose(gem.AbsXY, gem.Color, 10, 10).AppendTo(this);
-                                }
-                            }
-                            else // Select an already selected gem
-                            {
-                                if (gem.Color == _currentColor && (_gemSelecteds.Last().MapPosition != gem.MapPosition))
-                                {
-                                    DeSelectGem(_gemSelecteds.Last());
-                                    //Console.Write("< Deselect >");
-                                }
-                            }
-                        }
-                    }
+                    SelectGems();
 
                     break;
 
@@ -161,70 +103,41 @@ namespace DungeonsMatch3
 
                     ExploseSelectedGems();
                     DeSelectAllGems();
-                    ChangeState((int)States.PushGemsDown);
+
+                    
+                    int pushDirection = Misc.Rng.Next(0, 10);
+                    
+                    if (pushDirection > 5)
+                        ChangeState((int)States.PushGemsToUp);
+                    else 
+                        ChangeState((int)States.PushGemsToDown);
 
                     break;
 
-                case States.PushGemsDown:
+                case States.PushGemsToDown:
 
-                    for (int row = _grid._height; row >= 0; row--)
-                    {
-                        for (int col = 0; col < _grid._width; col++)
-                        {
-                            var gem = _grid.Get(col, row);
-
-                            if (gem != null)
-                            {
-                                gem.IsFall = false;
-                                // scan vertical
-                                for (int scanY = row + 1; scanY < _grid._height; scanY++)
-                                {
-                                    var gemAtBottom = _grid.Get(col, scanY);
-
-                                    if (gemAtBottom != null)
-                                        break;
-
-                                    if (gemAtBottom == null)
-                                    {
-                                        gem.IsFall = true;
-                                        gem.DownPosition = new Point(col, scanY);
-                                    }
-                                }
-
-                                if (gem.IsFall)
-                                {
-                                    DeleteGem(gem);
-                                    AddGem(gem, gem.DownPosition);
-                                    gem.MoveTo(gem.DownPosition);
-                                }
-                            }
-                        }
-                    }
-
-                    ChangeState((int)States.AddNewGems);
+                    PushGemsToDown();
+                    ChangeState((int)States.AddNewGemsToDown);
 
                     break;
 
-                case States.AddNewGems:
+                case States.AddNewGemsToDown:
 
-                    for (int row = _grid._height - 1; row >= 0; row--)
-                    {
-                        for (int col = 0; col < _grid._width; col++)
-                        {
-                            var gem = _grid.Get(col, row);
-                            if (gem == null)
-                            {
-                                var newGem = new Gem(this, RandomColor(), new Point(col, -1));
-                                newGem.SetPosition(MapPositionToVector2(newGem.MapPosition)).AppendTo(this);
+                    AddNewGemsToDown();
+                    ChangeState((int)States.Play);
 
-                                newGem.DownPosition = new Point(col, row);
-                                
-                                AddGem(newGem, newGem.DownPosition);
-                                newGem.MoveTo(newGem.DownPosition);
-                            }
-                        }
-                    }
+                    break;
 
+                case States.PushGemsToUp:
+
+                    PushGemsToUp();
+                    ChangeState((int)States.AddNewGemsToUp);
+
+                    break;
+
+                case States.AddNewGemsToUp:
+
+                    AddNewGemsToUp();
                     ChangeState((int)States.Play);
 
                     break;
@@ -264,6 +177,185 @@ namespace DungeonsMatch3
             UpdateChilds(gameTime);
 
             return base.Update(gameTime);
+        }
+        private void Play()
+        {
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
+            {
+                var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+                if (gem != null)
+                {
+                    gem.Shake(1);
+
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver))
+                    {
+                        if (!_gemSelecteds.Contains(gem))
+                        {
+                            _currentColor = gem.Color;
+                            SelectGem(gem);
+                            ChangeState((int)States.SelectGems);
+                        }
+                    }
+
+                }
+            }
+        }
+        public void SelectGems()
+        {
+            if (_mouse.LeftButton == ButtonState.Released)
+            {
+                if (_gemSelecteds.Count >= 3)
+                {
+                    ChangeState((int)States.ExploseSelectedGems);
+                }
+                else
+                {
+                    DeSelectAllGems();
+                    ChangeState((int)States.Play);
+                }
+
+            }
+            else
+            {
+                var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+
+                if (gem != null)
+                {
+
+                    if (!_gemSelecteds.Contains(gem)) // Select a non selected gem
+                    {
+                        if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
+                        {
+                            SelectGem(gem);
+                            new FxExplose(gem.AbsXY, gem.Color, 10, 10).AppendTo(this);
+                        }
+                    }
+                    else // Select an already selected gem
+                    {
+                        if (gem.Color == _currentColor && (_gemSelecteds.Last().MapPosition != gem.MapPosition))
+                        {
+                            DeSelectGem(_gemSelecteds.Last());
+                            //Console.Write("< Deselect >");
+                        }
+                    }
+                }
+            }
+        }
+        public void PushGemsToDown()
+        {
+            for (int row = _grid._height; row >= 0; row--)
+            {
+                for (int col = 0; col < _grid._width; col++)
+                {
+                    var gem = _grid.Get(col, row);
+
+                    if (gem != null)
+                    {
+                        gem.IsFall = false;
+                        // scan vertical
+                        for (int scanY = row + 1; scanY < _grid._height; scanY++)
+                        {
+                            var gemAtBottom = _grid.Get(col, scanY);
+
+                            if (gemAtBottom != null)
+                                break;
+
+                            if (gemAtBottom == null)
+                            {
+                                gem.IsFall = true;
+                                gem.DownPosition = new Point(col, scanY);
+                            }
+                        }
+
+                        if (gem.IsFall)
+                        {
+                            DeleteGem(gem);
+                            AddGem(gem, gem.DownPosition);
+                            gem.MoveTo(gem.DownPosition);
+                        }
+                    }
+                }
+            }
+        }
+        public void PushGemsToUp()
+        {
+            for (int row = 0; row < _grid._height; row++)
+            //for (int row = _grid._height; row >= 0; row--)
+            {
+                for (int col = 0; col < _grid._width; col++)
+                {
+                    var gem = _grid.Get(col, row);
+
+                    if (gem != null)
+                    {
+                        gem.IsFall = false;
+                        // scan vertical
+                        //for (int scanY = row + 1; scanY < _grid._height; scanY++)
+                        for (int scanY = row - 1; scanY >= 0; scanY--)
+                        {
+                            var gemAtBottom = _grid.Get(col, scanY);
+
+                            if (gemAtBottom != null)
+                                break;
+
+                            if (gemAtBottom == null)
+                            {
+                                gem.IsFall = true;
+                                gem.DownPosition = new Point(col, scanY);
+                            }
+                        }
+
+                        if (gem.IsFall)
+                        {
+                            DeleteGem(gem);
+                            AddGem(gem, gem.DownPosition);
+                            gem.MoveTo(gem.DownPosition);
+                        }
+                    }
+                }
+            }
+        }
+        public void AddNewGemsToDown()
+        {
+            for (int row = _grid._height - 1; row >= 0; row--)
+            {
+                for (int col = 0; col < _grid._width; col++)
+                {
+                    var gem = _grid.Get(col, row);
+                    if (gem == null)
+                    {
+                        var newGem = new Gem(this, RandomColor(), new Point(col, -1));
+                        newGem.SetPosition(MapPositionToVector2(newGem.MapPosition)).AppendTo(this);
+
+                        newGem.DownPosition = new Point(col, row);
+
+                        AddGem(newGem, newGem.DownPosition);
+                        newGem.MoveTo(newGem.DownPosition);
+                    }
+                }
+            }
+        }
+        public void AddNewGemsToUp()
+        {
+            //for (int row = _grid._height - 1; row >= 0; row--)
+            for (int row = 0; row <_grid._height; row++)
+            {
+                //for (int col = 0; col < _grid._width; col++)
+                for (int col = 0; col < _grid._width; col++)
+                {
+                    var gem = _grid.Get(col, row);
+                    if (gem == null)
+                    {
+                        var newGem = new Gem(this, RandomColor(), new Point(col, _grid._height + 1));
+                        newGem.SetPosition(MapPositionToVector2(newGem.MapPosition)).AppendTo(this);
+
+                        newGem.DownPosition = new Point(col, row);
+
+                        AddGem(newGem, newGem.DownPosition);
+                        newGem.MoveTo(newGem.DownPosition);
+                    }
+                }
+            }
         }
         public void SelectGem(Gem gem)
         {
@@ -425,7 +517,6 @@ namespace DungeonsMatch3
 
             return base.Draw(batch, gameTime, indexLayer);
         }
-
         public void DrawGemsLink(SpriteBatch batch)
         {
             for (int i = 0; i < _gemSelecteds.Count - 1; i++)

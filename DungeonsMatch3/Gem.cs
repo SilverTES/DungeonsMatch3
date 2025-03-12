@@ -23,8 +23,9 @@ namespace DungeonsMatch3
             Color.DodgerBlue,
             Color.ForestGreen,
             Color.DarkOrange,
-            Color.MediumVioletRed,
+            Color.BlueViolet,
             Color.Gold,
+            Color.Gray,
         ];
 
         public Color Color;
@@ -125,7 +126,6 @@ namespace DungeonsMatch3
 
                     if (_tempoDead <= 0)
                     {
-                        
                         KillMe();
                     }
 

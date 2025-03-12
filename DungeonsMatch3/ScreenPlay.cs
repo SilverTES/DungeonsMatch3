@@ -15,11 +15,10 @@ namespace DungeonsMatch3
 
         KeyboardState _key;
 
-        Arena.Dimension[] _dimension = [
-            new Arena.Dimension(6,8,80,80),
-            new Arena.Dimension(8,10,80,80),
-            new Arena.Dimension(10,12,80,80),
-            //new Arena.Dimension(12,14,80,80),
+        Arena.Format[] _format = [
+            new Arena.Format(6,10,80,80),
+            new Arena.Format(8,10,80,80),
+            new Arena.Format(10,10,80,80),
             ];
 
         int _indexDim = 0;
@@ -29,7 +28,7 @@ namespace DungeonsMatch3
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(_dimension[0]);
+            _arena.Setup(_format[0]);
             _arena.InitGrid();
             SetArenaCentered(_arena);
 
@@ -37,10 +36,10 @@ namespace DungeonsMatch3
             _loop.SetLoop(0f, 0f, 2f, .05f, Mugen.Animation.Loops.PINGPONG);
             _loop.Start();
         }
-        public void SetDimension(int index)
+        public void SetFormat(int index)
         {
             _arena.ClearGrid();
-            _arena.Setup(_dimension[index]);
+            _arena.Setup(_format[index]);
             SetArenaCentered(_arena);
             _arena.InitGrid();
         }
@@ -55,15 +54,15 @@ namespace DungeonsMatch3
 
             _key = Game1.Key;
 
-            if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexDim < _dimension.Length - 1) 
+            if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexDim < _format.Length - 1) 
             { 
                 _indexDim++;  
-                SetDimension(_indexDim); 
+                SetFormat(_indexDim); 
             }
             if (ButtonControl.OnePress("-", _key.IsKeyDown(Keys.PageDown)) && _indexDim > 0)
             {
                 _indexDim--;
-                SetDimension(_indexDim);
+                SetFormat(_indexDim);
             }
 
             UpdateChilds(gameTime);
@@ -86,9 +85,9 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.String(Game1._fontMain, $" Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
+                batch.String(Game1._fontMain, $"Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
 
-                batch.String(Game1._fontMain, $"Dimension Index = {_indexDim} {_dimension[_indexDim].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
+                batch.String(Game1._fontMain, $"Format Index = {_indexDim} {_format[_indexDim].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
 
                 for (int i = 0; i < 360; i++)
                 {
