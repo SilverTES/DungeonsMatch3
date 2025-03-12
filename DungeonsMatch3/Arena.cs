@@ -16,6 +16,7 @@ namespace DungeonsMatch3
         {
             None,
             Selected,
+            ExploseSelected,
         }
         public struct Dimension
         {
@@ -105,9 +106,16 @@ namespace DungeonsMatch3
 
                     if (_mouse.LeftButton == ButtonState.Released)
                     {
-                        DeSelectAllGem();
-
-                        ChangeState((int)States.None);
+                        if (_gemSelecteds.Count >= 3)
+                        {
+                            ChangeState((int)States.ExploseSelected);
+                        }
+                        else
+                        {
+                            DeSelectAllGem();
+                            ChangeState((int)States.None);
+                        }
+                        
                     }
                     else
                     {
@@ -136,6 +144,15 @@ namespace DungeonsMatch3
 
                     break;
 
+                case States.ExploseSelected:
+
+                    ExploseSelectedGem();
+
+                    DeSelectAllGem();
+
+                    ChangeState((int)States.None);
+
+                    break;
                 default:
                     break;
             }
@@ -191,6 +208,20 @@ namespace DungeonsMatch3
             }
 
             _gemSelecteds.Clear();
+        }
+        public void ExploseSelectedGem()
+        {
+            Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
+
+            for (int i = 0; i < _gemSelecteds.Count; i++)
+            {
+                var gem = _gemSelecteds[i];
+                _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
+
+                gem.KillMe();
+            }
+            _gemSelecteds.Clear();
+
         }
         //public Color CurrentColor()
         //{
