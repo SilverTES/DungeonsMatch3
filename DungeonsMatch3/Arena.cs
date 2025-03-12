@@ -18,6 +18,7 @@ namespace DungeonsMatch3
             SelectGems,
             ExploseSelectedGems,
             PushGemsDown,
+            AddNewGems,
         }
         public struct Dimension
         {
@@ -86,7 +87,7 @@ namespace DungeonsMatch3
             {
                 case States.Play:
 
-                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 32))
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 50))
                     {
                         var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
 
@@ -155,7 +156,6 @@ namespace DungeonsMatch3
 
                 case States.PushGemsDown:
 
-                    //for (int row = 0; row < _grid._height - 1; row++)
                     for (int row = _grid._height; row >= 0; row--)
                     {
                         for (int col = 0; col < _grid._width; col++)
@@ -185,9 +185,31 @@ namespace DungeonsMatch3
                                     DeleteGem(gem);
                                     AddGem(gem, gem.DownPosition);
                                     gem.MoveTo(gem.DownPosition);
-
                                 }
+                            }
+                        }
+                    }
 
+                    ChangeState((int)States.AddNewGems);
+
+                    break;
+
+                case States.AddNewGems:
+
+                    for (int row = _grid._height - 1; row >= 0; row--)
+                    {
+                        for (int col = 0; col < _grid._width; col++)
+                        {
+                            var gem = _grid.Get(col, row);
+                            if (gem == null)
+                            {
+                                var newGem = new Gem(this, RandomColor(), new Point(col, -1));
+                                newGem.SetPosition(MapPositionToVector2(newGem.MapPosition)).AppendTo(this);
+
+                                newGem.DownPosition = new Point(col, row);
+                                
+                                AddGem(newGem, newGem.DownPosition);
+                                newGem.MoveTo(newGem.DownPosition);
                             }
                         }
                     }
@@ -261,16 +283,11 @@ namespace DungeonsMatch3
                 var gem = _gemSelecteds[i];
                 _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
 
-                //gem.KillMe();
                 gem.ExploseMe();
             }
             _gemSelecteds.Clear();
 
         }
-        //public Color CurrentColor()
-        //{
-        //    return _currentColor != Const.NoIndex ? Gem.Colors[_currentColor] : Color.Black;
-        //}
         public Color RandomColor()
         {
             return Gem.Colors[Misc.Rng.Next(0, Gem.Colors.Length)];
@@ -299,18 +316,14 @@ namespace DungeonsMatch3
 
                     if (gem != null)
                     {
-                        gem.KillMe();
                         _grid.Put(i, j, null);
                     }
                     
                 }
             }
+
+            KillAll(UID.Get<Gem>());
         }
-        //public void AddGem(Point mapPosition, Color color)
-        //{
-        //    var gem = (Gem)new Gem(this, color, mapPosition).SetPosition(MapPositionToVector2(mapPosition)).AppendTo(this);
-        //    _grid.Put(mapPosition.X, mapPosition.Y, gem);
-        //}        
         public void AddGem(Gem gem)
         {
             _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
@@ -319,7 +332,6 @@ namespace DungeonsMatch3
         {
             _grid.Put(mapPosition.X, mapPosition.Y, gem);
         }
-
         public void DeleteGem(Gem gem)
         {
             _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);

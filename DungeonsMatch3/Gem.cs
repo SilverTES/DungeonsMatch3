@@ -37,20 +37,18 @@ namespace DungeonsMatch3
         Arena _arena;
 
         bool _isMove = false;
-        int _tempoMove = 60;
+        int _tempoMove = 30;
         int _ticMove = 0;
         Vector2 _from;
         Vector2 _goal;
 
         public Point DownPosition;
         public bool IsFall = false;
-        
 
-        int _tempoDead = 24;
-
-        float _radius = 32;
+        public float Radius = 32;
         float _ticRadius = 0;
 
+        int _tempoDead = 24;
         public Gem()
         {
             _type = UID.Get<Gem>();
@@ -95,8 +93,8 @@ namespace DungeonsMatch3
                 case States.Move:
 
 
-                    _x = Easing.GetValue(Easing.ElasticEaseOut, _ticMove, _from.X, _goal.X, _tempoMove);
-                    _y = Easing.GetValue(Easing.ElasticEaseOut, _ticMove, _from.Y, _goal.Y, _tempoMove);
+                    _x = Easing.GetValue(Easing.BounceEaseOut, _ticMove, _from.X, _goal.X, _tempoMove);
+                    _y = Easing.GetValue(Easing.BounceEaseOut, _ticMove, _from.Y, _goal.Y, _tempoMove);
 
                     _ticMove++;
 
@@ -105,7 +103,6 @@ namespace DungeonsMatch3
                         _ticMove = 0;
 
                         MapPosition = DownPosition;
-                        
 
                         ChangeState((int)States.None);
 
@@ -122,7 +119,7 @@ namespace DungeonsMatch3
 
                     _ticRadius++;
 
-                    _radius = Easing.GetValue(Easing.BounceEaseOut,_ticRadius, 32, 0, 24);
+                    Radius = Easing.GetValue(Easing.BounceEaseOut,_ticRadius, 32, 0, 24);
 
                     break;
 
@@ -142,10 +139,10 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.Point(AbsXY, _radius / 2, Color);
-                batch.Circle(AbsXY, _radius - 12, 8, Color, 4, _angle);
-                batch.Circle(AbsXY, _radius - 4, 8, Color, 4, _angle);
-                batch.Circle(AbsXY, _radius, 8, Color.Black, 5, _angle);
+                batch.Point(AbsXY, Radius / 2, Color);
+                batch.Circle(AbsXY, Radius - 12, 8, Color, 4, _angle);
+                batch.Circle(AbsXY, Radius - 4, 8, Color, 4, _angle);
+                batch.Circle(AbsXY, Radius, 8, Color.Black, 5, _angle);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
