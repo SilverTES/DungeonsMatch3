@@ -16,13 +16,15 @@ namespace DungeonsMatch3
         KeyboardState _key;
 
         Arena.Dimension[] _dimension = [
-            new Arena.Dimension(6,6,80,80),
-            new Arena.Dimension(8,8,80,80),
-            new Arena.Dimension(10,10,80,80),
-            new Arena.Dimension(12,12,80,80),
+            new Arena.Dimension(6,8,80,80),
+            new Arena.Dimension(8,10,80,80),
+            new Arena.Dimension(10,12,80,80),
+            //new Arena.Dimension(12,14,80,80),
             ];
 
         int _indexDim = 0;
+
+        Addon.Loop _loop;
 
         public ScreenPlay()
         {
@@ -30,6 +32,10 @@ namespace DungeonsMatch3
             _arena.Setup(_dimension[0]);
             _arena.InitGrid();
             SetArenaCentered(_arena);
+
+            _loop = new Addon.Loop(this);
+            _loop.SetLoop(0f, 0f, 2f, .05f, Mugen.Animation.Loops.PINGPONG);
+            _loop.Start();
         }
         public void SetDimension(int index)
         {
@@ -44,6 +50,7 @@ namespace DungeonsMatch3
         }
         public override Node Update(GameTime gameTime)
         {
+            _loop.Update(gameTime);
             UpdateRect();
 
             _key = Game1.Key;
@@ -69,9 +76,11 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.GraphicsDevice.Clear(HSV.ToRGB(160, 0.5f, 0.25f));
+                //batch.GraphicsDevice.Clear(HSV.ToRGB(160, 0.5f, 0.25f));
 
-                batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Gray * .5f, 1f);
+                batch.Draw(Game1._texBG, AbsXY + Vector2.UnitY * _loop._current, Color.White);
+
+                batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Black * .25f, 1f);
 
             }
 

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.GFX;
+using Mugen.Input;
 using Mugen.Physics;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,16 @@ namespace DungeonsMatch3
             {
                 case States.Play:
 
-                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 50))
+                    if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
+                    {
+                        var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+                        if (gem != null)
+                        {
+                            gem.Shake(1);
+                        }
+                    }
+
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
                     {
                         var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
 
@@ -226,6 +236,11 @@ namespace DungeonsMatch3
         public override Node Update(GameTime gameTime)
         {
             _mouse = Game1.Mouse;
+
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
+                Mouse.SetCursor(Game1.CursorB);
+            else
+                Mouse.SetCursor(Game1.CursorA);
 
             UpdateRect();
 
@@ -374,11 +389,11 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.FillRectangle(AbsRectF, Color.DarkSlateBlue * .5f);
+                batch.FillRectangle(AbsRectF, Color.Black * .5f);
                 //batch.Grid(AbsXY, AbsRectF.Width, AbsRectF.Height, CellSize.X, CellSize.Y, Color.Gray * .5f, 1);
 
-                if (IsInArena(_mousePos))
-                    batch.Rectangle(_rectOver, Color.Cyan * .5f, 4f);
+                //if (IsInArena(_mousePos))
+                //    batch.Rectangle(_rectOver, Color.Cyan * .5f, 4f);
                 
                 batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
 

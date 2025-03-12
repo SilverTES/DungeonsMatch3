@@ -22,14 +22,14 @@ namespace DungeonsMatch3
             Color.Red,
             Color.DodgerBlue,
             Color.ForestGreen,
-            Color.Yellow,
+            Color.DarkOrange,
             Color.MediumVioletRed,
-            //Color.MidnightBlue,
+            Color.Gold,
         ];
 
         public Color Color;
 
-        float _angle;
+        float _angle = (float)Geo.DegToRad(0);
 
         public bool _isSelected = false;
 
@@ -50,9 +50,15 @@ namespace DungeonsMatch3
         float _ticRadius = 0;
 
         int _tempoDead = 24;
+
+        Shake _shake = new();
         public Gem()
         {
             _type = UID.Get<Gem>();
+        }
+        public void Shake(float intensity, float step = 2, bool shakeX = true, bool shakeY = true)
+        {
+            _shake.SetIntensity(intensity, step, shakeX, shakeY);
         }
         //public int MyIndexColor()
         //{
@@ -67,6 +73,7 @@ namespace DungeonsMatch3
             MapPosition = mapPosition;
 
             ChangeState((int)States.None);
+
         }
         public void ExploseMe()
         {
@@ -87,7 +94,7 @@ namespace DungeonsMatch3
             {
                 case States.None:
 
-                    _angle += .005f;
+                    //_angle += .005f;
                     if (_angle >= Geo.RAD_360) _angle = Geo.RAD_0;
 
                     break;
@@ -144,21 +151,22 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
+                var shake = _shake.GetVector2();
 
-                batch.Point(AbsXY, Radius / 2, Color);
+                batch.Point(AbsXY + shake, Radius / 2, Color);
 
-                batch.Circle(AbsXY, Radius - 12, 8, Color, 4, _angle);
-                batch.Circle(AbsXY, Radius - 4, 8, Color, 4, _angle);
-                batch.Circle(AbsXY, Radius, 8, Color * .5f, 5, _angle);
+                batch.Circle(AbsXY + shake, Radius - 12, 8, Color, 4, _angle);
+                batch.Circle(AbsXY + shake, Radius - 4, 8, Color, 4, _angle);
+                batch.Circle(AbsXY + shake, Radius, 8, Color.Black, 2, _angle);
 
                 if (_isSelected)
-                    batch.Point(AbsXY, Radius / 3, Color.Black);
+                    batch.Point(AbsXY + shake, Radius / 4, Color.White);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
-                if (_isSelected)
-                    batch.Circle(AbsXY, 40, 24, Color.White, 4);
+                //if (_isSelected)
+                //    batch.Circle(AbsXY, 40, 24, Color.Black, 4);
 
                 //batch.CenterStringXY(Game1._fontMain, MapPosition.ToString(), AbsXY , Color.White);
             }

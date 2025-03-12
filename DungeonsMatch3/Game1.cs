@@ -21,6 +21,9 @@ public class Game1 : Game
     static public int ScreenH = 1080;
 
     static public SpriteFont _fontMain;
+    static public Texture2D _texBG;
+    static public Texture2D _texCursorA;
+    static public Texture2D _texCursorB;
 
     ScreenPlay _screenPlay;
 
@@ -28,6 +31,9 @@ public class Game1 : Game
     static public MouseState Mouse;
 
     static public Vector2 _mousePos;
+
+    static public MouseCursor CursorA;
+    static public MouseCursor CursorB;
 
     public Game1()
     {
@@ -43,7 +49,6 @@ public class Game1 : Game
         _screenPlay = new ScreenPlay();
         ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), [(int)Layers.Main, (int)Layers.FX, (int)Layers.Debug]);
 
-
         base.Initialize();
     }
 
@@ -52,6 +57,11 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         _fontMain = Content.Load<SpriteFont>("Fonts/fontMain");
+        _texBG = Content.Load<Texture2D>("Images/background00");
+        _texCursorA = Content.Load<Texture2D>("Images/mouse_cursor");
+        _texCursorB = Content.Load<Texture2D>("Images/mouse_cursor2");
+        CursorA = MouseCursor.FromTexture2D(_texCursorA, 0, 0);
+        CursorB = MouseCursor.FromTexture2D(_texCursorB, 0, 0);
     }
 
     protected override void Update(GameTime gameTime)
