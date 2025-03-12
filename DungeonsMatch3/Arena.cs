@@ -58,10 +58,10 @@ namespace DungeonsMatch3
 
             SetState((int)States.Play);
         }
-        public void Setup(Format dimension)
+        public void Setup(Format format)
         {
-            GridSize = dimension.GridSize;
-            CellSize = dimension.CellSize;
+            GridSize = format.GridSize;
+            CellSize = format.CellSize;
 
             _rect.Width = GridSize.X * CellSize.X;
             _rect.Height = GridSize.Y * CellSize.Y;
@@ -337,10 +337,8 @@ namespace DungeonsMatch3
         }
         public void AddNewGemsToUp()
         {
-            //for (int row = _grid._height - 1; row >= 0; row--)
             for (int row = 0; row <_grid._height; row++)
             {
-                //for (int col = 0; col < _grid._width; col++)
                 for (int col = 0; col < _grid._width; col++)
                 {
                     var gem = _grid.Get(col, row);
@@ -486,7 +484,7 @@ namespace DungeonsMatch3
 
                 //if (IsInArena(_mousePos))
                 //    batch.Rectangle(_rectOver, Color.Cyan * .5f, 4f);
-                
+
                 batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
 
                 DrawGemsLink(batch);
