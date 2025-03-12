@@ -21,9 +21,10 @@ namespace DungeonsMatch3
         [
             Color.Red,
             Color.DodgerBlue,
-            Color.Green,
+            Color.ForestGreen,
             Color.Yellow,
-            Color.Violet,
+            Color.MediumVioletRed,
+            //Color.MidnightBlue,
         ];
 
         public Color Color;
@@ -69,6 +70,7 @@ namespace DungeonsMatch3
         }
         public void ExploseMe()
         {
+            new FxExplose(AbsXY, Color, 10, 40).AppendTo(_parent);
             ChangeState((int)States.Dead);
         }
         public void MoveTo(Point mapPosition)
@@ -77,7 +79,7 @@ namespace DungeonsMatch3
             _goal = _arena.MapPositionToVector2(mapPosition);
 
             ChangeState((int)States.Move);
-            Console.WriteLine("Gem Move Down");
+            //Console.WriteLine("Gem Move Down");
         }
         protected override void RunState(GameTime gameTime)
         {
@@ -115,7 +117,10 @@ namespace DungeonsMatch3
                     _tempoDead--;
 
                     if (_tempoDead <= 0)
+                    {
+                        
                         KillMe();
+                    }
 
                     _ticRadius++;
 
@@ -139,10 +144,15 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
+
                 batch.Point(AbsXY, Radius / 2, Color);
+
                 batch.Circle(AbsXY, Radius - 12, 8, Color, 4, _angle);
                 batch.Circle(AbsXY, Radius - 4, 8, Color, 4, _angle);
-                batch.Circle(AbsXY, Radius, 8, Color.Black, 5, _angle);
+                batch.Circle(AbsXY, Radius, 8, Color * .5f, 5, _angle);
+
+                if (_isSelected)
+                    batch.Point(AbsXY, Radius / 3, Color.Black);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)

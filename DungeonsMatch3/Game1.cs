@@ -11,6 +11,7 @@ public class Game1 : Game
     public enum Layers
     {
         Main,
+        FX, 
         Debug,
     }
 
@@ -40,7 +41,7 @@ public class Game1 : Game
     protected override void Initialize()
     {
         _screenPlay = new ScreenPlay();
-        ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), [(int)Layers.Main, (int)Layers.Debug]);
+        ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), [(int)Layers.Main, (int)Layers.FX, (int)Layers.Debug]);
 
 
         base.Initialize();

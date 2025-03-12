@@ -131,6 +131,7 @@ namespace DungeonsMatch3
                                 if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
                                 {
                                     SelectGem(gem);
+                                    new FxExplose(gem.AbsXY, gem.Color, 10, 10).AppendTo(this);
                                 }
                             }
                             else // Select an already selected gem
@@ -390,19 +391,19 @@ namespace DungeonsMatch3
                 batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
                 batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
-                for (int i = 0; i < _grid._width; i++)
-                {
-                    for (int j = 0; j < _grid._height; j++)
-                    {
-                        var gem = _grid.Get(i, j);
-                        if (gem != null) 
-                        { 
-                            batch.CenterStringXY(Game1._fontMain, $"{System.Array.IndexOf(Gem.Colors, gem.Color)}", AbsXY + MapPositionToVector2(i, j), Color.White);
-                        }
-                    }
-                }
+                //for (int i = 0; i < _grid._width; i++)
+                //{
+                //    for (int j = 0; j < _grid._height; j++)
+                //    {
+                //        var gem = _grid.Get(i, j);
+                //        if (gem != null) 
+                //        { 
+                //            batch.CenterStringXY(Game1._fontMain, $"{System.Array.IndexOf(Gem.Colors, gem.Color)}", AbsXY + MapPositionToVector2(i, j), Color.White);
+                //        }
+                //    }
+                //}
 
-                batch.Point(_mapMouseOver, 4, Color.OrangeRed);
+                //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
             }
 
             DrawChilds(batch, gameTime, indexLayer);
