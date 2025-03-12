@@ -38,10 +38,11 @@ namespace DungeonsMatch3
 
         RectangleF _rectOver;
         Point _mapPostionOver;
+        Vector2 _mapMouseOver;
 
         List2D<Gem> _grid;
 
-        List<Gem> _selecteds = [];
+        List<Gem> _gemSelecteds = [];
         Color _currentColor = Color.Black;
 
         MouseState _mouse;
@@ -83,22 +84,18 @@ namespace DungeonsMatch3
             {
                 case States.None:
 
-                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver))
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver) && Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 32))
                     {
                         var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
 
                         if (gem != null)
                         {
-                            if (!_selecteds.Contains(gem))
+                            if (!_gemSelecteds.Contains(gem))
                             {
                                 _currentColor = gem.Color;
-
-                                gem._isSelected = true;
-                                _selecteds.Add(gem);
-                                Console.WriteLine($"Add Selected :{_mapPostionOver}");
+                                SelectGem(gem);
                             }
                         }
-
                         ChangeState((int)States.Selected);
                     }
 
@@ -118,19 +115,24 @@ namespace DungeonsMatch3
 
                         if (gem != null)
                         {
-                            if (!_selecteds.Contains(gem))
+                            
+                            if (!_gemSelecteds.Contains(gem)) // Select a non selected gem
                             {
-                                if (gem.Color == _currentColor && IsClose(_selecteds.Last().MapPosition, gem.MapPosition))
+                                if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
                                 {
-                                    gem._isSelected = true;
-                                    _selecteds.Add(gem);
-                                    Console.WriteLine($"Add Selected :{_mapPostionOver}");
+                                    SelectGem(gem);
                                 }
-
+                            }
+                            else // Select an already selected gem
+                            {
+                                if (gem.Color == _currentColor && (_gemSelecteds.Last().MapPosition != gem.MapPosition))
+                                {
+                                    DeSelectGem(_gemSelecteds.Last());
+                                    //Console.Write("< Deselect >");
+                                }
                             }
                         }
                     }
-
 
                     break;
 
@@ -156,11 +158,27 @@ namespace DungeonsMatch3
             _rectOver.X = _mapPostionOver.X * CellSize.X + _x; 
             _rectOver.Y = _mapPostionOver.Y * CellSize.Y + _y;
 
+            _mapMouseOver.X = _rectOver.X + CellSize.X / 2;
+            _mapMouseOver.Y = _rectOver.Y + CellSize.Y / 2;
+
             RunState(gameTime);
 
             UpdateChilds(gameTime);
 
             return base.Update(gameTime);
+        }
+        public void SelectGem(Gem gem)
+        {
+            gem._isSelected = true;
+            _gemSelecteds.Add(gem);
+        }
+        public void DeSelectGem(Gem gem)
+        {
+            if (_gemSelecteds.Contains(gem))
+            {
+                gem._isSelected = false;
+                _gemSelecteds.Remove(gem);
+            }
         }
         public void DeSelectAllGem()
         {
@@ -172,7 +190,7 @@ namespace DungeonsMatch3
                 gem._isSelected = false;
             }
 
-            _selecteds.Clear();
+            _gemSelecteds.Clear();
         }
         //public Color CurrentColor()
         //{
@@ -261,7 +279,7 @@ namespace DungeonsMatch3
             {
                 batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
                 batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
-                batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_selecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
+                batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
                 //for (int i = 0; i < _grid._width; i++)
                 //{
@@ -272,12 +290,17 @@ namespace DungeonsMatch3
                 //    }
                 //}
 
-                for (int i = 0; i < _selecteds.Count-1; i++)
+                for (int i = 0; i < _gemSelecteds.Count-1; i++)
                 {
-                    batch.Line(AbsXY + MapPositionToVector2(_selecteds[i].MapPosition), AbsXY + MapPositionToVector2(_selecteds[i+1].MapPosition), _currentColor, 15f);
+                    batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition), AbsXY + MapPositionToVector2(_gemSelecteds[i+1].MapPosition), _currentColor, 15f);
 
                     //batch.Circle(AbsXY + MapPositionToVector2(_selecteds[i].MapPosition), 40, 24, Color.White, 4);
                 }
+
+                if (_state == (int)States.Selected && _gemSelecteds.Count > 0)
+                    batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition), AbsXY + _mousePos, _currentColor, 15f);
+
+                batch.Point(_mapMouseOver, 4, Color.OrangeRed);
             }
 
             DrawChilds(batch, gameTime, indexLayer);

@@ -13,7 +13,7 @@ namespace DungeonsMatch3
         static public Color[] Colors =
         [
             Color.Red,
-            Color.Blue,
+            Color.DodgerBlue,
             Color.Green,
             Color.Yellow,
             Color.Violet,
