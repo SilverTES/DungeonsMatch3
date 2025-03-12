@@ -23,8 +23,8 @@ public class Game1 : Game
 
     ScreenPlay _screenPlay;
 
-    KeyboardState _key;
-    MouseState _mouse;
+    static public KeyboardState Key;
+    static public MouseState Mouse;
 
     static public Vector2 _mousePos;
 
@@ -55,8 +55,8 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        _key = Keyboard.GetState();
-        _mouse = Mouse.GetState();
+        Key = Keyboard.GetState();
+        Mouse = Microsoft.Xna.Framework.Input.Mouse.GetState();
         WindowManager.Update(gameTime);
 
         _mousePos = WindowManager.GetMousePosition();
@@ -65,7 +65,7 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        if (ButtonControl.OnePress("ToggleFullScreen", _key.IsKeyDown(Keys.F11)))
+        if (ButtonControl.OnePress("ToggleFullScreen", Key.IsKeyDown(Keys.F11)))
             WindowManager.ToggleFullscreen();
 
         ScreenManager.Update(gameTime);

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.GFX;
 using Mugen.Input;
+using Mugen.Physics;
 using System;
 
 namespace DungeonsMatch3
@@ -15,10 +16,10 @@ namespace DungeonsMatch3
         KeyboardState _key;
 
         Arena.Dimension[] _dimension = [
-            new Arena.Dimension(12,12,64,64),
+            new Arena.Dimension(6,6,80,80),
+            new Arena.Dimension(8,8,80,80),
             new Arena.Dimension(10,10,80,80),
-            new Arena.Dimension(8,8,120,120),
-            new Arena.Dimension(6,6,160,160),
+            new Arena.Dimension(12,12,80,80),
             ];
 
         int _indexDim = 0;
@@ -26,7 +27,7 @@ namespace DungeonsMatch3
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(_dimension[3]);
+            _arena.Setup(_dimension[0]);
             _arena.InitGrid();
             SetArenaCentered(_arena);
         }
@@ -45,7 +46,7 @@ namespace DungeonsMatch3
         {
             UpdateRect();
 
-            _key = Keyboard.GetState();
+            _key = Game1.Key;
 
             if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexDim < _dimension.Length - 1) 
             { 
@@ -79,6 +80,17 @@ namespace DungeonsMatch3
                 batch.String(Game1._fontMain, $" Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
 
                 batch.String(Game1._fontMain, $"Dimension Index = {_indexDim} {_dimension[_indexDim].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
+
+                for (int i = 0; i < 360; i++)
+                {
+                    Vector2 pos = new Vector2(240, 240);
+
+                    Vector2 peri = new Vector2();
+                    peri.X = (float)Math.Cos(Geo.DegToRad(i)) * 40;
+                    peri.Y = (float)Math.Sin(Geo.DegToRad(i)) * 40;
+
+                    batch.Point(pos + peri, 8, HSV.ToRGB(i, 1, 1) * .5f);
+                }
             }
 
             DrawChilds(batch, gameTime, indexLayer);

@@ -2,25 +2,55 @@
 using Microsoft.Xna.Framework;
 using Mugen.Core;
 using Mugen.Physics;
+using Mugen.GFX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DungeonsMatch3
 {
     class Gem : Node
     {
-        Color _color;
+        static public Color[] Colors =
+        [
+            Color.Red,
+            Color.Blue,
+            Color.Green,
+            Color.Yellow,
+            Color.Violet,
+        ];
+
+        public Color Color;
 
         float _angle;
-        public Gem(Color color)
+
+        public bool _isSelected = false;
+
+        public Point MapPosition;
+
+        Arena _arena;
+
+        public Gem()
         {
             _type = UID.Get<Gem>();
-            _color = color;
+        }
+        //public int MyIndexColor()
+        //{
+        //    return Colors.FirstOrDefault(x => x.Value == Color).Key;
+        //}
+        public Gem(Arena arena, Color color, Point mapPosition)
+        {
+            _type = UID.Get<Gem>();
+
+            _arena = arena;
+            Color = color;
+            MapPosition = mapPosition;
         }
         public override Node Update(GameTime gameTime)
         {
             UpdateRect();
 
             _angle += .005f;
-            if (_angle > Geo.RAD_360) _angle = Geo.RAD_0;
+            if (_angle >= Geo.RAD_360) _angle = Geo.RAD_0;
 
             return base.Update(gameTime);
         }
@@ -28,9 +58,17 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.Point(AbsXY, 16, _color);
-                batch.Circle(AbsXY, 28, 8, _color * .5f, 4, _angle);
-                batch.Circle(AbsXY, 20, 8, _color, 4, _angle);
+                batch.Point(AbsXY, 16, Color);
+                batch.Circle(AbsXY, 28, 8, Color, 4, _angle);
+                batch.Circle(AbsXY, 20, 8, Color, 4, _angle);
+            }
+
+            if (indexLayer == (int)Game1.Layers.Debug)
+            {
+                if (_isSelected)
+                    batch.Circle(AbsXY, 40, 24, Color.White, 4);
+
+                //batch.CenterStringXY(Game1._fontMain, MapPosition.ToString(), AbsXY , Color.White);
             }
 
             return base.Draw(batch, gameTime, indexLayer);

@@ -1,13 +1,22 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.GFX;
 using Mugen.Physics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DungeonsMatch3
 {
     class Arena : Node
     {
+        public enum States
+        {
+            None,
+            Selected,
+        }
         public struct Dimension
         {
             public Point GridSize;
@@ -20,14 +29,6 @@ namespace DungeonsMatch3
             }
         }
 
-        Color[] _colors = [
-            Color.Red,
-            Color.Blue,
-            Color.Green,
-            Color.Yellow,
-            Color.Violet,
-        ];
-
         public Point GridSize;
         public Point CellSize;
 
@@ -36,14 +37,20 @@ namespace DungeonsMatch3
         Vector2 _mousePos = new Vector2();
 
         RectangleF _rectOver;
-        Point _mapPostionOver; 
+        Point _mapPostionOver;
 
-        List2D<Cell> _grid;
+        List2D<Gem> _grid;
+
+        List<Gem> _selecteds = [];
+        Color _currentColor = Color.Black;
+
+        MouseState _mouse;
 
         public Arena()
         {
-            _grid = new List2D<Cell>(GridSize.X, GridSize.Y);
+            _grid = new List2D<Gem>(GridSize.X, GridSize.Y);
 
+            SetState((int)States.None);
         }
         public void Setup(Dimension dimension)
         {
@@ -65,13 +72,76 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < _grid._height; j++)
                 {
-                    var cell = new Cell();
-                    _grid.Put(i, j, cell);
+                    var gem = new Gem();
+                    _grid.Put(i, j, gem);
                 }
             }
         }
+        protected override void RunState(GameTime gameTime)
+        {
+            switch ((States)_state)
+            {
+                case States.None:
+
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver))
+                    {
+                        var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+
+                        if (gem != null)
+                        {
+                            if (!_selecteds.Contains(gem))
+                            {
+                                _currentColor = gem.Color;
+
+                                gem._isSelected = true;
+                                _selecteds.Add(gem);
+                                Console.WriteLine($"Add Selected :{_mapPostionOver}");
+                            }
+                        }
+
+                        ChangeState((int)States.Selected);
+                    }
+
+                    break;
+
+                case States.Selected:
+
+                    if (_mouse.LeftButton == ButtonState.Released)
+                    {
+                        DeSelectAllGem();
+
+                        ChangeState((int)States.None);
+                    }
+                    else
+                    {
+                        var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+
+                        if (gem != null)
+                        {
+                            if (!_selecteds.Contains(gem))
+                            {
+                                if (gem.Color == _currentColor && IsClose(_selecteds.Last().MapPosition, gem.MapPosition))
+                                {
+                                    gem._isSelected = true;
+                                    _selecteds.Add(gem);
+                                    Console.WriteLine($"Add Selected :{_mapPostionOver}");
+                                }
+
+                            }
+                        }
+                    }
+
+
+                    break;
+
+                default:
+                    break;
+            }
+        } 
         public override Node Update(GameTime gameTime)
         {
+            _mouse = Game1.Mouse;
+
             UpdateRect();
 
             _rect.Width = GridSize.X * CellSize.X;
@@ -80,19 +150,37 @@ namespace DungeonsMatch3
             _mousePos.X = Game1._mousePos.X - _x;
             _mousePos.Y = Game1._mousePos.Y - _y;
 
-            _mapPostionOver.X = (int)(_mousePos.X / CellSize.X) * CellSize.X;
-            _mapPostionOver.Y = (int)(_mousePos.Y / CellSize.Y) * CellSize.Y;
+            _mapPostionOver.X = (int)(_mousePos.X / CellSize.X);
+            _mapPostionOver.Y = (int)(_mousePos.Y / CellSize.Y);
 
-            _rectOver.X = _mapPostionOver.X + _x; 
-            _rectOver.Y = _mapPostionOver.Y + _y;
+            _rectOver.X = _mapPostionOver.X * CellSize.X + _x; 
+            _rectOver.Y = _mapPostionOver.Y * CellSize.Y + _y;
+
+            RunState(gameTime);
 
             UpdateChilds(gameTime);
 
             return base.Update(gameTime);
         }
+        public void DeSelectAllGem()
+        {
+            var gems = GroupOf(UID.Get<Gem>());
+            
+            for (int i = 0; i < gems.Count; i++)
+            {
+                var gem = (Gem)gems[i];
+                gem._isSelected = false;
+            }
+
+            _selecteds.Clear();
+        }
+        //public Color CurrentColor()
+        //{
+        //    return _currentColor != Const.NoIndex ? Gem.Colors[_currentColor] : Color.Black;
+        //}
         public Color RandomColor()
         {
-            return _colors[Misc.Rng.Next(0, _colors.Length)];
+            return Gem.Colors[Misc.Rng.Next(0, Gem.Colors.Length)];
         }
         public void InitGrid()
         {
@@ -111,16 +199,12 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < _grid._height; j++)
                 {
-                    var cell = _grid.Get(i, j);
+                    var gem = _grid.Get(i, j);
 
-                    if (cell != null)
+                    if (gem != null)
                     {
-                        cell._type = Const.NoIndex;
-                        if (cell._owner != null)
-                        {
-                            cell._owner.KillMe();
-                            cell._owner = null;
-                        }
+                        gem.KillMe();
+                        _grid.Put(i, j, null);
                     }
                     
                 }
@@ -128,17 +212,29 @@ namespace DungeonsMatch3
         }
         public void AddGem(Point mapPosition, Color color)
         {
-            var gem = new Gem(color).SetPosition(MapPositionToVector2(mapPosition)).AppendTo(this);
+            var gem = (Gem)new Gem(this, color, mapPosition).SetPosition(MapPositionToVector2(mapPosition)).AppendTo(this);
+            _grid.Put(mapPosition.X, mapPosition.Y, gem);
+        }
+        public bool IsClose(Point A, Point B)
+        {
+            if (!IsInArena(A) || !IsInArena(B))
+                return false;
 
-            var cell = new Cell();
-            cell._type = UID.Get<Gem>();
-            cell._owner = gem;
+            if (Math.Abs(A.X - B.X) < 2 &&
+                Math.Abs(A.Y - B.Y) < 2) return true;
 
-            _grid.Put(mapPosition.X, mapPosition.Y, cell);
+            return false;
         }
         public bool IsInArena(Vector2 position)
         {
             return Misc.PointInRect(position + XY, _rect);
+        }
+        public bool IsInArena(Point mapPosition)
+        {
+            if (mapPosition.X < 0 || mapPosition.X >= _grid._width || mapPosition.Y < 0 || mapPosition.Y >= _grid._height)
+                return false;
+
+            return true;
         }
         public Vector2 MapPositionToVector2(Point mapPosition)
         {
@@ -164,14 +260,23 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.Debug)
             {
                 batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
+                batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
+                batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_selecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
-                for (int i = 0; i < _grid._width; i++)
+                //for (int i = 0; i < _grid._width; i++)
+                //{
+                //    for (int j = 0; j < _grid._height; j++)
+                //    {
+                //        int type = _grid.Get(i, j)._type;
+                //        batch.CenterStringXY(Game1._fontMain, type != Const.NoIndex ? type.ToString() : ".", AbsXY + MapPositionToVector2(i,j), Color.White);
+                //    }
+                //}
+
+                for (int i = 0; i < _selecteds.Count-1; i++)
                 {
-                    for (int j = 0; j < _grid._height; j++)
-                    {
-                        int type = _grid.Get(i, j)._type;
-                        batch.CenterStringXY(Game1._fontMain, type != Const.NoIndex ? type.ToString() : ".", AbsXY + MapPositionToVector2(i,j), Color.White);
-                    }
+                    batch.Line(AbsXY + MapPositionToVector2(_selecteds[i].MapPosition), AbsXY + MapPositionToVector2(_selecteds[i+1].MapPosition), _currentColor, 15f);
+
+                    //batch.Circle(AbsXY + MapPositionToVector2(_selecteds[i].MapPosition), 40, 24, Color.White, 4);
                 }
             }
 
