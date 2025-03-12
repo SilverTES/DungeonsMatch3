@@ -43,6 +43,7 @@ namespace DungeonsMatch3
         Vector2 _goal;
 
         public Point DownPosition;
+        public bool IsFall = false;
         
 
         int _tempoDead = 24;
@@ -102,7 +103,12 @@ namespace DungeonsMatch3
                     if (_ticMove > _tempoMove)
                     {
                         _ticMove = 0;
+
+                        MapPosition = DownPosition;
+                        
+
                         ChangeState((int)States.None);
+
                     }
 
                     break;

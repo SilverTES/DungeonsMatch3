@@ -7,7 +7,6 @@ using Mugen.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DungeonsMatch3
 {
@@ -156,7 +155,8 @@ namespace DungeonsMatch3
 
                 case States.PushGemsDown:
 
-                    for (int row = 0; row < _grid._height - 1; row++)
+                    //for (int row = 0; row < _grid._height - 1; row++)
+                    for (int row = _grid._height; row >= 0; row--)
                     {
                         for (int col = 0; col < _grid._width; col++)
                         {
@@ -164,7 +164,7 @@ namespace DungeonsMatch3
 
                             if (gem != null)
                             {
-                                bool isFall = false;
+                                gem.IsFall = false;
                                 // scan vertical
                                 for (int scanY = row + 1; scanY < _grid._height; scanY++)
                                 {
@@ -175,13 +175,18 @@ namespace DungeonsMatch3
 
                                     if (gemAtBottom == null)
                                     {
-                                        isFall = true;
+                                        gem.IsFall = true;
                                         gem.DownPosition = new Point(col, scanY);
                                     }
                                 }
 
-                                if (isFall)
+                                if (gem.IsFall)
+                                {
+                                    DeleteGem(gem);
+                                    AddGem(gem, gem.DownPosition);
                                     gem.MoveTo(gem.DownPosition);
+
+                                }
 
                             }
                         }
@@ -276,8 +281,11 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < _grid._height; j++)
                 {
+                    var color = RandomColor();
 
-                    AddGem(new Point(i, j), RandomColor());
+                    var gem = (Gem)new Gem(this, color, new Point(i, j)).SetPosition(MapPositionToVector2(new Point(i, j))).AppendTo(this);
+
+                    AddGem(gem);
                 }
             }
         }
@@ -298,10 +306,27 @@ namespace DungeonsMatch3
                 }
             }
         }
-        public void AddGem(Point mapPosition, Color color)
+        //public void AddGem(Point mapPosition, Color color)
+        //{
+        //    var gem = (Gem)new Gem(this, color, mapPosition).SetPosition(MapPositionToVector2(mapPosition)).AppendTo(this);
+        //    _grid.Put(mapPosition.X, mapPosition.Y, gem);
+        //}        
+        public void AddGem(Gem gem)
         {
-            var gem = (Gem)new Gem(this, color, mapPosition).SetPosition(MapPositionToVector2(mapPosition)).AppendTo(this);
+            _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
+        }
+        public void AddGem(Gem gem, Point mapPosition)
+        {
             _grid.Put(mapPosition.X, mapPosition.Y, gem);
+        }
+
+        public void DeleteGem(Gem gem)
+        {
+            _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
+        }
+        public void DeleteGem(Point mapPosition)
+        {
+            _grid.Put(mapPosition.X, mapPosition.Y, null);
         }
         public bool IsClose(Point A, Point B)
         {
