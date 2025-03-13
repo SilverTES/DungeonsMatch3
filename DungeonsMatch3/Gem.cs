@@ -32,13 +32,14 @@ namespace DungeonsMatch3
 
         float _angle = (float)Geo.DegToRad(0);
 
-        public bool _isSelected = false;
+        public bool IsSelected = false;
+        public bool IsSameColor = false;    // true if found some close gems with same color
 
         public Point MapPosition;
 
         Arena _arena;
 
-        bool _isMove = false;
+
         int _tempoMove = 30;
         int _ticMove = 0;
         Vector2 _from;
@@ -159,7 +160,7 @@ namespace DungeonsMatch3
                 batch.Circle(AbsXY + shake, Radius - 4, 8, Color, 4, _angle);
                 batch.Circle(AbsXY + shake, Radius, 8, Color.Black, 2, _angle);
 
-                if (_isSelected)
+                if (IsSelected)
                     batch.Point(AbsXY + shake, Radius / 4, Color.White);
             }
 

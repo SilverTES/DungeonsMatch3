@@ -12,18 +12,17 @@ namespace DungeonsMatch3
     class ScreenPlay : Node
     {
         Arena _arena;
-
-        KeyboardState _key;
-
+        int _indexFormat = 0;
         Arena.Format[] _format = [
             new Arena.Format(6,10,80,80),
             new Arena.Format(8,10,80,80),
             new Arena.Format(10,10,80,80),
             ];
 
-        int _indexDim = 0;
-
+        KeyboardState _key;
         Addon.Loop _loop;
+
+        Hero _hero;
 
         public ScreenPlay()
         {
@@ -35,6 +34,10 @@ namespace DungeonsMatch3
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0f, 0f, 2f, .05f, Mugen.Animation.Loops.PINGPONG);
             _loop.Start();
+
+            _hero = new Hero();
+            _hero.SetPosition(420, 140).AppendTo(this);
+
         }
         public void SetFormat(int index)
         {
@@ -54,15 +57,15 @@ namespace DungeonsMatch3
 
             _key = Game1.Key;
 
-            if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexDim < _format.Length - 1) 
+            if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexFormat < _format.Length - 1) 
             { 
-                _indexDim++;  
-                SetFormat(_indexDim); 
+                _indexFormat++;  
+                SetFormat(_indexFormat); 
             }
-            if (ButtonControl.OnePress("-", _key.IsKeyDown(Keys.PageDown)) && _indexDim > 0)
+            if (ButtonControl.OnePress("-", _key.IsKeyDown(Keys.PageDown)) && _indexFormat > 0)
             {
-                _indexDim--;
-                SetFormat(_indexDim);
+                _indexFormat--;
+                SetFormat(_indexFormat);
             }
 
             UpdateChilds(gameTime);
@@ -81,29 +84,34 @@ namespace DungeonsMatch3
 
                 batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Black * .25f, 1f);
 
+
+
             }
 
-            if (indexLayer == (int)Game1.Layers.Main)
+            if (indexLayer == (int)Game1.Layers.Debug)
             {
                 batch.String(Game1._fontMain, $"Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
+                batch.String(Game1._fontMain, $"Format Index = {_indexFormat} {_format[_indexFormat].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
 
-                batch.String(Game1._fontMain, $"Format Index = {_indexDim} {_format[_indexDim].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
-
-                for (int i = 0; i < 360; i++)
-                {
-                    Vector2 pos = new Vector2(240, 240);
-
-                    Vector2 peri = new Vector2();
-                    peri.X = (float)Math.Cos(Geo.DegToRad(i)) * 40;
-                    peri.Y = (float)Math.Sin(Geo.DegToRad(i)) * 40;
-
-                    batch.Point(pos + peri, 8, HSV.ToRGB(i, 1, 1) * .5f);
-                }
+                DrawColorCircle(batch, new Vector2(Game1.ScreenW / 2, 80));
             }
 
             DrawChilds(batch, gameTime, indexLayer);
 
             return base.Draw(batch, gameTime, indexLayer);
+        }
+
+        public void DrawColorCircle(SpriteBatch batch, Vector2 position, float radius = 40f, float thickness = 8f)
+        {
+            Vector2 peri = new Vector2();
+
+            for (int i = 0; i < 360; i++)
+            {
+                peri.X = (float)Math.Cos(Geo.DegToRad(i)) * radius;
+                peri.Y = (float)Math.Sin(Geo.DegToRad(i)) * radius;
+
+                batch.Point(position + peri, thickness, HSV.ToRGB(i, 1, 1) * .5f);
+            }
         }
 
     }

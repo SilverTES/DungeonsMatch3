@@ -15,8 +15,6 @@ public class Game1 : Game
         Debug,
     }
 
-    private SpriteBatch _spriteBatch;
-
     static public int ScreenW = 1920;
     static public int ScreenH = 1080;
 
@@ -54,8 +52,6 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
-
         _fontMain = Content.Load<SpriteFont>("Fonts/fontMain");
         _texBG = Content.Load<Texture2D>("Images/background00");
         _texCursorA = Content.Load<Texture2D>("Images/mouse_cursor");
