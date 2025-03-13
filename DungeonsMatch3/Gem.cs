@@ -34,6 +34,7 @@ namespace DungeonsMatch3
 
         public bool IsSelected = false;
         public bool IsSameColor = false;    // true if found some close gems with same color
+        public int NbSameColor = 0; 
 
         public Point MapPosition;
 
@@ -162,6 +163,10 @@ namespace DungeonsMatch3
 
                 if (IsSelected)
                     batch.Point(AbsXY + shake, Radius / 4, Color.White);
+
+                if (IsSameColor)
+                    batch.Circle(AbsXY + shake, Radius + 2, 8, Color.White, 4f);
+
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -170,6 +175,7 @@ namespace DungeonsMatch3
                 //    batch.Circle(AbsXY, 40, 24, Color.Black, 4);
 
                 //batch.CenterStringXY(Game1._fontMain, MapPosition.ToString(), AbsXY , Color.White);
+                //batch.CenterStringXY(Game1._fontMain, NbSameColor.ToString(), AbsXY , Color.White);
             }
 
             return base.Draw(batch, gameTime, indexLayer);

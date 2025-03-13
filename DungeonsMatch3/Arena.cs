@@ -225,6 +225,7 @@ namespace DungeonsMatch3
                     if (gem != null)
                     {
                         gem.IsSameColor = false;
+                        gem.NbSameColor = 0;
                     }
                 }
             }
@@ -240,8 +241,6 @@ namespace DungeonsMatch3
 
             queue.Enqueue(gem);
             result.Add(gem);
-
-            gem.IsSameColor = true;
 
             while(queue.Count > 0)
             {
@@ -261,10 +260,12 @@ namespace DungeonsMatch3
                     {
                         if (closeGem.Color == gem.Color)
                         {
-                            closeGem.Shake(2);
+                            //closeGem.Shake(2);
 
                             if (!closeGem.IsSameColor)
                             {
+                                gem.IsSameColor = true;
+
                                 closeGem.IsSameColor = true;
                                 queue.Enqueue(closeGem);
                                 result.Add(closeGem);
@@ -272,6 +273,11 @@ namespace DungeonsMatch3
                         }
                     }
                 }
+            }
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                result[i].NbSameColor = result.Count;
             }
 
             return result;
@@ -568,7 +574,7 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
-                batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
+                //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
                 //batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
