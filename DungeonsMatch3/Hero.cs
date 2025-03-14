@@ -7,10 +7,11 @@ namespace DungeonsMatch3
 {
     class Hero : Node
     {
+        int _energy = 80;
+
         public Hero() 
         {
             SetSize(240, 240);
-
         }
         public override Node Update(GameTime gameTime)
         {
@@ -26,6 +27,7 @@ namespace DungeonsMatch3
                 batch.Rectangle(AbsRectF, Color.DarkSlateBlue, 3f);
 
                 batch.CenterBorderedStringXY(Game1._fontMain, "Hero", AbsRectF.TopCenter, Color.Yellow, Color.Black);
+                batch.CenterBorderedStringXY(Game1._fontMain, $"{_energy}", AbsRectF.BottomCenter, Color.Yellow, Color.Black);
             }
             return base.Draw(batch, gameTime, indexLayer);
         }

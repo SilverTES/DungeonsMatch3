@@ -192,7 +192,10 @@ namespace DungeonsMatch3
         }
         private void Play()
         {
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
+            if (!IsInArena(_mousePos))
+                ResetGridGemsAsSameColor();
+
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 30))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
@@ -250,8 +253,7 @@ namespace DungeonsMatch3
 
                 for (int i = 0; i < ClosePoints.Length; i++)
                 {
-                    scan.X = nextGem.MapPosition.X + ClosePoints[i].X;
-                    scan.Y = nextGem.MapPosition.Y + ClosePoints[i].Y;
+                    scan = nextGem.MapPosition + ClosePoints[i];
 
                     if (!IsInArena(scan)) continue;
 

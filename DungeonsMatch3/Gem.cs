@@ -164,9 +164,8 @@ namespace DungeonsMatch3
                 if (IsSelected)
                     batch.Point(AbsXY + shake, Radius / 4, Color.White);
 
-                if (IsSameColor)
-                    batch.Circle(AbsXY + shake, Radius + 2, 8, Color.White, 4f);
-
+                if (IsSameColor && NbSameColor > 2)
+                    batch.Circle(AbsXY + shake, Radius + 2, 8, Color.White * 1f, 2f);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
