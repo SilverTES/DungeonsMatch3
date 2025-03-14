@@ -14,15 +14,15 @@ namespace DungeonsMatch3
         Arena _arena;
         int _indexFormat = 0;
         Arena.Format[] _format = [
-            new Arena.Format(6,12,80,80),
-            new Arena.Format(8,12,80,80),
-            new Arena.Format(10,12,80,80),
+            new Arena.Format(6, 10, 80, 80),
+            new Arena.Format(8, 10, 80, 80),
+            new Arena.Format(10, 10, 80, 80),
             ];
 
         KeyboardState _key;
         Addon.Loop _loop;
 
-        Hero _hero;
+        Hero[] _hero = new Hero[3];
 
         BattleField _battlefield;
 
@@ -46,8 +46,13 @@ namespace DungeonsMatch3
             _battlefield.AddEnemy(new Enemy(_battlefield), new Point(6,4));
             _battlefield.AddEnemy(new Enemy(_battlefield), new Point(7,6));
 
-            _hero = new Hero();
-            _hero.SetPosition(20, 140).AppendTo(this);
+            //_hero[0] = (Hero)new Hero().SetPosition(20, 140 + 260 * 0).AppendTo(this);
+            //_hero[1] = (Hero)new Hero().SetPosition(20, 140 + 260 * 1).AppendTo(this);
+
+            for (int i = 0; i < _hero.Length; i++)
+            {
+                _hero[i] = (Hero)new Hero().SetPosition(20, 140 + 280 * i).AppendTo(this);
+            }
 
         }
         public void SetFormat(int index)

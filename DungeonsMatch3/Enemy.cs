@@ -43,7 +43,7 @@ namespace DungeonsMatch3
         }
         public void TicTurn()
         {
-            Shake.SetIntensity(2);
+            Shake.SetIntensity(4);
 
             _ticTurnToMove--;
             if (_ticTurnToMove < 0)
