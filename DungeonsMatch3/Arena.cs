@@ -191,7 +191,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius) && IsInGrid(_mapMouseOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -224,7 +224,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 12))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
@@ -430,8 +430,8 @@ namespace DungeonsMatch3
 
                         if (gem.IsFall)
                         {
-                            DeleteGem(gem);
-                            AddGem(gem, gem.DownPosition);
+                            DeleteInGrid(gem);
+                            AddInGrid(gem, gem.DownPosition);
                             gem.MoveTo(gem.DownPosition);
                         }
                     }
@@ -468,8 +468,8 @@ namespace DungeonsMatch3
 
                         if (gem.IsFall)
                         {
-                            DeleteGem(gem);
-                            AddGem(gem, gem.DownPosition);
+                            DeleteInGrid(gem);
+                            AddInGrid(gem, gem.DownPosition);
                             gem.MoveTo(gem.DownPosition);
                         }
                     }
@@ -490,7 +490,7 @@ namespace DungeonsMatch3
 
                         newGem.DownPosition = new Point(col, row);
 
-                        AddGem(newGem, newGem.DownPosition);
+                        AddInGrid(newGem, newGem.DownPosition);
                         newGem.MoveTo(newGem.DownPosition);
                     }
                 }
@@ -510,7 +510,7 @@ namespace DungeonsMatch3
 
                         newGem.DownPosition = new Point(col, row);
 
-                        AddGem(newGem, newGem.DownPosition);
+                        AddInGrid(newGem, newGem.DownPosition);
                         newGem.MoveTo(newGem.DownPosition);
                     }
                 }
@@ -543,7 +543,7 @@ namespace DungeonsMatch3
         }
         public void ExploseSelectedGems()
         {
-            Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
+            //Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
             
             
             Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
@@ -572,7 +572,7 @@ namespace DungeonsMatch3
 
                     var gem = (Gem)new Gem(this, color, new Point(i, j)).SetPosition(MapPositionToVector2(new Point(i, j))).AppendTo(this);
 
-                    AddGem(gem);
+                    AddInGrid(gem);
                 }
             }
         }
@@ -594,19 +594,19 @@ namespace DungeonsMatch3
 
             KillAll(UID.Get<Gem>());
         }
-        public void AddGem(Gem gem)
+        public void AddInGrid(Gem gem)
         {
             _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
         }
-        public void AddGem(Gem gem, Point mapPosition)
+        public void AddInGrid(Gem gem, Point mapPosition)
         {
             _grid.Put(mapPosition.X, mapPosition.Y, gem);
         }
-        public void DeleteGem(Gem gem)
+        public void DeleteInGrid(Gem gem)
         {
             _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
         }
-        public void DeleteGem(Point mapPosition)
+        public void DeleteInGrid(Point mapPosition)
         {
             _grid.Put(mapPosition.X, mapPosition.Y, null);
         }

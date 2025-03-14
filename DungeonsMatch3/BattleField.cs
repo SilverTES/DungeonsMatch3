@@ -26,6 +26,8 @@ namespace DungeonsMatch3
             SetSize(CellSize.X * GridSize.X, CellSize.Y * GridSize.Y);
 
             _rectOver = new RectangleF(0, 0, CellSize.X, CellSize.Y);
+
+            CreateGrid();
         }
         public void CreateGrid()
         {
@@ -34,7 +36,7 @@ namespace DungeonsMatch3
                 for (int j = 0; j < _grid._height; j++)
                 {
                     //var gem = new Gem();
-                    //_grid.Put(i, j, gem);
+                    _grid.Put(i, j, null);
                 }
             }
         }
@@ -71,16 +73,24 @@ namespace DungeonsMatch3
                 }
             }
         }
-        public void AddEnemy(Enemy enemy)
+        public void AddInGrid(Enemy enemy)
         {
             _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
         }
-        public void AddEnemy(Enemy enemy, Point mapPosition)
+        public void AddInGrid(Enemy enemy, Point mapPosition)
         {
             _grid.Put(mapPosition.X, mapPosition.Y, enemy);
             enemy.AppendTo(this);
             enemy.MapPosition = mapPosition;
             enemy.SetPosition(MapPositionToVector2(mapPosition));
+        }
+        public void DeleteInGrid(Enemy enemy)
+        {
+            _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, null);
+        }
+        public void DeleteInGrid(Point mapPosition)
+        {
+            _grid.Put(mapPosition.X, mapPosition.Y, null);
         }
         public bool IsInGrid(Vector2 position)
         {
@@ -106,7 +116,7 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.Main)
             {
                 batch.FillRectangle(AbsRectF, Color.Black * .25f);
-                batch.Rectangle(AbsRectF, Color.DarkSlateBlue, 3f);
+                batch.Rectangle(AbsRectF.Extend(10), Color.DarkSlateBlue, 3f);
 
                 batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Black * .5f, 1f);
 
@@ -125,10 +135,10 @@ namespace DungeonsMatch3
                 {
                     for (int j = 0; j < _grid._height; j++)
                     {
-                        var gem = _grid.Get(i, j);
-                        if (gem != null)
+                        var node = _grid.Get(i, j);
+                        if (node != null)
                         {
-                            batch.CenterStringXY(Game1._fontMain, $"{ 0 }", AbsXY + MapPositionToVector2(i, j) + CellSize.ToVector2() / 2, Color.White * .5f);
+                            batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize.ToVector2() / 2, Color.White * .5f);
                         }
                     }
                 }

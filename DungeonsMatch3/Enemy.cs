@@ -3,8 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Mugen.Animation;
 using Mugen.Core;
 using Mugen.GFX;
-using System;
-
 
 namespace DungeonsMatch3
 {
@@ -18,8 +16,8 @@ namespace DungeonsMatch3
         }
 
         int _energy = 40;
-        public static int NbTurnToMove = 2;
-        int _ticTurnToMove = 2;
+        public int NbTurn = 2;
+        int _ticTurn;
 
         public Point MapPosition;
         public Point GoalPosition;
@@ -33,29 +31,31 @@ namespace DungeonsMatch3
 
         public Shake Shake = new();
 
-        public Enemy(BattleField battleField)
+        public Enemy(BattleField battleField, int nbTurn = 2)
         {
             _type = UID.Get<Enemy>();
             _battleField = battleField;
             SetSize(BattleField.CellSize.ToVector2());
 
             ChangeState((int)States.None);
+
+            NbTurn = nbTurn;
+            _ticTurn = nbTurn;
         }
         public void TicTurn()
         {
             Shake.SetIntensity(4);
 
-            _ticTurnToMove--;
-            if (_ticTurnToMove < 0)
+            _ticTurn--;
+            if (_ticTurn <= 0)
             {
-                _ticTurnToMove = NbTurnToMove;
+                _ticTurn = NbTurn;
                 Action();
             }
         }
         public void Action()
         {
-            Console.WriteLine("< Action >");
-
+            //Console.WriteLine("< Action >");
 
             GoalPosition = MapPosition + new Point(-1, 0);
 
@@ -90,9 +90,10 @@ namespace DungeonsMatch3
                         _ticMove = 0;
 
                         MapPosition = GoalPosition;
+                        
+                        _battleField.AddInGrid(this);
 
                         ChangeState((int)States.None);
-
                     }
 
                     break;
@@ -109,6 +110,8 @@ namespace DungeonsMatch3
         }
         public void MoveTo(Point mapPosition)
         {
+            _battleField.DeleteInGrid(this);
+
             _from = _battleField.MapPositionToVector2(MapPosition);
             _goal = _battleField.MapPositionToVector2(mapPosition);
 
@@ -124,17 +127,17 @@ namespace DungeonsMatch3
                 batch.FillRectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue * .5f);
                 batch.Rectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue, 5f);
 
-                batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
-                batch.CenterBorderedStringXY(Game1._fontMain, $"{_energy}", shake + AbsRectF.BottomCenter, Color.Yellow, Color.Black);
+                //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
+                batch.CenterBorderedStringXY(Game1._fontMain, $"{_energy}", shake + AbsRectF.TopLeft + Vector2.One * 24, Color.Yellow, Color.Black);
 
                 if (_state != (int)States.Move)
-                    for (int i = 0; i < NbTurnToMove; i++)
+                    for (int i = 0; i < NbTurn; i++)
                     {
                         var pos = AbsRectF.BottomLeft;
-                        batch.Point(pos.X + i * 10 + 20, pos.Y - 20, 4, Color.Black);
+                        batch.Point(pos.X + i * 12 + 20, pos.Y - 20, 5, Color.Black);
 
-                        if  (i < _ticTurnToMove)
-                            batch.Point(pos.X + i * 10 + 20, pos.Y - 20, 4, Color.Yellow);
+                        if  (i < _ticTurn)
+                            batch.Point(pos.X + i * 12 + 20, pos.Y - 20, 5, Color.Yellow);
                     }
             }
 
