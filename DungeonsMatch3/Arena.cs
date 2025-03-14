@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
+using Mugen.Event;
 using Mugen.GFX;
 using Mugen.Physics;
 using System;
@@ -22,6 +23,13 @@ namespace DungeonsMatch3
             PushGemsToUp,
             AddNewGemsToUp,
         }
+
+        public enum Timers
+        {
+            None,
+            Help,
+        }
+        TimerEvent _timers;
         public struct Format
         {
             public Point GridSize;
@@ -69,6 +77,12 @@ namespace DungeonsMatch3
             _grid = new List2D<Gem>(GridSize.X, GridSize.Y);
 
             SetState((int)States.Play);
+
+            _timers = new TimerEvent(Enums.Count<Timers>());
+
+            _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0,0,3));
+            _timers.StartTimer((int)Timers.Help);
+
         }
         public void Setup(Format format)
         {
@@ -113,6 +127,8 @@ namespace DungeonsMatch3
 
                 case States.ExploseSelectedGems:
 
+                    Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
+
                     ExploseSelectedGems();
                     DeSelectAllGems();
 
@@ -123,6 +139,8 @@ namespace DungeonsMatch3
                         ChangeState((int)States.PushGemsToUp);
                     else 
                         ChangeState((int)States.PushGemsToDown);
+
+                    _timers.StartTimer((int)Timers.Help);
 
                     break;
 
@@ -160,6 +178,8 @@ namespace DungeonsMatch3
         } 
         public override Node Update(GameTime gameTime)
         {
+            _timers.Update();
+
             _mouse = Game1.Mouse;
 
             if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
@@ -195,7 +215,7 @@ namespace DungeonsMatch3
             if (!IsInArena(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 30))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 24))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
@@ -209,11 +229,28 @@ namespace DungeonsMatch3
                             _currentColor = gemOver.Color;
                             SelectGem(gemOver);
                             ChangeState((int)States.SelectGems);
+
+                            Game1._soundClock.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
                         }
                     }
 
                     _currentGemOver.Shake(1);
                     FindSameGems(_currentGemOver);
+                }
+            }
+
+            if (_timers.OnTimer((int)Timers.Help))
+            {
+                
+                Console.WriteLine("Help Help");
+                
+                var result = SearchSameGems();
+
+                ResetGridGemsAsSameColor();
+
+                for (int i = 0; i < result.Count; i++)
+                {
+                    result[i].Shake(2, .01f);
                 }
             }
         }
@@ -232,6 +269,31 @@ namespace DungeonsMatch3
                     }
                 }
             }
+        }
+        public List<Gem> SearchSameGems()
+        {
+            List<Gem> result = [];
+
+            for (int i = 0; i < _grid._width; i++)
+            {
+                for (int j = 0; j < _grid._height; j++)
+                {
+                    var gem = _grid.Get(i, j);
+
+                    if (gem != null)
+                    {
+                        var gems = FindSameGems(gem);
+                        if (gems.Count > 2)
+                        {
+                            result = gems;
+                            break;
+                        }
+
+                    }
+                }
+            }
+
+            return result;
         }
         public List<Gem> FindSameGems(Gem gem)
         {
@@ -312,6 +374,8 @@ namespace DungeonsMatch3
                         {
                             SelectGem(gem);
                             new FxExplose(gem.AbsXY, gem.Color, 10, 10).AppendTo(this);
+
+                            Game1._soundClock.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
                         }
                     }
                     else // Select an already selected gem

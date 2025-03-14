@@ -81,6 +81,8 @@ namespace DungeonsMatch3
         public void ExploseMe()
         {
             new FxExplose(AbsXY, Color, 10, 40).AppendTo(_parent);
+            new PopInfo(NbSameColor.ToString(), Color.White, Color, 0, 32, 32).SetPosition(XY).AppendTo(_parent);
+
             ChangeState((int)States.Dead);
         }
         public void MoveTo(Point mapPosition)

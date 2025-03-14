@@ -14,9 +14,9 @@ namespace DungeonsMatch3
         Arena _arena;
         int _indexFormat = 0;
         Arena.Format[] _format = [
-            new Arena.Format(6,10,80,80),
-            new Arena.Format(8,10,80,80),
-            new Arena.Format(10,10,80,80),
+            new Arena.Format(6,8,80,80),
+            new Arena.Format(8,8,80,80),
+            new Arena.Format(10,8,80,80),
             ];
 
         KeyboardState _key;
