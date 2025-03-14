@@ -16,6 +16,7 @@ namespace DungeonsMatch3
         public enum States
         {
             Play,
+            FinishTurn,
             SelectGems,
             ExploseSelectedGems,
             PushGemsToDown,
@@ -56,15 +57,17 @@ namespace DungeonsMatch3
         public Point GridSize;
         public Point CellSize;
 
+        public int NbTurns = 0;
+        public bool OnFinishTurn = false;
         public RectangleF Rect => _rect;
-
-        Vector2 _mousePos = new Vector2();
 
         List2D<Gem> _grid;
 
+        Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
         Point _mapPostionOver;
         Vector2 _mapMouseOver;
+
         Gem _currentGemOver;
         Color _currentColor = Color.Black;
 
@@ -80,7 +83,7 @@ namespace DungeonsMatch3
 
             _timers = new TimerEvent(Enums.Count<Timers>());
 
-            _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0,0,3));
+            _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0,0,3), true);
             _timers.StartTimer((int)Timers.Help);
 
         }
@@ -114,20 +117,18 @@ namespace DungeonsMatch3
             switch ((States)_state)
             {
                 case States.Play:
-
+                    OnFinishTurn = false;
                     Play();
 
                     break;
 
                 case States.SelectGems:
-
+                    
                     SelectGems();
 
                     break;
 
                 case States.ExploseSelectedGems:
-
-                    Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
 
                     ExploseSelectedGems();
                     DeSelectAllGems();
@@ -151,13 +152,6 @@ namespace DungeonsMatch3
 
                     break;
 
-                case States.AddNewGemsToDown:
-
-                    AddNewGemsToDown();
-                    ChangeState((int)States.Play);
-
-                    break;
-
                 case States.PushGemsToUp:
 
                     PushGemsToUp();
@@ -165,9 +159,24 @@ namespace DungeonsMatch3
 
                     break;
 
+                case States.AddNewGemsToDown:
+
+                    AddNewGemsToDown();
+                    ChangeState((int)States.FinishTurn);
+
+                    break;
+
+
                 case States.AddNewGemsToUp:
 
                     AddNewGemsToUp();
+                    ChangeState((int)States.FinishTurn);
+
+                    break;
+
+                case States.FinishTurn:
+
+                    OnFinishTurn = true;
                     ChangeState((int)States.Play);
 
                     break;
@@ -182,7 +191,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 40))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -212,17 +221,17 @@ namespace DungeonsMatch3
         }
         private void Play()
         {
-            if (!IsInArena(_mousePos))
+            if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, 24))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
                 {
                     _currentGemOver = gemOver;
                     
-                    if (_mouse.LeftButton == ButtonState.Pressed && IsInArena(_mapPostionOver))
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPostionOver))
                     {
                         if (!_gemSelecteds.Contains(gemOver))
                         {
@@ -234,23 +243,23 @@ namespace DungeonsMatch3
                         }
                     }
 
-                    _currentGemOver.Shake(1);
+                    _currentGemOver.Shake.SetIntensity(1);
                     FindSameGems(_currentGemOver);
                 }
             }
-
+            
             if (_timers.OnTimer((int)Timers.Help))
             {
-                
-                Console.WriteLine("Help Help");
-                
+
+                //Console.WriteLine("Help Help");
+
                 var result = SearchSameGems();
 
                 ResetGridGemsAsSameColor();
 
                 for (int i = 0; i < result.Count; i++)
                 {
-                    result[i].Shake(2, .01f);
+                    result[i].Shake.SetIntensity(3, .01f);
                 }
             }
         }
@@ -317,7 +326,7 @@ namespace DungeonsMatch3
                 {
                     scan = nextGem.MapPosition + ClosePoints[i];
 
-                    if (!IsInArena(scan)) continue;
+                    if (!IsInGrid(scan)) continue;
 
                     var closeGem = _grid.Get(scan.X, scan.Y);
                     if (closeGem != null)
@@ -353,11 +362,15 @@ namespace DungeonsMatch3
                 if (_gemSelecteds.Count >= 3)
                 {
                     ChangeState((int)States.ExploseSelectedGems);
+
+                    NbTurns++;
+                    //OnFinishTurn = true;
                 }
                 else
                 {
                     DeSelectAllGems();
                     ChangeState((int)States.Play);
+                    //OnFinishTurn = false;
                 }
 
             }
@@ -373,7 +386,7 @@ namespace DungeonsMatch3
                         if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
                         {
                             SelectGem(gem);
-                            new FxExplose(gem.AbsXY, gem.Color, 10, 10).AppendTo(this);
+                            new FxExplose(gem.AbsXY, gem.Color, 5, 10).AppendTo(this);
 
                             Game1._soundClock.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
                         }
@@ -531,6 +544,9 @@ namespace DungeonsMatch3
         public void ExploseSelectedGems()
         {
             Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
+            
+            
+            Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
 
             for (int i = 0; i < _gemSelecteds.Count; i++)
             {
@@ -596,7 +612,7 @@ namespace DungeonsMatch3
         }
         public bool IsClose(Point A, Point B)
         {
-            if (!IsInArena(A) || !IsInArena(B))
+            if (!IsInGrid(A) || !IsInGrid(B))
                 return false;
 
             if (Math.Abs(A.X - B.X) < 2 &&
@@ -604,11 +620,11 @@ namespace DungeonsMatch3
 
             return false;
         }
-        public bool IsInArena(Vector2 position)
+        public bool IsInGrid(Vector2 position)
         {
             return Misc.PointInRect(position + XY, _rect);
         }
-        public bool IsInArena(Point mapPosition)
+        public bool IsInGrid(Point mapPosition)
         {
             if (mapPosition.X < 0 || mapPosition.X >= _grid._width || mapPosition.Y < 0 || mapPosition.Y >= _grid._height)
                 return false;
@@ -630,12 +646,23 @@ namespace DungeonsMatch3
                 batch.FillRectangle(AbsRectF, Color.Black * .80f);
                 //batch.Grid(AbsXY, AbsRectF.Width, AbsRectF.Height, CellSize.X, CellSize.Y, Color.Gray * .5f, 1);
 
-                //if (IsInArena(_mousePos))
+                //if (IsInGrid(_mousePos))
                 //    batch.Rectangle(_rectOver, Color.Cyan * .5f, 4f);
 
                 batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
 
                 DrawGemsLink(batch);
+
+            }
+
+            if (indexLayer == (int)Game1.Layers.FX)
+            {
+                if (_state == (int)States.SelectGems)
+                {
+                    batch.Point(AbsXY + _mousePos - Vector2.UnitY * 20, 24, Color.Black * 1f);
+                    batch.CenterBorderedStringXY(Game1._fontMedium, $"{_gemSelecteds.Count}", AbsXY + _mousePos - Vector2.UnitY * 20, _currentColor, Color.White);
+                    batch.Circle(AbsXY + _mousePos - Vector2.UnitY * 20, 24, 24, _currentColor, 2f);
+                }
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -658,6 +685,8 @@ namespace DungeonsMatch3
                 //}
 
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
+
+                batch.CenterStringXY(Game1._fontMain, $"Nb Turns = {NbTurns}", AbsRectF.TopCenter - Vector2.UnitY * 20, Color.Yellow);
             }
 
             DrawChilds(batch, gameTime, indexLayer);

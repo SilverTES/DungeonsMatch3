@@ -14,9 +14,9 @@ namespace DungeonsMatch3
         Arena _arena;
         int _indexFormat = 0;
         Arena.Format[] _format = [
-            new Arena.Format(6,8,80,80),
-            new Arena.Format(8,8,80,80),
-            new Arena.Format(10,8,80,80),
+            new Arena.Format(6,12,80,80),
+            new Arena.Format(8,12,80,80),
+            new Arena.Format(10,12,80,80),
             ];
 
         KeyboardState _key;
@@ -24,31 +24,42 @@ namespace DungeonsMatch3
 
         Hero _hero;
 
+        BattleField _battlefield;
+
+        //Enemy _enemy;
+
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
             _arena.Setup(_format[0]);
             _arena.InitGrid();
-            SetArenaCentered(_arena);
+            SetArenaPosition(_arena);
 
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0f, 0f, 2f, .05f, Mugen.Animation.Loops.PINGPONG);
             _loop.Start();
 
+            _battlefield = new BattleField();
+            _battlefield.SetPosition(920, 40).AppendTo(this);
+
+            _battlefield.AddEnemy(new Enemy(_battlefield), new Point(7,1));
+            _battlefield.AddEnemy(new Enemy(_battlefield), new Point(6,4));
+            _battlefield.AddEnemy(new Enemy(_battlefield), new Point(7,6));
+
             _hero = new Hero();
-            _hero.SetPosition(420, 140).AppendTo(this);
+            _hero.SetPosition(20, 140).AppendTo(this);
 
         }
         public void SetFormat(int index)
         {
             _arena.ClearGrid();
             _arena.Setup(_format[index]);
-            SetArenaCentered(_arena);
+            SetArenaPosition(_arena);
             _arena.InitGrid();
         }
-        public void SetArenaCentered(Arena arena)
+        public void SetArenaPosition(Arena arena)
         {
-            arena.SetPosition((Game1.ScreenW - arena.Rect.Width) / 2, (Game1.ScreenH - arena.Rect.Height) / 2);
+            arena.SetPosition((Game1.ScreenW - arena.Rect.Width) / 2 - 320, (Game1.ScreenH - arena.Rect.Height) / 2);
         }
         public override Node Update(GameTime gameTime)
         {
@@ -57,6 +68,7 @@ namespace DungeonsMatch3
 
             _key = Game1.Key;
 
+            #region Debug
             if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexFormat < _format.Length - 1) 
             { 
                 _indexFormat++;  
@@ -67,8 +79,16 @@ namespace DungeonsMatch3
                 _indexFormat--;
                 SetFormat(_indexFormat);
             }
+            #endregion
+
 
             UpdateChilds(gameTime);
+
+            if (_arena.OnFinishTurn)
+            {
+                Console.WriteLine("Arena.OnFinisTurn");
+                _battlefield.DoAction();
+            }
 
             return base.Update(gameTime);
         }
@@ -82,7 +102,7 @@ namespace DungeonsMatch3
 
                 batch.Draw(Game1._texBG, AbsXY + Vector2.UnitY * _loop._current, Color.White);
 
-                batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Black * .25f, 1f);
+                //batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Black * .25f, 1f);
 
 
 
@@ -90,10 +110,10 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
-                batch.String(Game1._fontMain, $"Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
-                batch.String(Game1._fontMain, $"Format Index = {_indexFormat} {_format[_indexFormat].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
+                //batch.String(Game1._fontMain, $"Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
+                //batch.String(Game1._fontMain, $"Format Index = {_indexFormat} {_format[_indexFormat].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
 
-                DrawColorCircle(batch, new Vector2(Game1.ScreenW / 2, 80));
+                //DrawColorCircle(batch, new Vector2(Game1.ScreenW / 2, 80));
             }
 
             DrawChilds(batch, gameTime, indexLayer);

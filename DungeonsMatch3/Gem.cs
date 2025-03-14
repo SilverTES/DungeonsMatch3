@@ -26,6 +26,7 @@ namespace DungeonsMatch3
             Color.BlueViolet,
             Color.Gold,
             Color.Gray,
+            //Color.HotPink,
         ];
 
         public Color Color;
@@ -49,20 +50,21 @@ namespace DungeonsMatch3
         public Point DownPosition;
         public bool IsFall = false;
 
-        public float Radius = 32;
+        static public float Radius = 32;
+        float _radius;
         float _ticRadius = 0;
 
         int _tempoDead = 24;
 
-        Shake _shake = new();
+        public Shake Shake = new();
         public Gem()
         {
             _type = UID.Get<Gem>();
         }
-        public void Shake(float intensity, float step = 2, bool shakeX = true, bool shakeY = true)
-        {
-            _shake.SetIntensity(intensity, step, shakeX, shakeY);
-        }
+        //public void Shake(float intensity, float step = 2, bool shakeX = true, bool shakeY = true)
+        //{
+        //    _shake.SetIntensity(intensity, step, shakeX, shakeY);
+        //}
         //public int MyIndexColor()
         //{
         //    return Colors.FirstOrDefault(x => x.Value == Color).Key;
@@ -76,6 +78,8 @@ namespace DungeonsMatch3
             MapPosition = mapPosition;
 
             ChangeState((int)States.None);
+
+            _radius = Radius;
 
         }
         public void ExploseMe()
@@ -135,7 +139,7 @@ namespace DungeonsMatch3
 
                     _ticRadius++;
 
-                    Radius = Easing.GetValue(Easing.BounceEaseOut,_ticRadius, 32, 0, 24);
+                    _radius = Easing.GetValue(Easing.BounceEaseOut,_ticRadius, 32, 0, 24);
 
                     break;
 
@@ -155,19 +159,19 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                var shake = _shake.GetVector2();
+                var shake = Shake.GetVector2();
 
-                batch.Point(AbsXY + shake, Radius / 2, Color);
+                batch.Point(AbsXY + shake, _radius / 2, Color);
 
-                batch.Circle(AbsXY + shake, Radius - 12, 8, Color, 4, _angle);
-                batch.Circle(AbsXY + shake, Radius - 4, 8, Color, 4, _angle);
-                batch.Circle(AbsXY + shake, Radius, 8, Color.Black, 2, _angle);
+                batch.Circle(AbsXY + shake, _radius - 12, 8, Color, 4, _angle);
+                batch.Circle(AbsXY + shake, _radius - 4, 8, Color, 4, _angle);
+                batch.Circle(AbsXY + shake, _radius, 8, Color.Black, 2, _angle);
 
                 if (IsSelected)
-                    batch.Point(AbsXY + shake, Radius / 4, Color.White);
+                    batch.Point(AbsXY + shake, _radius / 4, Color.White);
 
                 if (IsSameColor && NbSameColor > 2)
-                    batch.Circle(AbsXY + shake, Radius + 2, 8, Color.White * 1f, 2f);
+                    batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
