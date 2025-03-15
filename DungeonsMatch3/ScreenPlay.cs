@@ -3,21 +3,37 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.GFX;
+using Mugen.GUI;
 using Mugen.Input;
 using Mugen.Physics;
 using System;
 
 namespace DungeonsMatch3
 {
+    public struct SizeTab
+    {
+        public Point Grid;
+        public Point Cell;
+
+        public SizeTab(int gridW, int gridH, int cellW, int cellH)
+        {
+            Grid = new Point(gridW, gridH);
+            Cell = new Point(cellW, cellH);
+        }
+    }
+
     class ScreenPlay : Node
     {
         Arena _arena;
-        int _indexFormat = 0;
-        Arena.Format[] _format = [
-            new Arena.Format(6, 10, 80, 80),
-            new Arena.Format(8, 10, 80, 80),
-            new Arena.Format(10, 10, 80, 80),
-            ];
+        //int _indexSizeTab = 0;
+        //SizeTab[] _sizeTab = [
+        //    new SizeTab(6, 8, 80, 80),
+        //    new SizeTab(8, 10, 80, 80),
+        //    new SizeTab(10, 10, 80, 80),
+        //    //new Format(6, 10, 80, 80),
+        //    //new Format(8, 10, 80, 80),
+        //    //new Format(10, 10, 80, 80),
+        //    ];
 
         KeyboardState _key;
         Addon.Loop _loop;
@@ -28,41 +44,90 @@ namespace DungeonsMatch3
 
         //Enemy _enemy;
 
+        Slot[] _slot = new Slot[10];
+
+        Container _divMain;
+        Container _divSlot;
+        Container _divArena;
+        Container _divBattle;
+
         public ScreenPlay()
         {
+            
+
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(_format[0]);
+            _arena.Setup(new SizeTab(6, 8, 80, 80));
             _arena.InitGrid();
-            SetArenaPosition(_arena);
 
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0f, 0f, 2f, .05f, Mugen.Animation.Loops.PINGPONG);
             _loop.Start();
 
-            _battlefield = new BattleField();
-            _battlefield.SetPosition(920, 40).AppendTo(this);
+            _battlefield = (BattleField)new BattleField().AppendTo(this);
+            _battlefield.Setup(new SizeTab(6, 8, 120, 120));
 
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,1), 4));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,4), 3));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,6), 5));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,3), 2));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,0), 3));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,1), 2));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,2), 1));
 
-            for (int i = 0; i < _hero.Length; i++)
+            _divMain = new Container(Style.Space.One * 20, Style.Space.One * 0, Position.HORIZONTAL);
+            
+            _divSlot = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+            _divArena = new Container(Style.Space.One * 10, Style.Space.One * 20, Position.VERTICAL);
+            _divBattle = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+
+            //for (int i = 0; i < _hero.Length; i++)
+            //{
+            //    _hero[i] = (Hero)new Hero().AppendTo(this);
+
+            //    _container.Add(_hero[i]);
+            //}
+            //_container.Add(new Hero().SetSize(80, 140).AppendTo(this));
+            //_container.Add(new Hero().SetSize(180, 80).AppendTo(this));
+
+            for (int i = 0; i < 3; i++)
             {
-                _hero[i] = (Hero)new Hero().SetPosition(20, 140 + 280 * i).AppendTo(this);
+                _slot[i] = (Slot)new Slot().AppendTo(this);
+                _divSlot.Insert(_slot[i]);
             }
 
+            _slot[4] = (Slot)new Slot().AppendTo(this);
+            _divArena.Insert(_slot[4]);
+            _divArena.Insert(_arena);
+
+            //var hero = (Hero)new Hero().AppendTo(this);
+            //_divBattle.Insert(hero);
+            _divBattle.Insert(_battlefield);
+
+            _divMain.Insert(_divSlot);
+            _divMain.Insert(_divArena);
+            _divMain.Insert(_divBattle);
+
+            _divMain.SetPosition((Game1.ScreenW - _divMain.Rect.Width) / 2, (Game1.ScreenH - _divMain.Rect.Height) / 2);
+            _divMain.Refresh();
+
+
         }
-        public void SetFormat(int index)
+        //public void SetFormat(int index)
+        //{
+        //    _arena.ClearGrid();
+        //    _arena.Setup(_sizeTab[index]);
+        //    _container.Refresh();
+        //    _arena.InitGrid();
+        //}
+        public void Shuffle()
         {
             _arena.ClearGrid();
-            _arena.Setup(_format[index]);
-            SetArenaPosition(_arena);
             _arena.InitGrid();
-        }
-        public void SetArenaPosition(Arena arena)
-        {
-            arena.SetPosition((Game1.ScreenW - arena.Rect.Width) / 2 - 320, (Game1.ScreenH - arena.Rect.Height) / 2);
+
+            var enemies = _battlefield.GroupOf<Enemy>();
+
+            foreach (Enemy enemy in enemies) 
+            { 
+                //Console.WriteLine($"enemy = {enemy}");
+                enemy.Init();
+                enemy.MoveTo(new Point(BattleField.GridSize.X - 1, enemy.MapPosition.Y));
+            }
         }
         public override Node Update(GameTime gameTime)
         {
@@ -72,15 +137,19 @@ namespace DungeonsMatch3
             _key = Game1.Key;
 
             #region Debug
-            if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexFormat < _format.Length - 1) 
-            { 
-                _indexFormat++;  
-                SetFormat(_indexFormat); 
-            }
-            if (ButtonControl.OnePress("-", _key.IsKeyDown(Keys.PageDown)) && _indexFormat > 0)
+            //if (ButtonControl.OnePress("+", _key.IsKeyDown(Keys.PageUp)) && _indexSizeTab < _sizeTab.Length - 1) 
+            //{ 
+            //    _indexSizeTab++;  
+            //    SetFormat(_indexSizeTab); 
+            //}
+            //if (ButtonControl.OnePress("-", _key.IsKeyDown(Keys.PageDown)) && _indexSizeTab > 0)
+            //{
+            //    _indexSizeTab--;
+            //    SetFormat(_indexSizeTab);
+            //}
+            if (ButtonControl.OnePress("Shuffle", _key.IsKeyDown(Keys.F5)))
             {
-                _indexFormat--;
-                SetFormat(_indexFormat);
+                Shuffle();
             }
             #endregion
 
@@ -117,6 +186,10 @@ namespace DungeonsMatch3
                 //batch.String(Game1._fontMain, $"Format Index = {_indexFormat} {_format[_indexFormat].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
 
                 //DrawColorCircle(batch, new Vector2(Game1.ScreenW / 2, 80));
+
+                //_mainContainer.DrawDebug(batch, Color.Red);
+                //_slotContainer.DrawDebug(batch, Color.Red);
+                //_battleContainer.DrawDebug(batch, Color.Red);
             }
 
             DrawChilds(batch, gameTime, indexLayer);

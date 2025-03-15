@@ -15,8 +15,8 @@ namespace DungeonsMatch3
             Dead,
         }
 
-        int _energy = 40;
-        public int NbTurn = 2;
+        int _energy;
+        public int NbTurn;
         int _ticTurn;
 
         public Point MapPosition;
@@ -39,9 +39,17 @@ namespace DungeonsMatch3
 
             ChangeState((int)States.None);
 
-            NbTurn = nbTurn;
             MapPosition = mapPosition;
-            _ticTurn = nbTurn;
+            NbTurn = nbTurn;
+
+            Init();
+        }
+        public override Node Init()
+        {
+            _energy = 40;
+            _ticTurn = NbTurn;
+
+            return base.Init();
         }
         public void TicTurn()
         {
@@ -58,10 +66,10 @@ namespace DungeonsMatch3
         {
             //Console.WriteLine("< Action >");
 
-            GoalPosition = MapPosition + new Point(-1, 0);
+            var goalPosition = MapPosition + new Point(-1, 0);
 
-            if (_battleField.IsInGrid(GoalPosition))
-                MoveTo(GoalPosition);
+            if (_battleField.IsInGrid(goalPosition))
+                MoveTo(goalPosition);
         }
         public override Node Update(GameTime gameTime)
         {
@@ -111,13 +119,14 @@ namespace DungeonsMatch3
         }
         public void MoveTo(Point goalPosition)
         {
+            GoalPosition = goalPosition;
+
             _battleField.DeleteInGrid(this);
 
             _from = _battleField.MapPositionToVector2(MapPosition);
             _goal = _battleField.MapPositionToVector2(goalPosition);
 
             ChangeState((int)States.Move);
-            //Console.WriteLine("Gem Move Down");
         }
         public override Node Draw(SpriteBatch batch, GameTime gameTime, int indexLayer)
         {
@@ -131,18 +140,23 @@ namespace DungeonsMatch3
                 //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
                 batch.CenterBorderedStringXY(Game1._fontMain, $"{_energy}", shake + AbsRectF.TopLeft + Vector2.One * 24, Color.Yellow, Color.Black);
 
-                if (_state != (int)States.Move)
-                    for (int i = 0; i < NbTurn; i++)
-                    {
-                        var pos = AbsRectF.BottomLeft;
-                        batch.Point(pos.X + i * 12 + 20, pos.Y - 20, 5, Color.Black);
-
-                        if  (i < _ticTurn)
-                            batch.Point(pos.X + i * 12 + 20, pos.Y - 20, 5, Color.Yellow);
-                    }
+                //if (_state != (int)States.Move)
+                    DrawTicTurn(batch);
             }
 
             return base.Draw(batch, gameTime, indexLayer);
+        }
+
+        void DrawTicTurn(SpriteBatch batch)
+        {
+            for (int i = 1; i < NbTurn; i++)
+            {
+                var pos = AbsRectF.BottomLeft;
+                batch.Point(pos.X + i * 8 + 10, pos.Y - 20, 5, Color.Black);
+
+                if (i < _ticTurn)
+                    batch.Point(pos.X + i * 8 + 10, pos.Y - 20, 3, Color.Yellow);
+            }
         }
     }
 }

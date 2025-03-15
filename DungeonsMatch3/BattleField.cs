@@ -9,7 +9,7 @@ namespace DungeonsMatch3
 {
     class BattleField : Node
     {
-        static public Point GridSize = new Point(8, 8);
+        static public Point GridSize = new Point(14, 5);
         static public Point CellSize = new Point(120, 120);
 
         List2D<Node> _grid;
@@ -19,6 +19,8 @@ namespace DungeonsMatch3
         Point _mapPostionOver;
         Vector2 _mapMouseOver;
 
+        public RectangleF Rect => _rect;
+
         public BattleField() 
         {
             _grid = new List2D<Node>(GridSize.X, GridSize.Y);
@@ -26,6 +28,20 @@ namespace DungeonsMatch3
             SetSize(CellSize.X * GridSize.X, CellSize.Y * GridSize.Y);
 
             _rectOver = new RectangleF(0, 0, CellSize.X, CellSize.Y);
+
+            CreateGrid();
+        }
+        public void Setup(SizeTab sizeTab)
+        {
+            GridSize = sizeTab.Grid;
+            CellSize = sizeTab.Cell;
+
+            _rect.Width = GridSize.X * CellSize.X;
+            _rect.Height = GridSize.Y * CellSize.Y;
+
+            _rectOver = new RectangleF(0, 0, CellSize.X, CellSize.Y);
+
+            _grid.ResizeVecObject2D(GridSize.X, GridSize.Y);
 
             CreateGrid();
         }
@@ -76,7 +92,6 @@ namespace DungeonsMatch3
         public void AddInGrid(Enemy enemy)
         {
             _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
-            //enemy.MapPosition = mapPosition;
             enemy.SetPosition(MapPositionToVector2(enemy.MapPosition));
             enemy.AppendTo(this);
         }

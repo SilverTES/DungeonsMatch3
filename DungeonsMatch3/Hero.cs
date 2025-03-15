@@ -12,7 +12,7 @@ namespace DungeonsMatch3
         public Hero() 
         {
             _type = UID.Get<Hero>();
-            SetSize(360, 240);
+            SetSize(120, 120);
         }
         public override Node Update(GameTime gameTime)
         {

@@ -31,17 +31,6 @@ namespace DungeonsMatch3
             Help,
         }
         TimerEvent _timers;
-        public struct Format
-        {
-            public Point GridSize;
-            public Point CellSize;
-
-            public Format(int gridW, int gridH, int cellW, int cellH)
-            {
-                GridSize = new Point(gridW, gridH);
-                CellSize = new Point(cellW, cellH);
-            }
-        }
 
         public Point[] ClosePoints = [
             new Point(0, -1),
@@ -87,10 +76,10 @@ namespace DungeonsMatch3
             _timers.StartTimer((int)Timers.Help);
 
         }
-        public void Setup(Format format)
+        public void Setup(SizeTab sizeTab)
         {
-            GridSize = format.GridSize;
-            CellSize = format.CellSize;
+            GridSize = sizeTab.Grid;
+            CellSize = sizeTab.Cell;
 
             _rect.Width = GridSize.X * CellSize.X;
             _rect.Height = GridSize.Y * CellSize.Y;
