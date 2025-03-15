@@ -2,11 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Mugen.Core;
 using Mugen.GFX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DungeonsMatch3
 {
@@ -14,7 +9,7 @@ namespace DungeonsMatch3
     {
         public Slot() 
         {
-            SetSize(480, 240);
+            SetSize(360, 240);
         }
         public override Node Update(GameTime gameTime)
         {

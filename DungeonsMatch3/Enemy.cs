@@ -5,7 +5,6 @@ using Mugen.Core;
 using Mugen.Event;
 using Mugen.GFX;
 using Mugen.Physics;
-using System;
 using static Mugen.Core.Addon;
 
 namespace DungeonsMatch3
@@ -50,7 +49,8 @@ namespace DungeonsMatch3
         {
             _type = UID.Get<Enemy>();
             _battleField = battleField;
-            SetSize(BattleField.CellSize.ToVector2());
+
+            SetSize(_battleField.CellSize.ToVector2());
 
             ChangeState((int)States.None);
 
@@ -77,7 +77,7 @@ namespace DungeonsMatch3
         }
         public override Node Init()
         {
-            _energy = 40;
+            _energy = 32;
             _ticTurn = NbTurn;
 
             return base.Init();
@@ -106,7 +106,7 @@ namespace DungeonsMatch3
         {
             //Console.WriteLine("< Action >");
 
-            var goalPosition = MapPosition + new Point(-1, 0);
+            var goalPosition = MapPosition + new Point(0, 1);
 
             if (_battleField.IsInGrid(goalPosition) && _battleField.IsNull(goalPosition))
             {
@@ -183,9 +183,9 @@ namespace DungeonsMatch3
             {
                 var shake = Shake.GetVector2();
 
-                batch.FillRectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue * .5f);
-                batch.Rectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue, 5f);
-
+                //batch.FillRectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue * .5f);
+                //batch.Rectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue, 5f);
+                
                 //batch.Draw(Game1._texMob00, AbsRect, Color.White);
 
                 GFX.Draw(batch, Game1._texMob00, Color.White, _loop._current, AbsXY + (Game1._texMob00.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * 1);

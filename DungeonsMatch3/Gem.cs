@@ -21,7 +21,7 @@ namespace DungeonsMatch3
         [
             Color.Red,
             Color.DodgerBlue,
-            Color.ForestGreen,
+            //Color.ForestGreen,
             Color.DarkOrange,
             Color.BlueViolet,
             Color.Gold,
@@ -50,7 +50,7 @@ namespace DungeonsMatch3
         public Point GoalPosition;
         public bool IsFall = false;
 
-        static public float Radius = 32;
+        static public float Radius = 30;
         float _radius;
         float _ticRadius = 0;
 

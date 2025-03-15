@@ -47,16 +47,15 @@ namespace DungeonsMatch3
         Slot[] _slot = new Slot[10];
 
         Container _divMain;
-        Container _divSlot;
+        Container _divSlotLeft;
+        Container _divSlotRight;
         Container _divArena;
         Container _divBattle;
 
         public ScreenPlay()
         {
-            
-
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(6, 10, 80, 80));
+            _arena.Setup(new SizeTab(10, 6, 64, 64));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);
@@ -64,21 +63,16 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(6, 6, 128, 128));
+            _battlefield.Setup(new SizeTab(6, 5, 128, 128));
 
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,0), 6));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,1), 3));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,2), 2));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(4,2), 2));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,3), 8));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,4), 7));
-            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(5,5), 5));
+            _battlefield.AddRandomEnemy();
 
             _divMain = new Container(Style.Space.One * 20, Style.Space.One * 0, Position.HORIZONTAL);
             
-            _divSlot = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
-            _divArena = new Container(Style.Space.One * 10, Style.Space.One * 20, Position.VERTICAL);
-            _divBattle = new Container(Style.Space.One * 10, Style.Space.One * 10);
+            _divSlotLeft = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+            _divSlotRight = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+            _divArena = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+            _divBattle = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
 
             //for (int i = 0; i < _hero.Length; i++)
             //{
@@ -89,23 +83,27 @@ namespace DungeonsMatch3
             //_container.Add(new Hero().SetSize(80, 140).AppendTo(this));
             //_container.Add(new Hero().SetSize(180, 80).AppendTo(this));
 
-            for (int i = 0; i < 4; i++)
-            {
-                _slot[i] = (Slot)new Slot().AppendTo(this);
-                _divSlot.Insert(_slot[i]);
-            }
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    _slot[i] = (Slot)new Slot().AppendTo(this);
+            //    _divSlotLeft.Insert(_slot[i]);
+
+            //    _slot[i] = (Slot)new Slot().AppendTo(this);
+            //    _divSlotRight.Insert(_slot[i]);
+            //}
 
             //_slot[4] = (Slot)new Slot().AppendTo(this);
             //_divArena.Insert(_slot[4]);
-            _divArena.Insert(_arena);
 
             //var hero = (Hero)new Hero().AppendTo(this);
             //_divBattle.Insert(hero);
             _divBattle.Insert(_battlefield);
+            _divBattle.Insert(_arena);
 
-            _divMain.Insert(_divSlot);
+            //_divMain.Insert(_divSlotLeft);
             _divMain.Insert(_divArena);
             _divMain.Insert(_divBattle);
+            //_divMain.Insert(_divSlotRight);
 
             _divMain.SetPosition((Game1.ScreenW - _divMain.Rect.Width) / 2, (Game1.ScreenH - _divMain.Rect.Height) / 2);
             _divMain.Refresh();
@@ -124,14 +122,17 @@ namespace DungeonsMatch3
             _arena.ClearGrid();
             _arena.InitGrid();
 
-            var enemies = _battlefield.GroupOf<Enemy>();
+            //var enemies = _battlefield.GroupOf<Enemy>();
 
-            foreach (Enemy enemy in enemies) 
-            { 
-                //Console.WriteLine($"enemy = {enemy}");
-                enemy.Init();
-                enemy.MoveTo(new Point(BattleField.GridSize.X - 1, enemy.MapPosition.Y));
-            }
+            //foreach (Enemy enemy in enemies) 
+            //{ 
+            //    //Console.WriteLine($"enemy = {enemy}");
+            //    enemy.Init();
+            //    enemy.MoveTo(new Point(enemy.MapPosition.X, 0));
+            //}
+            _battlefield.ClearGrid();
+            _battlefield.AddRandomEnemy();
+
         }
         public override Node Update(GameTime gameTime)
         {

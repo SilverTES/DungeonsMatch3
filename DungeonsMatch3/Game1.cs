@@ -34,6 +34,7 @@ public class Game1 : Game
     static public SoundEffect _soundClock;
     static public SoundEffect _soundPop;
     static public SoundEffect _soundBlockHit;
+    static public SoundEffect _soundSword;
 
     static public float _volumeMaster = .5f;
 
@@ -108,6 +109,7 @@ public class Game1 : Game
         _soundClock = Content.Load<SoundEffect>("Sounds/clock");
         _soundPop = Content.Load<SoundEffect>("Sounds/pop");
         _soundBlockHit = Content.Load<SoundEffect>("Sounds/blockhit");
+        _soundSword = Content.Load<SoundEffect>("Sounds/sword");
     }
 
     protected override void Update(GameTime gameTime)

@@ -105,3 +105,9 @@
 /processorParam:Quality=Best
 /build:Sounds/pop.wav
 
+#begin Sounds/sword.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/sword.wav
+

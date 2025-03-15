@@ -69,7 +69,7 @@ namespace DungeonsMatch3
         MouseState _mouse;
 
         public int Multiplier = 0;
-        public int Attack = 2;
+        public int Attack = 3;
 
         public int TotalAttack = 0;
 
@@ -133,7 +133,7 @@ namespace DungeonsMatch3
                 case States.ExploseSelectedGems:
 
                     //Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
-                    Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
+                    Game1._soundPop.Play(.05f * Game1._volumeMaster, 1.0f, 0.0f);
 
 
                     ExploseSelectedGems();
@@ -613,13 +613,13 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.FillRectangle(AbsRectF, Color.Black * .80f);
+                batch.FillRectangle(AbsRectF, Color.Black * .5f);
                 //batch.Grid(AbsXY, AbsRectF.Width, AbsRectF.Height, CellSize.X, CellSize.Y, Color.Gray * .5f, 1);
 
                 //if (IsInGrid(_mousePos))
                 //    batch.Rectangle(_rectOver, Color.Cyan * .5f, 4f);
 
-                batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
+                //batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
 
                 DrawGemsLink(batch);
 
@@ -646,7 +646,7 @@ namespace DungeonsMatch3
             {
                 //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
-                //batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
+                batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.TopCenter - Vector2.UnitY * 20, Color.Cyan);
                 //batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
                 //for (int i = 0; i < _grid._width; i++)
@@ -663,7 +663,7 @@ namespace DungeonsMatch3
 
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
 
-                batch.CenterStringXY(Game1._fontMain, $"Nb Turns = {NbTurns}", AbsRectF.TopCenter - Vector2.UnitY * 20, Color.Yellow);
+                batch.CenterStringXY(Game1._fontMain, $"Nb Turns = {NbTurns}", AbsRectF.BottomCenter, Color.Yellow);
             }
 
             DrawChilds(batch, gameTime, indexLayer);
