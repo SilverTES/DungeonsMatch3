@@ -2,12 +2,25 @@
 using Microsoft.Xna.Framework.Graphics;
 using Mugen.Animation;
 using Mugen.Core;
+using Mugen.Event;
 using Mugen.GFX;
+using Mugen.Physics;
+using System;
+using static Mugen.Core.Addon;
 
 namespace DungeonsMatch3
 {
     class Enemy : Node  
     {
+        public enum Timers
+        {
+            BeforeSpawn,
+            Trail,
+            Death,
+            Spawn,
+            Count,
+        }
+        TimerEvent _timer;
         public enum States
         {
             None,
@@ -31,6 +44,8 @@ namespace DungeonsMatch3
 
         public Shake Shake = new();
 
+        Loop _loop;
+
         public Enemy(BattleField battleField, Point mapPosition, int nbTurn = 2)
         {
             _type = UID.Get<Enemy>();
@@ -42,6 +57,22 @@ namespace DungeonsMatch3
             MapPosition = mapPosition;
             NbTurn = nbTurn;
 
+            float angleDelta = .005f;
+            _loop = new Addon.Loop(this);
+            _loop.SetLoop(0, -Geo.RAD_225 * angleDelta, Geo.RAD_225 * angleDelta, .001f, Loops.PINGPONG);
+            _loop.Start();
+            AddAddon(_loop);
+
+            _timer = new TimerEvent((int)Timers.Count);
+            _timer.SetTimer((int)Timers.Trail, TimerEvent.Time(0, 0, .001f));
+            _timer.SetTimer((int)Timers.Death, TimerEvent.Time(0, 0, .5f));
+            _timer.SetTimer((int)Timers.Spawn, TimerEvent.Time(0, 1.5f, 0));
+            //_timer.SetTimer((int)Timers.BeforeSpawn, tempoBeforeSpawn);
+
+            _timer.StartTimer((int)Timers.BeforeSpawn);
+
+            _timer.StartTimer((int)Timers.Trail);
+
             Init();
         }
         public override Node Init()
@@ -51,9 +82,18 @@ namespace DungeonsMatch3
 
             return base.Init();
         }
+        public void SetDamage(int damage)
+        {
+            _energy += damage;
+        }
+        public void ExploseMe()
+        {
+            _battleField.DeleteInGrid(this);
+            KillMe();
+        }
         public void TicTurn()
         {
-            Shake.SetIntensity(4);
+            //Shake.SetIntensity(4);
 
             _ticTurn--;
             if (_ticTurn <= 0)
@@ -68,11 +108,14 @@ namespace DungeonsMatch3
 
             var goalPosition = MapPosition + new Point(-1, 0);
 
-            if (_battleField.IsInGrid(goalPosition))
+            if (_battleField.IsInGrid(goalPosition) && _battleField.IsNull(goalPosition))
+            {
                 MoveTo(goalPosition);
+            }
         }
         public override Node Update(GameTime gameTime)
         {
+            _timer.Update();
             UpdateRect();
 
             RunState(gameTime);
@@ -85,9 +128,15 @@ namespace DungeonsMatch3
             {
                 case States.None:
 
+                    if (_energy <= 0)
+                        ExploseMe();
+
                     break;
 
                 case States.Move:
+
+                    if (_timer.OnTimer((int)Timers.Trail))
+                        new Trail(AbsRectF.Center, Vector2.One, .025f, Color.WhiteSmoke).AppendTo(_parent);
 
                     _x = Easing.GetValue(Easing.QuarticEaseOut, _ticMove, _from.X, _goal.X, _tempoMove);
                     _y = Easing.GetValue(Easing.QuarticEaseOut, _ticMove, _from.Y, _goal.Y, _tempoMove);
@@ -137,6 +186,10 @@ namespace DungeonsMatch3
                 batch.FillRectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue * .5f);
                 batch.Rectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue, 5f);
 
+                //batch.Draw(Game1._texMob00, AbsRect, Color.White);
+
+                GFX.Draw(batch, Game1._texMob00, Color.White, _loop._current, AbsXY + (Game1._texMob00.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * 1);
+
                 //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
                 batch.CenterBorderedStringXY(Game1._fontMain, $"{_energy}", shake + AbsRectF.TopLeft + Vector2.One * 24, Color.Yellow, Color.Black);
 
@@ -152,10 +205,12 @@ namespace DungeonsMatch3
             for (int i = 1; i < NbTurn; i++)
             {
                 var pos = AbsRectF.BottomLeft;
-                batch.Point(pos.X + i * 8 + 10, pos.Y - 20, 5, Color.Black);
+                batch.Point(pos.X + i * 10, pos.Y - 10, 5, _ticTurn == 1 ? Color.Red : Color.Black);
 
                 if (i < _ticTurn)
-                    batch.Point(pos.X + i * 8 + 10, pos.Y - 20, 3, Color.Yellow);
+                    batch.Point(pos.X + i * 10, pos.Y - 10, 3, Color.Yellow);
+
+                batch.Circle(pos.X + i * 10, pos.Y - 10, 5, 8, Color.White);
             }
         }
     }

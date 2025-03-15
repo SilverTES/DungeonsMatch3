@@ -1,28 +1,43 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.GFX;
+using Mugen.Input;
 using Mugen.Physics;
+using System;
 
 
 namespace DungeonsMatch3
 {
     class BattleField : Node
     {
+        public enum States
+        {
+            Play,
+            DoAction,
+
+        }
+
         static public Point GridSize = new Point(14, 5);
-        static public Point CellSize = new Point(120, 120);
+        static public Point CellSize = new Point(128, 128);
 
         List2D<Node> _grid;
 
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
+        RectangleF _prevRectOver;
         Point _mapPostionOver;
         Vector2 _mapMouseOver;
 
+        MouseState _mouse;
+
         public RectangleF Rect => _rect;
 
-        public BattleField() 
+        Arena _arena;
+        public BattleField(Arena arena) 
         {
+            _arena = arena;
             _grid = new List2D<Node>(GridSize.X, GridSize.Y);
 
             SetSize(CellSize.X * GridSize.X, CellSize.Y * GridSize.Y);
@@ -30,6 +45,8 @@ namespace DungeonsMatch3
             _rectOver = new RectangleF(0, 0, CellSize.X, CellSize.Y);
 
             CreateGrid();
+
+            ChangeState((int)States.Play);
         }
         public void Setup(SizeTab sizeTab)
         {
@@ -51,13 +68,14 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < _grid._height; j++)
                 {
-                    //var gem = new Gem();
                     _grid.Put(i, j, null);
                 }
             }
         }
         public override Node Update(GameTime gameTime)
         {
+            _mouse = Game1.Mouse;
+
             UpdateRect();
 
             _mousePos.X = Game1._mousePos.X - _x;
@@ -66,28 +84,90 @@ namespace DungeonsMatch3
             _mapPostionOver.X = (int)(_mousePos.X / CellSize.X);
             _mapPostionOver.Y = (int)(_mousePos.Y / CellSize.Y);
 
+            _prevRectOver = _rectOver;
+
             _rectOver.X = _mapPostionOver.X * CellSize.X + _x;
             _rectOver.Y = _mapPostionOver.Y * CellSize.Y + _y;
 
             _mapMouseOver.X = _rectOver.X + CellSize.X / 2;
             _mapMouseOver.Y = _rectOver.Y + CellSize.Y / 2;
 
+            RunState(gameTime);
+
             UpdateChilds(gameTime);
 
             return base.Update(gameTime);
         }
+        protected override void RunState(GameTime gameTime)
+        {
+            switch ((States)_state)
+            {
+                case States.Play:
+
+                    if (!IsInGrid(_mousePos))
+                        break;
+
+                    if (ButtonControl.OnePress("Attack", _mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPostionOver)) && _arena.State == Arena.States.Action)
+                    {
+                        Attack(_arena, _mapPostionOver);
+                        //var node = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+
+                        //if (node != null)
+                        //{
+                        //    if (node._type == UID.Get<Enemy>())
+                        //    {
+                        //        var enemy = (Enemy)node;
+
+                        //        enemy.Set
+                        //    }
+                        //}
+                    }
+
+
+                    break;
+                case States.DoAction:
+
+                    ChangeState((int)States.Play);
+
+                    break;
+                default:
+                    break;
+            }
+
+            base.RunState(gameTime);
+        }
         public void DoAction()
         {
-            var nodes = GroupOf(UID.Get<Enemy>());
+            var enemies = GroupOf<Enemy>();
 
-            foreach (var node in nodes)
+            enemies.Sort((e1, e2) => e1.MapPosition.X.CompareTo(e2.MapPosition.X));
+
+            foreach (var enemy in enemies)
             { 
-                var enemy = node as Enemy;
-                if (enemy != null) 
+                enemy.TicTurn();
+            }
+
+            ChangeState((int)States.DoAction);
+        }
+        public void Attack(Arena arena, Point mapPosition)
+        {
+            var node = _grid.Get(mapPosition.X, mapPosition.Y);
+
+            if (node != null)
+            {
+                if (node._type == UID.Get<Enemy>())
                 {
-                    enemy.TicTurn();
+                    var enemy = (Enemy)node;
+                    enemy.SetDamage(-arena.TotalAttack);
+                    enemy.Shake.SetIntensity(6, .05f);
+
+                    Game1._soundPop.Play(.5f * Game1._volumeMaster, 1f, 0f);
+                    new PopInfo($"-{_arena.TotalAttack}", Color.White, _arena.CurrentColor, 0, 16, 32).SetPosition(enemy.AbsRectF.TopCenter).AppendTo(_parent);
+
+                    arena.ChangeState((int)Arena.States.FinishTurn);
                 }
             }
+
         }
         public void AddInGrid(Enemy enemy)
         {
@@ -118,6 +198,10 @@ namespace DungeonsMatch3
 
             return true;
         }
+        public bool IsNull(Point mapPosition)
+        {
+            return _grid.Get(mapPosition.X, mapPosition.Y) == null;
+        }
         public Vector2 MapPositionToVector2(Point mapPosition)
         {
             return (mapPosition * CellSize).ToVector2();// + CellSize.ToVector2() / 2;
@@ -128,15 +212,23 @@ namespace DungeonsMatch3
         }
         public override Node Draw(SpriteBatch batch, GameTime gameTime, int indexLayer)
         {
+            batch.GraphicsDevice.Clear(Color.Transparent);
+
             if (indexLayer == (int)Game1.Layers.Main)
             {
                 batch.FillRectangle(AbsRectF, Color.Black * .25f);
-                batch.Rectangle(AbsRectF.Extend(10), Color.DarkSlateBlue, 3f);
+                //batch.Rectangle(AbsRectF.Extend(10), Color.DarkSlateBlue, 3f);
+
+                if (_rectOver != _prevRectOver && IsInGrid(_mousePos))
+                {
+                    new Trail(_rectOver.Center, Vector2.One, .025f, Color.WhiteSmoke * .5f).AppendTo(_parent);
+                    //new FxExplose(_rectOver.Center, Color.Gray).AppendTo(_parent);
+                    //Console.WriteLine("RectOver !=");
+                }
 
                 batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Black * .5f, 1f);
 
-                if (IsInGrid(_mousePos))
-                    batch.Rectangle(_rectOver, Color.Cyan * .75f, 5f);
+
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -160,9 +252,17 @@ namespace DungeonsMatch3
 
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
 
+                batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.TopCenter, Color.Cyan);
+
             }
 
-            DrawChilds(batch, gameTime);
+            if (indexLayer == (int)Game1.Layers.HUD)
+            {
+                if (IsInGrid(_mousePos))
+                    batch.Rectangle(_rectOver, Color.Cyan * .5f, 3f);
+            }
+
+            DrawChilds(batch, gameTime, indexLayer);
 
             return base.Draw(batch, gameTime, indexLayer);
         }

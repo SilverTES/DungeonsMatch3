@@ -44,7 +44,7 @@ namespace DungeonsMatch3
         }
         public override Node Draw(SpriteBatch batch, GameTime gameTime, int indexLayer)
         {
-            if (indexLayer == (int)Game1.Layers.FX)
+            if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 batch.TopCenterBorderedString(Game1._fontMedium, _label, AbsX, AbsY - _animate.Value(), _color * _alpha, _colorBG * _alpha);
             }

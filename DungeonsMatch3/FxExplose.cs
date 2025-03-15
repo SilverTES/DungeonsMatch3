@@ -81,7 +81,7 @@ namespace DungeonsMatch3
         }
         public override Node Draw(SpriteBatch batch, GameTime gameTime, int indexLayer)
         {
-            if (indexLayer == (int)Game1.Layers.FX)
+            if (indexLayer == (int)Game1.Layers.FrontFX)
                 for (int i = 0; i < _numParticles; i++)
                 {
                     _particles[i].Draw(batch, gameTime, indexLayer);

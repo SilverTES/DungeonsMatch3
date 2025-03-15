@@ -16,6 +16,7 @@ namespace DungeonsMatch3
         public enum States
         {
             Play,
+            Action,
             FinishTurn,
             SelectGems,
             ExploseSelectedGems,
@@ -24,6 +25,8 @@ namespace DungeonsMatch3
             PushGemsToUp,
             AddNewGemsToUp,
         }
+
+        public States State => (States)_state;
 
         public enum Timers
         {
@@ -59,10 +62,16 @@ namespace DungeonsMatch3
 
         Gem _currentGemOver;
         Color _currentColor = Color.Black;
+        public Color CurrentColor => _currentColor;
 
         List<Gem> _gemSelecteds = [];
 
         MouseState _mouse;
+
+        public int Multiplier = 0;
+        public int Attack = 2;
+
+        public int TotalAttack = 0;
 
         public Arena()
         {
@@ -107,6 +116,7 @@ namespace DungeonsMatch3
             {
                 case States.Play:
                     OnFinishTurn = false;
+                    TotalAttack = 0;
                     Play();
 
                     break;
@@ -115,12 +125,16 @@ namespace DungeonsMatch3
                     
                     SelectGems();
 
+                    Multiplier = _gemSelecteds.Count;
+                    TotalAttack = Attack * Multiplier;
+
                     break;
 
                 case States.ExploseSelectedGems:
 
                     //Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
                     Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
+
 
                     ExploseSelectedGems();
                     DeSelectAllGems();
@@ -154,7 +168,7 @@ namespace DungeonsMatch3
                 case States.AddNewGemsToDown:
 
                     AddNewGemsToDown();
-                    ChangeState((int)States.FinishTurn);
+                    ChangeState((int)States.Action);
 
                     break;
 
@@ -162,7 +176,12 @@ namespace DungeonsMatch3
                 case States.AddNewGemsToUp:
 
                     AddNewGemsToUp();
-                    ChangeState((int)States.FinishTurn);
+                    ChangeState((int)States.Action);
+
+                    break;
+
+                case States.Action:
+
 
                     break;
 
@@ -606,12 +625,19 @@ namespace DungeonsMatch3
 
             }
 
-            if (indexLayer == (int)Game1.Layers.FX)
+            if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 if (_state == (int)States.SelectGems)
                 {
                     batch.Point(AbsXY + _mousePos - Vector2.UnitY * 20, 24, Color.Black * 1f);
-                    batch.CenterBorderedStringXY(Game1._fontMedium, $"{_gemSelecteds.Count}", AbsXY + _mousePos - Vector2.UnitY * 20, _currentColor, Color.White);
+                    batch.CenterBorderedStringXY(Game1._fontMedium, $"{TotalAttack}", AbsXY + _mousePos - Vector2.UnitY * 20, _currentColor, Color.White);
+                    batch.Circle(AbsXY + _mousePos - Vector2.UnitY * 20, 24, 24, _currentColor, 2f);
+                }
+
+                if (_state == (int)States.Action)
+                {
+                    batch.Point(AbsXY + _mousePos - Vector2.UnitY * 20, 24, Color.Black * 1f);
+                    batch.CenterBorderedStringXY(Game1._fontMedium, $"{TotalAttack}", AbsXY + _mousePos - Vector2.UnitY * 20, _currentColor, Color.White);
                     batch.Circle(AbsXY + _mousePos - Vector2.UnitY * 20, 24, 24, _currentColor, 2f);
                 }
             }

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.Input;
+using System;
 
 namespace DungeonsMatch3;
 
@@ -11,8 +12,10 @@ public class Game1 : Game
 {
     public enum Layers
     {
+        BackFX,
         Main,
-        FX, 
+        FrontFX, 
+        HUD, 
         Debug,
     }
 
@@ -21,9 +24,12 @@ public class Game1 : Game
 
     static public SpriteFont _fontMain;
     static public SpriteFont _fontMedium;
+
     static public Texture2D _texBG;
     static public Texture2D _texCursorA;
     static public Texture2D _texCursorB;
+    static public Texture2D _texMob00;
+    static public Texture2D _texTrail;
 
     static public SoundEffect _soundClock;
     static public SoundEffect _soundPop;
@@ -53,7 +59,33 @@ public class Game1 : Game
     protected override void Initialize()
     {
         _screenPlay = new ScreenPlay();
-        ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), [(int)Layers.Main, (int)Layers.FX, (int)Layers.Debug]);
+        ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), 
+            [
+            (int)Layers.BackFX,
+            (int)Layers.Main, 
+            (int)Layers.HUD, 
+            (int)Layers.FrontFX, 
+            (int)Layers.Debug,
+            ]);
+
+        //ScreenManager.SetLayersOrder([
+
+        //    (int)Layers.BackFX,
+        //    (int)Layers.Main,
+        //    (int)Layers.HUD,
+        //    (int)Layers.FrontFX,
+        //    (int)Layers.Debug,
+
+        //]);
+
+        Console.WriteLine($" NB Layers = { ScreenManager.NbLayers }");
+
+        var layerOrder = ScreenManager.GetLayersOrder();
+
+        for ( int i = 0; i < layerOrder.Count; i++ )
+        {
+            Console.WriteLine((Layers)layerOrder[i]);
+        }
 
         base.Initialize();
     }
@@ -66,6 +98,10 @@ public class Game1 : Game
         _texBG = Content.Load<Texture2D>("Images/background00");
         _texCursorA = Content.Load<Texture2D>("Images/mouse_cursor");
         _texCursorB = Content.Load<Texture2D>("Images/mouse_cursor2");
+
+        _texMob00 = Content.Load<Texture2D>("Images/mob00");
+        _texTrail = Content.Load<Texture2D>("Images/trail");
+
         CursorA = MouseCursor.FromTexture2D(_texCursorA, 0, 0);
         CursorB = MouseCursor.FromTexture2D(_texCursorB, 0, 0);
 
