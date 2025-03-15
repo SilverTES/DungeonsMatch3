@@ -31,7 +31,7 @@ namespace DungeonsMatch3
 
         public Shake Shake = new();
 
-        public Enemy(BattleField battleField, int nbTurn = 2)
+        public Enemy(BattleField battleField, Point mapPosition, int nbTurn = 2)
         {
             _type = UID.Get<Enemy>();
             _battleField = battleField;
@@ -40,6 +40,7 @@ namespace DungeonsMatch3
             ChangeState((int)States.None);
 
             NbTurn = nbTurn;
+            MapPosition = mapPosition;
             _ticTurn = nbTurn;
         }
         public void TicTurn()
@@ -91,7 +92,7 @@ namespace DungeonsMatch3
 
                         MapPosition = GoalPosition;
                         
-                        _battleField.AddInGrid(this);
+                        _battleField.SetInGrid(this);
 
                         ChangeState((int)States.None);
                     }
@@ -108,12 +109,12 @@ namespace DungeonsMatch3
 
             base.RunState(gameTime);
         }
-        public void MoveTo(Point mapPosition)
+        public void MoveTo(Point goalPosition)
         {
             _battleField.DeleteInGrid(this);
 
             _from = _battleField.MapPositionToVector2(MapPosition);
-            _goal = _battleField.MapPositionToVector2(mapPosition);
+            _goal = _battleField.MapPositionToVector2(goalPosition);
 
             ChangeState((int)States.Move);
             //Console.WriteLine("Gem Move Down");

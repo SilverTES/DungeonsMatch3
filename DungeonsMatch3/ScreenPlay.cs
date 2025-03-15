@@ -42,10 +42,10 @@ namespace DungeonsMatch3
             _battlefield = new BattleField();
             _battlefield.SetPosition(920, 40).AppendTo(this);
 
-            _battlefield.AddInGrid(new Enemy(_battlefield, 4), new Point(7,1));
-            _battlefield.AddInGrid(new Enemy(_battlefield, 3), new Point(7,4));
-            _battlefield.AddInGrid(new Enemy(_battlefield, 5), new Point(7,6));
-            _battlefield.AddInGrid(new Enemy(_battlefield, 2), new Point(7,3));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,1), 4));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,4), 3));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,6), 5));
+            _battlefield.AddInGrid(new Enemy(_battlefield, new Point(7,3), 2));
 
             for (int i = 0; i < _hero.Length; i++)
             {

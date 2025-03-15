@@ -76,13 +76,13 @@ namespace DungeonsMatch3
         public void AddInGrid(Enemy enemy)
         {
             _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
-        }
-        public void AddInGrid(Enemy enemy, Point mapPosition)
-        {
-            _grid.Put(mapPosition.X, mapPosition.Y, enemy);
+            //enemy.MapPosition = mapPosition;
+            enemy.SetPosition(MapPositionToVector2(enemy.MapPosition));
             enemy.AppendTo(this);
-            enemy.MapPosition = mapPosition;
-            enemy.SetPosition(MapPositionToVector2(mapPosition));
+        }
+        public void SetInGrid(Enemy enemy)
+        {
+            _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
         }
         public void DeleteInGrid(Enemy enemy)
         {

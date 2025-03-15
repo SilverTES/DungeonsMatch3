@@ -47,7 +47,7 @@ namespace DungeonsMatch3
         Vector2 _from;
         Vector2 _goal;
 
-        public Point DownPosition;
+        public Point GoalPosition;
         public bool IsFall = false;
 
         static public float Radius = 32;
@@ -89,10 +89,13 @@ namespace DungeonsMatch3
 
             ChangeState((int)States.Dead);
         }
-        public void MoveTo(Point mapPosition)
+        public void MoveTo(Point goalPosition)
         {
+            GoalPosition = goalPosition;
+            _arena.SetInGrid(this, goalPosition);
+
             _from = _arena.MapPositionToVector2(MapPosition);
-            _goal = _arena.MapPositionToVector2(mapPosition);
+            _goal = _arena.MapPositionToVector2(goalPosition);
 
             ChangeState((int)States.Move);
             //Console.WriteLine("Gem Move Down");
@@ -120,7 +123,7 @@ namespace DungeonsMatch3
                     {
                         _ticMove = 0;
 
-                        MapPosition = DownPosition;
+                        MapPosition = GoalPosition;
 
                         ChangeState((int)States.None);
 

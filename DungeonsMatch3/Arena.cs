@@ -130,6 +130,9 @@ namespace DungeonsMatch3
 
                 case States.ExploseSelectedGems:
 
+                    //Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
+                    Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
+
                     ExploseSelectedGems();
                     DeSelectAllGems();
 
@@ -224,7 +227,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 12))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
@@ -364,13 +367,11 @@ namespace DungeonsMatch3
                     ChangeState((int)States.ExploseSelectedGems);
 
                     NbTurns++;
-                    //OnFinishTurn = true;
                 }
                 else
                 {
                     DeSelectAllGems();
                     ChangeState((int)States.Play);
-                    //OnFinishTurn = false;
                 }
 
             }
@@ -416,23 +417,17 @@ namespace DungeonsMatch3
                         // scan vertical
                         for (int scanY = row + 1; scanY < _grid._height; scanY++)
                         {
-                            var gemAtBottom = _grid.Get(col, scanY);
-
-                            if (gemAtBottom != null)
-                                break;
-
-                            if (gemAtBottom == null)
+                            if (_grid.Get(col, scanY) == null)
                             {
                                 gem.IsFall = true;
-                                gem.DownPosition = new Point(col, scanY);
+                                gem.GoalPosition = new Point(col, scanY);
                             }
                         }
 
                         if (gem.IsFall)
                         {
                             DeleteInGrid(gem);
-                            AddInGrid(gem, gem.DownPosition);
-                            gem.MoveTo(gem.DownPosition);
+                            gem.MoveTo(gem.GoalPosition);
                         }
                     }
                 }
@@ -441,7 +436,6 @@ namespace DungeonsMatch3
         public void PushGemsToUp()
         {
             for (int row = 0; row < _grid._height; row++)
-            //for (int row = _grid._height; row >= 0; row--)
             {
                 for (int col = 0; col < _grid._width; col++)
                 {
@@ -451,26 +445,19 @@ namespace DungeonsMatch3
                     {
                         gem.IsFall = false;
                         // scan vertical
-                        //for (int scanY = row + 1; scanY < _grid._height; scanY++)
                         for (int scanY = row - 1; scanY >= 0; scanY--)
                         {
-                            var gemAtBottom = _grid.Get(col, scanY);
-
-                            if (gemAtBottom != null)
-                                break;
-
-                            if (gemAtBottom == null)
+                            if (_grid.Get(col, scanY) == null)
                             {
                                 gem.IsFall = true;
-                                gem.DownPosition = new Point(col, scanY);
+                                gem.GoalPosition = new Point(col, scanY);
                             }
                         }
 
                         if (gem.IsFall)
                         {
                             DeleteInGrid(gem);
-                            AddInGrid(gem, gem.DownPosition);
-                            gem.MoveTo(gem.DownPosition);
+                            gem.MoveTo(gem.GoalPosition);
                         }
                     }
                 }
@@ -482,17 +469,8 @@ namespace DungeonsMatch3
             {
                 for (int col = 0; col < _grid._width; col++)
                 {
-                    var gem = _grid.Get(col, row);
-                    if (gem == null)
-                    {
-                        var newGem = new Gem(this, RandomColor(), new Point(col, -1));
-                        newGem.SetPosition(MapPositionToVector2(newGem.MapPosition)).AppendTo(this);
-
-                        newGem.DownPosition = new Point(col, row);
-
-                        AddInGrid(newGem, newGem.DownPosition);
-                        newGem.MoveTo(newGem.DownPosition);
-                    }
+                    if (_grid.Get(col, row) == null)
+                        AddInGrid(new Gem(this, RandomColor(), new Point(col, -1))).MoveTo(new Point(col, row));
                 }
             }
         }
@@ -502,17 +480,8 @@ namespace DungeonsMatch3
             {
                 for (int col = 0; col < _grid._width; col++)
                 {
-                    var gem = _grid.Get(col, row);
-                    if (gem == null)
-                    {
-                        var newGem = new Gem(this, RandomColor(), new Point(col, _grid._height + 1));
-                        newGem.SetPosition(MapPositionToVector2(newGem.MapPosition)).AppendTo(this);
-
-                        newGem.DownPosition = new Point(col, row);
-
-                        AddInGrid(newGem, newGem.DownPosition);
-                        newGem.MoveTo(newGem.DownPosition);
-                    }
+                    if (_grid.Get(col, row) == null)
+                        AddInGrid(new Gem(this, RandomColor(), new Point(col, _grid._height + 1))).MoveTo(new Point(col, row));
                 }
             }
         }
@@ -543,20 +512,10 @@ namespace DungeonsMatch3
         }
         public void ExploseSelectedGems()
         {
-            //Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
-            
-            
-            Game1._soundBlockHit.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
-
             for (int i = 0; i < _gemSelecteds.Count; i++)
-            {
-                var gem = _gemSelecteds[i];
-                _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
+                DeleteInGrid(_gemSelecteds[i]).ExploseMe();
 
-                gem.ExploseMe();
-            }
             _gemSelecteds.Clear();
-
         }
         public Color RandomColor()
         {
@@ -568,11 +527,7 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < _grid._height; j++)
                 {
-                    var color = RandomColor();
-
-                    var gem = (Gem)new Gem(this, color, new Point(i, j)).SetPosition(MapPositionToVector2(new Point(i, j))).AppendTo(this);
-
-                    AddInGrid(gem);
+                    AddInGrid(new Gem(this, RandomColor(), new Point(i, j)));
                 }
             }
         }
@@ -582,29 +537,36 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < _grid._height; j++)
                 {
-                    var gem = _grid.Get(i, j);
-
-                    if (gem != null)
-                    {
-                        _grid.Put(i, j, null);
-                    }
-                    
+                    DeleteInGrid(new Point(i, j));
                 }
             }
 
             KillAll(UID.Get<Gem>());
         }
-        public void AddInGrid(Gem gem)
+        public Gem AddInGrid(Gem gem)
         {
             _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
+            gem.SetPosition(MapPositionToVector2(gem.MapPosition)).AppendTo(this);
+
+            return gem;
         }
-        public void AddInGrid(Gem gem, Point mapPosition)
+        public Gem SetInGrid(Gem gem, Point mapPosition)
         {
             _grid.Put(mapPosition.X, mapPosition.Y, gem);
+
+            return gem;
         }
-        public void DeleteInGrid(Gem gem)
+        public Gem SetInGrid(Gem gem)
+        {
+            _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
+
+            return gem;
+        }
+        public Gem DeleteInGrid(Gem gem)
         {
             _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
+
+            return gem;
         }
         public void DeleteInGrid(Point mapPosition)
         {
