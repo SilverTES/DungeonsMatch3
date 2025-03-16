@@ -47,15 +47,15 @@ namespace DungeonsMatch3
         Slot[] _slot = new Slot[10];
 
         Container _divMain;
-        Container _divSlotLeft;
-        Container _divSlotRight;
+        //Container _divSlotLeft;
+        //Container _divSlotRight;
         Container _divArena;
         Container _divBattle;
 
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(10, 6, 64, 64));
+            _arena.Setup(new SizeTab(8, 6, 64, 64));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);
@@ -63,16 +63,16 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(6, 5, 128, 128));
+            _battlefield.Setup(new SizeTab(13, 5, 128, 128));
 
             _battlefield.AddRandomEnemy();
 
-            _divMain = new Container(Style.Space.One * 20, Style.Space.One * 0, Position.HORIZONTAL);
+            _divMain = new Container(Style.Space.One * 4, Style.Space.One * 0, Position.VERTICAL);
             
-            _divSlotLeft = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
-            _divSlotRight = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
-            _divArena = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
-            _divBattle = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+            //_divSlotLeft = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
+            //_divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divArena = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divBattle = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
 
             //for (int i = 0; i < _hero.Length; i++)
             //{
@@ -83,10 +83,10 @@ namespace DungeonsMatch3
             //_container.Add(new Hero().SetSize(80, 140).AppendTo(this));
             //_container.Add(new Hero().SetSize(180, 80).AppendTo(this));
 
-            //for (int i = 0; i < 3; i++)
+            //for (int i = 0; i < 4; i++)
             //{
-            //    _slot[i] = (Slot)new Slot().AppendTo(this);
-            //    _divSlotLeft.Insert(_slot[i]);
+            //    //_slot[i] = (Slot)new Slot().AppendTo(this);
+            //    //_divSlotLeft.Insert(_slot[i]);
 
             //    _slot[i] = (Slot)new Slot().AppendTo(this);
             //    _divSlotRight.Insert(_slot[i]);
@@ -97,13 +97,15 @@ namespace DungeonsMatch3
 
             //var hero = (Hero)new Hero().AppendTo(this);
             //_divBattle.Insert(hero);
+            
             _divBattle.Insert(_battlefield);
-            _divBattle.Insert(_arena);
+            //_divBattle.Insert(_divSlotRight);
+
+            _divArena.Insert(_arena);
 
             //_divMain.Insert(_divSlotLeft);
-            _divMain.Insert(_divArena);
             _divMain.Insert(_divBattle);
-            //_divMain.Insert(_divSlotRight);
+            _divMain.Insert(_divArena);
 
             _divMain.SetPosition((Game1.ScreenW - _divMain.Rect.Width) / 2, (Game1.ScreenH - _divMain.Rect.Height) / 2);
             _divMain.Refresh();
@@ -176,7 +178,7 @@ namespace DungeonsMatch3
             if (_arena.OnFinishTurn)
             {
                 Console.WriteLine("Arena.OnFinisTurn");
-                _battlefield.DoAction();
+                //_battlefield.DoAction();
             }
 
             return base.Update(gameTime);

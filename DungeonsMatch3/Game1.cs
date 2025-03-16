@@ -23,6 +23,7 @@ public class Game1 : Game
     static public int ScreenH = 1080;
 
     static public SpriteFont _fontMain;
+    static public SpriteFont _fontMain2;
     static public SpriteFont _fontMedium;
 
     static public Texture2D _texBG;
@@ -94,6 +95,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _fontMain = Content.Load<SpriteFont>("Fonts/fontMain");
+        _fontMain2 = Content.Load<SpriteFont>("Fonts/fontMain2");
         _fontMedium = Content.Load<SpriteFont>("Fonts/fontMedium");
 
         _texBG = Content.Load<Texture2D>("Images/background00");

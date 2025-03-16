@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
+using Mugen.Event;
 using Mugen.GFX;
 using Mugen.Input;
 using Mugen.Physics;
@@ -13,9 +14,16 @@ namespace DungeonsMatch3
 {
     class BattleField : Node
     {
+        public enum Timers
+        {
+            None,
+            Damage,
+        }
+        TimerEvent _timer;
         public enum States
         {
             Play,
+            DoDamage,
             DoAction,
 
         }
@@ -48,6 +56,10 @@ namespace DungeonsMatch3
             CreateGrid();
 
             ChangeState((int)States.Play);
+
+            _timer = new TimerEvent(Enums.Count<Timers>());
+            _timer.SetTimer((int)Timers.Damage, TimerEvent.Time(0, 0, 1));
+
         }
         public void Setup(SizeTab sizeTab)
         {
@@ -87,9 +99,9 @@ namespace DungeonsMatch3
         }
         public void AddRandomEnemy()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid._height; i++)
             {
-                AddInGrid(new Enemy(this, new Point(i, 0), Misc.Rng.Next(2,6)));
+                AddInGrid(new Enemy(this, new Point(0, i), Misc.Rng.Next(2,6)));
             }
         }
         public Enemy FindClosestEnemy()
@@ -102,6 +114,8 @@ namespace DungeonsMatch3
         }
         public override Node Update(GameTime gameTime)
         {
+            _timer.Update();
+
             _mouse = Game1.Mouse;
 
             UpdateRect();
@@ -137,25 +151,51 @@ namespace DungeonsMatch3
 
                     if (ButtonControl.OnePress("Attack", _mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPostionOver)) && _arena.State == Arena.States.Action)
                     {
-                        Attack(_arena, _mapPostionOver);
+                        if (Attack(_arena, _mapPostionOver))
+                        {
+                            _timer.StartTimer((int)Timers.Damage);
+                            ChangeState((int)States.DoDamage);
+                        }
                     }
 
                     if (GroupOf<Enemy>().Count == 0)
                         AddRandomEnemy();
 
-                    var enemy = FindClosestEnemy();
-                    if (enemy != null && _arena.State == Arena.States.Action)
+                    if (_rectOver != _prevRectOver && IsInGrid(_mousePos) && !IsNull(_mapPostionOver))
                     {
-                        Attack(_arena, enemy.MapPosition);
+                        Game1._soundClock.Play(.1f * Game1._volumeMaster, .5f, 0f);
+                        //new Trail(_rectOver.Center, Vector2.One, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
+                        //new FxExplose(_rectOver.Center, Color.Gray).AppendTo(_parent);
+                        //Console.WriteLine("RectOver !=");
                     }
+
+                    //var enemy = FindClosestEnemy();
+                    //if (enemy != null && _arena.State == Arena.States.Action)
+                    //{
+                    //    Attack(_arena, enemy.MapPosition);
+                    //}
 
 
                     break;
+
                 case States.DoAction:
 
                     ChangeState((int)States.Play);
 
                     break;
+
+                case States.DoDamage:
+
+                    if (_timer.OnTimer((int)Timers.Damage))
+                    {
+                        //Console.WriteLine("Dherhdesrhjerj");
+                        _timer.StopTimer((int)Timers.Damage);
+                        DoAction();
+                        ChangeState((int)States.DoAction);
+                    }
+
+                    break;
+
                 default:
                     break;
             }
@@ -173,9 +213,9 @@ namespace DungeonsMatch3
                 enemy.TicTurn();
             }
 
-            ChangeState((int)States.DoAction);
+            
         }
-        public void Attack(Arena arena, Point mapPosition)
+        public bool Attack(Arena arena, Point mapPosition)
         {   
             var node = _grid.Get(mapPosition.X, mapPosition.Y);
 
@@ -184,15 +224,20 @@ namespace DungeonsMatch3
                 if (node._type == UID.Get<Enemy>())
                 {
                     var enemy = (Enemy)node;
-                    enemy.SetDamage(-arena.TotalAttack);
+                    enemy.SetDamage(arena.TotalAttack);
                     enemy.Shake.SetIntensity(8, .1f);
 
-                    Game1._soundSword.Play(.8f * Game1._volumeMaster, 1f, 0f);
+                    Game1._soundSword.Play(.8f * Game1._volumeMaster, .1f, 0f);
                     new PopInfo($"-{_arena.TotalAttack}", Color.White, _arena.CurrentColor, 0, 16, 32).SetPosition(enemy.AbsRectF.TopCenter).AppendTo(_parent);
+                    new FxExplose(enemy.AbsRectF.Center, _arena.CurrentColor, 17, 20).AppendTo(_parent);
 
                     arena.ChangeState((int)Arena.States.FinishTurn);
+
+                    return true;
                 }
             }
+
+            return false;
 
         }
         public void AddInGrid(Enemy enemy)
@@ -242,7 +287,7 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.FillRectangle(AbsRectF, Color.Black * .25f);
+                batch.FillRectangle(AbsRectF, Color.Black * .5f);
                 //batch.Rectangle(AbsRectF.Extend(10), Color.DarkSlateBlue, 3f);
 
                 if (_rectOver != _prevRectOver && IsInGrid(_mousePos))
@@ -252,7 +297,7 @@ namespace DungeonsMatch3
                     //Console.WriteLine("RectOver !=");
                 }
 
-                batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Black * .5f, 1f);
+                batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Black * .5f, 3f);
 
 
             }
@@ -271,7 +316,7 @@ namespace DungeonsMatch3
                         var node = _grid.Get(i, j);
                         if (node != null)
                         {
-                            batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize.ToVector2() / 2, Color.White * .5f);
+                            //batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize.ToVector2() / 2, Color.White * .5f);
                         }
                     }
                 }

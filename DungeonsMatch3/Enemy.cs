@@ -27,7 +27,9 @@ namespace DungeonsMatch3
             Dead,
         }
 
-        int _energy;
+        Specs _specs = new();
+
+        //int _energy;
         public int NbTurn;
         int _ticTurn;
 
@@ -77,14 +79,18 @@ namespace DungeonsMatch3
         }
         public override Node Init()
         {
-            _energy = 32;
+            _specs.MaxEnergy = 32;
+            _specs.Energy = _specs.MaxEnergy;
+
             _ticTurn = NbTurn;
 
             return base.Init();
         }
         public void SetDamage(int damage)
         {
-            _energy += damage;
+            //_specs.Energy += damage;
+
+            _specs.SetDamage(damage);
         }
         public void ExploseMe()
         {
@@ -106,7 +112,8 @@ namespace DungeonsMatch3
         {
             //Console.WriteLine("< Action >");
 
-            var goalPosition = MapPosition + new Point(0, 1);
+            // Move 
+            var goalPosition = MapPosition + new Point(1, 0);
 
             if (_battleField.IsInGrid(goalPosition) && _battleField.IsNull(goalPosition))
             {
@@ -116,6 +123,8 @@ namespace DungeonsMatch3
         public override Node Update(GameTime gameTime)
         {
             _timer.Update();
+            _specs.Update(gameTime);
+
             UpdateRect();
 
             RunState(gameTime);
@@ -128,7 +137,7 @@ namespace DungeonsMatch3
             {
                 case States.None:
 
-                    if (_energy <= 0)
+                    if (_specs.Energy <= 0)
                         ExploseMe();
 
                     break;
@@ -152,6 +161,8 @@ namespace DungeonsMatch3
                         _battleField.SetInGrid(this);
 
                         ChangeState((int)States.None);
+
+                        Game1._soundClock.Play(.1f * Game1._volumeMaster, .5f, 0f);
                     }
 
                     break;
@@ -181,25 +192,45 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                var shake = Shake.GetVector2();
-
                 //batch.FillRectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue * .5f);
                 //batch.Rectangle(AbsRectF.Extend(-10) + shake, Color.DarkSlateBlue, 5f);
-                
+
                 //batch.Draw(Game1._texMob00, AbsRect, Color.White);
 
                 GFX.Draw(batch, Game1._texMob00, Color.White, _loop._current, AbsXY + (Game1._texMob00.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * 1);
 
                 //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
-                batch.CenterBorderedStringXY(Game1._fontMain, $"{_energy}", shake + AbsRectF.TopLeft + Vector2.One * 24, Color.Yellow, Color.Black);
+                batch.CenterBorderedStringXY(Game1._fontMain2, $"{_specs.Energy}", Shake.GetVector2() + AbsRectF.TopLeft + Vector2.One * 24 + Vector2.UnitX * 10, Color.Yellow, Color.Black);
 
+                DrawEnergyBar(batch);
                 //if (_state != (int)States.Move)
-                    DrawTicTurn(batch);
+                DrawTicTurn(batch);
             }
 
             return base.Draw(batch, gameTime, indexLayer);
         }
+        void DrawEnergyBar(SpriteBatch batch)
+        {
+            float _scaleSpawn = 1;
+            float _alphaSpawn = 1;
+            var shake = Shake.GetVector2();
+            var canvas = RectangleF.GetRectangleCentered(AbsRectF.Center, AbsRectF.GetSize() * _scaleSpawn);
 
+            Color fg = Color.GreenYellow;
+            Color bg = Color.Green;
+
+            if (_specs.Energy <= 20)
+            {
+                fg = Color.Yellow;
+                bg = Color.Red;
+            }
+
+            GFX.Bar(batch, canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 8, Color.Red * _alphaSpawn);
+            GFX.Bar(batch, canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.Energy, 8, fg * _alphaSpawn);
+            GFX.BarLines(batch, canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 8, Color.Black * _alphaSpawn, 2);
+
+            GFX.Bar(batch, canvas.TopCenter + (Vector2.UnitY * -0.25f) - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 2, Color.White * .5f);
+        }
         void DrawTicTurn(SpriteBatch batch)
         {
             for (int i = 1; i < NbTurn; i++)

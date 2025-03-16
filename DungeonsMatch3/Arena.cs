@@ -22,8 +22,8 @@ namespace DungeonsMatch3
             ExploseSelectedGems,
             PushGemsToDown,
             AddNewGemsToDown,
-            PushGemsToUp,
-            AddNewGemsToUp,
+            //PushGemsToUp,
+            //AddNewGemsToUp,
         }
 
         public States State => (States)_state;
@@ -69,7 +69,7 @@ namespace DungeonsMatch3
         MouseState _mouse;
 
         public int Multiplier = 0;
-        public int Attack = 3;
+        public int Attack = 2;
 
         public int TotalAttack = 0;
 
@@ -133,18 +133,18 @@ namespace DungeonsMatch3
                 case States.ExploseSelectedGems:
 
                     //Console.WriteLine($"Explose Selected = {_gemSelecteds.Count}");
-                    Game1._soundPop.Play(.05f * Game1._volumeMaster, 1.0f, 0.0f);
+                    Game1._soundPop.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
 
 
                     ExploseSelectedGems();
                     DeSelectAllGems();
 
                     
-                    int pushDirection = Misc.Rng.Next(0, 10);
+                    //int pushDirection = Misc.Rng.Next(0, 10);
                     
-                    if (pushDirection > 5)
-                        ChangeState((int)States.PushGemsToUp);
-                    else 
+                    //if (pushDirection > 5)
+                    //    ChangeState((int)States.PushGemsToUp);
+                    //else 
                         ChangeState((int)States.PushGemsToDown);
 
                     _timers.StartTimer((int)Timers.Help);
@@ -158,12 +158,12 @@ namespace DungeonsMatch3
 
                     break;
 
-                case States.PushGemsToUp:
+                //case States.PushGemsToUp:
 
-                    PushGemsToUp();
-                    ChangeState((int)States.AddNewGemsToUp);
+                //    PushGemsToUp();
+                //    ChangeState((int)States.AddNewGemsToUp);
 
-                    break;
+                //    break;
 
                 case States.AddNewGemsToDown:
 
@@ -173,12 +173,12 @@ namespace DungeonsMatch3
                     break;
 
 
-                case States.AddNewGemsToUp:
+                //case States.AddNewGemsToUp:
 
-                    AddNewGemsToUp();
-                    ChangeState((int)States.Action);
+                //    AddNewGemsToUp();
+                //    ChangeState((int)States.Action);
 
-                    break;
+                //    break;
 
                 case States.Action:
 
@@ -441,36 +441,36 @@ namespace DungeonsMatch3
                 }
             }
         }
-        public void PushGemsToUp()
-        {
-            for (int row = 0; row < _grid._height; row++)
-            {
-                for (int col = 0; col < _grid._width; col++)
-                {
-                    var gem = _grid.Get(col, row);
+        //public void PushGemsToUp()
+        //{
+        //    for (int row = 0; row < _grid._height; row++)
+        //    {
+        //        for (int col = 0; col < _grid._width; col++)
+        //        {
+        //            var gem = _grid.Get(col, row);
 
-                    if (gem != null)
-                    {
-                        gem.IsFall = false;
-                        // scan vertical
-                        for (int scanY = row - 1; scanY >= 0; scanY--)
-                        {
-                            if (_grid.Get(col, scanY) == null)
-                            {
-                                gem.IsFall = true;
-                                gem.GoalPosition = new Point(col, scanY);
-                            }
-                        }
+        //            if (gem != null)
+        //            {
+        //                gem.IsFall = false;
+        //                // scan vertical
+        //                for (int scanY = row - 1; scanY >= 0; scanY--)
+        //                {
+        //                    if (_grid.Get(col, scanY) == null)
+        //                    {
+        //                        gem.IsFall = true;
+        //                        gem.GoalPosition = new Point(col, scanY);
+        //                    }
+        //                }
 
-                        if (gem.IsFall)
-                        {
-                            DeleteInGrid(gem);
-                            gem.MoveTo(gem.GoalPosition);
-                        }
-                    }
-                }
-            }
-        }
+        //                if (gem.IsFall)
+        //                {
+        //                    DeleteInGrid(gem);
+        //                    gem.MoveTo(gem.GoalPosition);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
         public void AddNewGemsToDown()
         {
             for (int row = _grid._height - 1; row >= 0; row--)
@@ -482,17 +482,17 @@ namespace DungeonsMatch3
                 }
             }
         }
-        public void AddNewGemsToUp()
-        {
-            for (int row = 0; row <_grid._height; row++)
-            {
-                for (int col = 0; col < _grid._width; col++)
-                {
-                    if (_grid.Get(col, row) == null)
-                        AddInGrid(new Gem(this, RandomColor(), new Point(col, _grid._height + 1))).MoveTo(new Point(col, row));
-                }
-            }
-        }
+        //public void AddNewGemsToUp()
+        //{
+        //    for (int row = 0; row <_grid._height; row++)
+        //    {
+        //        for (int col = 0; col < _grid._width; col++)
+        //        {
+        //            if (_grid.Get(col, row) == null)
+        //                AddInGrid(new Gem(this, RandomColor(), new Point(col, _grid._height + 1))).MoveTo(new Point(col, row));
+        //        }
+        //    }
+        //}
         public void SelectGem(Gem gem)
         {
             gem.IsSelected = true;
@@ -613,7 +613,7 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.FillRectangle(AbsRectF, Color.Black * .5f);
+                batch.FillRectangle(AbsRectF, Color.Black * .8f);
                 //batch.Grid(AbsXY, AbsRectF.Width, AbsRectF.Height, CellSize.X, CellSize.Y, Color.Gray * .5f, 1);
 
                 //if (IsInGrid(_mousePos))
@@ -622,24 +622,18 @@ namespace DungeonsMatch3
                 //batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
 
                 DrawGemsLink(batch);
-
             }
 
             if (indexLayer == (int)Game1.Layers.FrontFX)
             {
+                if (_state == (int)States.Action)
+                    batch.FillRectangle(AbsRectF, Color.Black * .5f);
+
                 if (_state == (int)States.SelectGems)
-                {
-                    batch.Point(AbsXY + _mousePos - Vector2.UnitY * 20, 24, Color.Black * 1f);
-                    batch.CenterBorderedStringXY(Game1._fontMedium, $"{TotalAttack}", AbsXY + _mousePos - Vector2.UnitY * 20, _currentColor, Color.White);
-                    batch.Circle(AbsXY + _mousePos - Vector2.UnitY * 20, 24, 24, _currentColor, 2f);
-                }
+                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
 
                 if (_state == (int)States.Action)
-                {
-                    batch.Point(AbsXY + _mousePos - Vector2.UnitY * 20, 24, Color.Black * 1f);
-                    batch.CenterBorderedStringXY(Game1._fontMedium, $"{TotalAttack}", AbsXY + _mousePos - Vector2.UnitY * 20, _currentColor, Color.White);
-                    batch.Circle(AbsXY + _mousePos - Vector2.UnitY * 20, 24, 24, _currentColor, 2f);
-                }
+                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -669,6 +663,16 @@ namespace DungeonsMatch3
             DrawChilds(batch, gameTime, indexLayer);
 
             return base.Draw(batch, gameTime, indexLayer);
+        }
+        public void DrawAttack(SpriteBatch batch, Vector2 position)
+        {
+            //batch.Point(position, 24, Color.Black * .5f);
+            var text = $"{TotalAttack}";
+            var textSize = Game1._fontMedium.MeasureString(text);
+
+            batch.FillRectangleCentered(position, textSize * 2.2f, Color.Black * .8f, 0);
+            batch.RectangleCentered(position, textSize * 2.0f, _currentColor, 3f);
+            batch.CenterBorderedStringXY(Game1._fontMedium, text , position, _currentColor, Color.White);
         }
         public void DrawGemsLink(SpriteBatch batch)
         {

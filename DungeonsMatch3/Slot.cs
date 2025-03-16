@@ -9,7 +9,7 @@ namespace DungeonsMatch3
     {
         public Slot() 
         {
-            SetSize(360, 240);
+            SetSize(360, 160);
         }
         public override Node Update(GameTime gameTime)
         {
@@ -20,7 +20,7 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.Main)
             {
                 batch.FillRectangle(AbsRectF.Extend(0), Color.Black * .5f);
-                batch.Rectangle(AbsRectF.Extend(0), Color.DarkSlateBlue, 5f);
+                //batch.Rectangle(AbsRectF.Extend(0), Color.DarkSlateBlue, 5f);
 
                 //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
                 batch.CenterBorderedStringXY(Game1._fontMain, "Slot", AbsRectF.TopLeft - Vector2.One * 4, Color.Yellow, Color.Black);
