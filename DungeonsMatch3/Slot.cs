@@ -45,7 +45,7 @@ namespace DungeonsMatch3
 
             if (Misc.PointInRect(_mousePos, AbsRect) && ButtonControl.OnePress("OnClick", _mouse.LeftButton == ButtonState.Pressed) && _arena.GetState() == (int)Arena.States.Action)
             {
-                Misc.Log($"Coucou {_index}");
+                //Misc.Log($"Coucou {_index}");
 
                 _points += _arena.TotalAttack;
 
@@ -81,8 +81,8 @@ namespace DungeonsMatch3
                 batch.BevelledRectangle(AbsRectF, Vector2.One * 8, Color.DarkSlateBlue, 3f);
 
 
-                batch.CenterBorderedStringXY(Game1._fontMain, "Slot", AbsRectF.TopCenter, Color.Yellow, Color.Black);
-                batch.CenterBorderedStringXY(Game1._fontMain, $"Points {_points}", AbsRectF.TopLeft, Color.Yellow, Color.Black);
+                //batch.CenterBorderedStringXY(Game1._fontMain2, "Slot", AbsRectF.TopCenter, Color.Yellow, Color.Black);
+                batch.CenterBorderedStringXY(Game1._fontMain2, $"{_points}", AbsRectF.TopCenter - Vector2.UnitY * 10, Color.Yellow, Color.Black);
             }
 
             return base.Draw(batch, gameTime, indexLayer);
