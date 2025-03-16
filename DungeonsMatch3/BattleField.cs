@@ -99,9 +99,16 @@ namespace DungeonsMatch3
         }
         public void AddRandomEnemy()
         {
-            for (int i = 0; i < _grid._height; i++)
+            for (int i = 0; i < 5; i++)
             {
-                AddInGrid(new Enemy(this, new Point(0, i), Misc.Rng.Next(2,6)));
+                int x, y;
+
+                do
+                {
+                    x = Misc.Rng.Next(0, 2);
+                    y = Misc.Rng.Next(0, GridSize.Y);
+
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), Misc.Rng.Next(2, 6), TimerEvent.Time(0, 0, .05f * i * 5))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -146,6 +153,9 @@ namespace DungeonsMatch3
             {
                 case States.Play:
 
+                    if (GroupOf<Enemy>().Count == 0)
+                        AddRandomEnemy();
+
                     if (!IsInGrid(_mousePos))
                         break;
 
@@ -158,8 +168,6 @@ namespace DungeonsMatch3
                         }
                     }
 
-                    if (GroupOf<Enemy>().Count == 0)
-                        AddRandomEnemy();
 
                     if (_rectOver != _prevRectOver && IsInGrid(_mousePos) && !IsNull(_mapPostionOver))
                     {
@@ -206,7 +214,7 @@ namespace DungeonsMatch3
         {
             var enemies = GroupOf<Enemy>();
 
-            enemies.Sort((e1, e2) => e1.MapPosition.X.CompareTo(e2.MapPosition.X));
+            enemies.Sort((e1, e2) => e2.MapPosition.X.CompareTo(e1.MapPosition.X));
 
             foreach (var enemy in enemies)
             { 
@@ -240,11 +248,16 @@ namespace DungeonsMatch3
             return false;
 
         }
-        public void AddInGrid(Enemy enemy)
+        public bool AddInGrid(Enemy enemy)
         {
+            if (!IsNull(enemy.MapPosition))
+                return false;
+
             _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
             enemy.SetPosition(MapPositionToVector2(enemy.MapPosition));
             enemy.AppendTo(this);
+
+            return true;
         }
         public void SetInGrid(Enemy enemy)
         {
@@ -297,8 +310,8 @@ namespace DungeonsMatch3
                     //Console.WriteLine("RectOver !=");
                 }
 
-                batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Black * .5f, 3f);
-
+                //batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Black * .5f, 3f);
+                batch.Grid(AbsXY, _rect.Width, _rect.Height, CellSize.X, CellSize.Y, Color.Gray * .1f, 3f);
 
             }
 

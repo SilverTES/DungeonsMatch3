@@ -47,15 +47,15 @@ namespace DungeonsMatch3
         Slot[] _slot = new Slot[10];
 
         Container _divMain;
-        //Container _divSlotLeft;
-        //Container _divSlotRight;
+        Container _divSlotLeft;
+        Container _divSlotRight;
         Container _divArena;
         Container _divBattle;
 
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(8, 6, 64, 64));
+            _arena.Setup(new SizeTab(8, 6, 80, 80));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);
@@ -63,15 +63,15 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(13, 5, 128, 128));
+            _battlefield.Setup(new SizeTab(14, 4, 128, 128));
 
             _battlefield.AddRandomEnemy();
 
             _divMain = new Container(Style.Space.One * 4, Style.Space.One * 0, Position.VERTICAL);
             
-            //_divSlotLeft = new Container(Style.Space.One * 10, Style.Space.One * 10, Position.VERTICAL);
-            //_divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
-            _divArena = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divSlotLeft = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divArena = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
             _divBattle = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
 
             //for (int i = 0; i < _hero.Length; i++)
@@ -83,25 +83,27 @@ namespace DungeonsMatch3
             //_container.Add(new Hero().SetSize(80, 140).AppendTo(this));
             //_container.Add(new Hero().SetSize(180, 80).AppendTo(this));
 
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    //_slot[i] = (Slot)new Slot().AppendTo(this);
-            //    //_divSlotLeft.Insert(_slot[i]);
+            for (int i = 0; i < 3; i++)
+            {
+                _slot[i] = (Slot)new Slot().AppendTo(this);
+                _divSlotLeft.Insert(_slot[i]);
 
-            //    _slot[i] = (Slot)new Slot().AppendTo(this);
-            //    _divSlotRight.Insert(_slot[i]);
-            //}
+                _slot[i] = (Slot)new Slot().AppendTo(this);
+                _divSlotRight.Insert(_slot[i]);
+            }
 
             //_slot[4] = (Slot)new Slot().AppendTo(this);
             //_divArena.Insert(_slot[4]);
 
             //var hero = (Hero)new Hero().AppendTo(this);
             //_divBattle.Insert(hero);
-            
+
             _divBattle.Insert(_battlefield);
             //_divBattle.Insert(_divSlotRight);
 
+            _divArena.Insert(_divSlotLeft);
             _divArena.Insert(_arena);
+            _divArena.Insert(_divSlotRight);
 
             //_divMain.Insert(_divSlotLeft);
             _divMain.Insert(_divBattle);
@@ -219,7 +221,7 @@ namespace DungeonsMatch3
             return base.Draw(batch, gameTime, indexLayer);
         }
 
-        public void DrawColorCircle(SpriteBatch batch, Vector2 position, float radius = 40f, float thickness = 8f)
+        public void DrawColorCircle(SpriteBatch batch, Vector2 position, float radius = 40f, float thickness = 1f)
         {
             Vector2 peri = new Vector2();
 
