@@ -88,10 +88,10 @@ namespace DungeonsMatch3
 
             for (int i = 0; i < 2; i++)
             {
-                _slot[i] = (Slot)new Slot().AppendTo(this);
+                _slot[i] = (Slot)new Slot(_arena, _battlefield).AppendTo(this);
                 _divSlotLeft.Insert(_slot[i]);
 
-                _slot[i] = (Slot)new Slot().Flip().AppendTo(this);
+                _slot[i] = (Slot)new Slot(_arena, _battlefield).Flip().AppendTo(this);
                 _divSlotRight.Insert(_slot[i]);
             }
 
