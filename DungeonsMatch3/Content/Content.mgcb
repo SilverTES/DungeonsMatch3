@@ -46,6 +46,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/background00.png
 
+#begin Images/hero00.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/hero00.png
+
 #begin Images/mob00.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -111,6 +123,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sounds/pop.wav
+
+#begin Sounds/rock_slide.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/rock_slide.wav
 
 #begin Sounds/sword.wav
 /importer:WavImporter

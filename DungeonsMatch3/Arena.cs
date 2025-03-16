@@ -202,7 +202,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius) && IsInGrid(_mapMouseOver))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 8) && IsInGrid(_mapMouseOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -235,7 +235,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 8))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)

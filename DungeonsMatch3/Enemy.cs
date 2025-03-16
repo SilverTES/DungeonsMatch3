@@ -32,6 +32,8 @@ namespace DungeonsMatch3
 
         Specs _specs = new();
 
+        Point _size = new();
+
         //int _energy;
         public int NbTurn;
         int _ticTurn;
@@ -57,7 +59,7 @@ namespace DungeonsMatch3
 
         Loop _loop;
 
-        public Enemy(BattleField battleField, Point mapPosition, int nbTurn = 2, float tempoBeforeSpawn = 0f)
+        public Enemy(BattleField battleField, Point mapPosition, int nbTurn = 2, float tempoBeforeSpawn = 0f, Point size = default)
         {
             _type = UID.Get<Enemy>();
             _battleField = battleField;
@@ -66,6 +68,7 @@ namespace DungeonsMatch3
 
             ChangeState((int)States.None);
 
+            _size = size;
             MapPosition = mapPosition;
             NbTurn = nbTurn;
 
@@ -101,11 +104,11 @@ namespace DungeonsMatch3
 
             return base.Init();
         }
-        public void SetDamage(int damage)
+        public int SetDamage(int damage)
         {
             //_specs.Energy += damage;
 
-            _specs.SetDamage(damage);
+            return _specs.SetDamage(damage);
         }
         public void ExploseMe()
         {
@@ -133,6 +136,7 @@ namespace DungeonsMatch3
             if (_battleField.IsInGrid(goalPosition) && _battleField.IsNull(goalPosition))
             {
                 MoveTo(goalPosition);
+                Game1._soundRockSlide.Play(.1f * Game1._volumeMaster, .5f, 0f);
             }
         }
         public override Node Update(GameTime gameTime)
@@ -212,6 +216,8 @@ namespace DungeonsMatch3
             {
                 ChangeState((int)States.IsSpawn);
                 _ticScale = 0f;
+
+                Game1._soundPop.Play(.2f * Game1._volumeMaster, .5f, 0f);
             }
         }
         void IsSpawn(GameTime gameTime)
@@ -301,12 +307,13 @@ namespace DungeonsMatch3
             for (int i = 1; i < NbTurn; i++)
             {
                 var pos = AbsRectF.BottomLeft;
-                batch.Point(pos.X + i * 10, pos.Y - 10, 5, _ticTurn == 1 ? Color.Red * _alphaSpawn : Color.Black * _alphaSpawn);
+
+                batch.Point(pos.X + i * 10, pos.Y - 10, 5, _ticTurn == 1 ? Color.Transparent * _alphaSpawn : Color.Black * _alphaSpawn);
 
                 if (i < _ticTurn)
                     batch.Point(pos.X + i * 10, pos.Y - 10, 3, Color.Yellow * _alphaSpawn);
 
-                batch.Circle(pos.X + i * 10, pos.Y - 10, 5, 8, Color.White * _alphaSpawn);
+                //batch.Circle(pos.X + i * 10, pos.Y - 10, 5, 8, Color.White * _alphaSpawn);
             }
         }
     }

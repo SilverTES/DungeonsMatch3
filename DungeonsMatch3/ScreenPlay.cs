@@ -52,10 +52,13 @@ namespace DungeonsMatch3
         Container _divArena;
         Container _divBattle;
 
+        int _wave = 1;
+        public int Wave => _wave;
+
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(8, 6, 80, 80));
+            _arena.Setup(new SizeTab(8, 8, 64, 64));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);
@@ -63,7 +66,7 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(14, 4, 128, 128));
+            _battlefield.Setup(new SizeTab(8, 4, 128, 128));
 
             _battlefield.AddRandomEnemy();
 
@@ -83,12 +86,12 @@ namespace DungeonsMatch3
             //_container.Add(new Hero().SetSize(80, 140).AppendTo(this));
             //_container.Add(new Hero().SetSize(180, 80).AppendTo(this));
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 _slot[i] = (Slot)new Slot().AppendTo(this);
                 _divSlotLeft.Insert(_slot[i]);
 
-                _slot[i] = (Slot)new Slot().AppendTo(this);
+                _slot[i] = (Slot)new Slot().Flip().AppendTo(this);
                 _divSlotRight.Insert(_slot[i]);
             }
 
@@ -179,8 +182,15 @@ namespace DungeonsMatch3
 
             if (_arena.OnFinishTurn)
             {
-                Console.WriteLine("Arena.OnFinisTurn");
+                Misc.Log("Arena.OnFinishTurn");
                 //_battlefield.DoAction();
+            }
+
+            // Debug
+            if (_battlefield.GroupOf<Enemy>().Count < 3)
+            {
+                _wave++;
+                _battlefield.AddRandomEnemy();
             }
 
             return base.Update(gameTime);
@@ -201,6 +211,8 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
+                batch.String(Game1._fontMain, $"Wave {Wave}", Vector2.One * 20 + Vector2.UnitY * 10, Color.Yellow, Style.HorizontalAlign.Left);
+
                 //batch.String(Game1._fontMain, $"Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
                 //batch.String(Game1._fontMain, $"Format Index = {_indexFormat} {_format[_indexFormat].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);
 
@@ -213,7 +225,7 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.BackFX)
             {
-                batch.Draw(Game1._texBG, AbsXY + Vector2.UnitY * _loop._current, Color.White);
+                batch.Draw(Game1._texBG, AbsXY + Vector2.UnitY * _loop._current - Vector2.UnitY * 2, Color.White);
             }
 
             DrawChilds(batch, gameTime, indexLayer);

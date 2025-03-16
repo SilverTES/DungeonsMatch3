@@ -29,13 +29,16 @@ public class Game1 : Game
     static public Texture2D _texBG;
     static public Texture2D _texCursorA;
     static public Texture2D _texCursorB;
-    static public Texture2D _texMob00;
     static public Texture2D _texTrail;
+    
+    static public Texture2D _texMob00;
+    static public Texture2D _texHero00;
 
     static public SoundEffect _soundClock;
     static public SoundEffect _soundPop;
     static public SoundEffect _soundBlockHit;
     static public SoundEffect _soundSword;
+    static public SoundEffect _soundRockSlide;
 
     static public float _volumeMaster = .5f;
 
@@ -103,6 +106,7 @@ public class Game1 : Game
         _texCursorB = Content.Load<Texture2D>("Images/mouse_cursor2");
 
         _texMob00 = Content.Load<Texture2D>("Images/mob00");
+        _texHero00 = Content.Load<Texture2D>("Images/hero00");
         _texTrail = Content.Load<Texture2D>("Images/trail");
 
         CursorA = MouseCursor.FromTexture2D(_texCursorA, 0, 0);
@@ -112,6 +116,7 @@ public class Game1 : Game
         _soundPop = Content.Load<SoundEffect>("Sounds/pop");
         _soundBlockHit = Content.Load<SoundEffect>("Sounds/blockhit");
         _soundSword = Content.Load<SoundEffect>("Sounds/sword");
+        _soundRockSlide = Content.Load<SoundEffect>("Sounds/rock_slide");
     }
 
     protected override void Update(GameTime gameTime)

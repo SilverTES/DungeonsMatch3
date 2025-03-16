@@ -108,7 +108,7 @@ namespace DungeonsMatch3
                     x = Misc.Rng.Next(0, 2);
                     y = Misc.Rng.Next(0, GridSize.Y);
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), Misc.Rng.Next(2, 6), TimerEvent.Time(0, 0, .05f * i * 5))));
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), Misc.Rng.Next(2, 6), TimerEvent.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -153,8 +153,7 @@ namespace DungeonsMatch3
             {
                 case States.Play:
 
-                    if (GroupOf<Enemy>().Count == 0)
-                        AddRandomEnemy();
+
 
                     if (!IsInGrid(_mousePos))
                         break;
@@ -232,11 +231,18 @@ namespace DungeonsMatch3
                 if (node._type == UID.Get<Enemy>())
                 {
                     var enemy = (Enemy)node;
-                    enemy.SetDamage(arena.TotalAttack);
+                    var overKill = enemy.SetDamage(arena.TotalAttack);
                     enemy.Shake.SetIntensity(8, .1f);
 
                     Game1._soundSword.Play(.8f * Game1._volumeMaster, .1f, 0f);
-                    new PopInfo($"-{_arena.TotalAttack}", Color.White, _arena.CurrentColor, 0, 16, 32).SetPosition(enemy.AbsRectF.TopCenter).AppendTo(_parent);
+
+                    string str = "-" + _arena.TotalAttack;
+
+                    if (overKill < 0)
+                        str = "OVERKILL " + overKill;
+
+                    new PopInfo(str, Color.White, _arena.CurrentColor, 0, 16, 32).SetPosition(enemy.AbsRectF.TopCenter).AppendTo(_parent);
+
                     new FxExplose(enemy.AbsRectF.Center, _arena.CurrentColor, 17, 20).AppendTo(_parent);
 
                     arena.ChangeState((int)Arena.States.FinishTurn);

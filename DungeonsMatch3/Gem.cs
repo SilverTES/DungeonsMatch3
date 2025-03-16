@@ -21,7 +21,7 @@ namespace DungeonsMatch3
         [
             Color.Red,
             Color.DodgerBlue,
-            //Color.ForestGreen,
+            Color.ForestGreen,
             Color.DarkOrange,
             Color.BlueViolet,
             Color.Gold,
