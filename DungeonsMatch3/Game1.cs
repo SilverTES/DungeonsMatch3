@@ -3,7 +3,9 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
+using Mugen.GFX;
 using Mugen.Input;
+using Mugen.Physics;
 using System;
 
 namespace DungeonsMatch3;
@@ -59,6 +61,53 @@ public class Game1 : Game
         Window.AllowUserResizing = true;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+    }
+
+    /// <summary>
+    /// Dessine une ligne incurvée entre pointA et pointB avec un point de contrôle pointC.
+    /// </summary>
+    /// <param name="spriteBatch">Le SpriteBatch pour dessiner.</param>
+    /// <param name="pixel">Texture d'un pixel pour le rendu.</param>
+    /// <param name="pointA">Point de départ.</param>
+    /// <param name="pointB">Point d'arrivée.</param>
+    /// <param name="pointC">Point de contrôle pour la courbure.</param>
+    /// <param name="color">Couleur de la ligne.</param>
+    public static void DrawCurvedLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Vector2 pointC, Color colorA, Color colorB, float thickness = 1f, int nbSegments = 50)
+    {
+        int segments = nbSegments; // Nombre de segments pour la courbe
+        Vector2 previousPoint = pointA;
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float t = i / (float)segments;
+
+            // Calculer le point sur la courbe de Bézier quadratique
+            float tSquared = t * t;
+            float oneMinusT = 1 - t;
+            float oneMinusTSquared = oneMinusT * oneMinusT;
+            Vector2 currentPoint = oneMinusTSquared * pointA + 2 * oneMinusT * t * pointC + tSquared * pointB;
+
+            // Dessiner un segment entre previousPoint et currentPoint
+            float distance = Vector2.Distance(previousPoint, currentPoint);
+            float angle = (float)Math.Atan2(currentPoint.Y - previousPoint.Y, currentPoint.X - previousPoint.X);
+
+            //spriteBatch.Draw(
+            //    pixel,
+            //    previousPoint,
+            //    null,
+            //    Color.Lerp(colorA, colorB, (float)i / (float)segments),
+            //    angle,
+            //    Vector2.Zero,
+            //    new Vector2(distance, thickness), // Étirer le pixel pour former une ligne
+            //    SpriteEffects.None,
+            //    0f
+            //);
+
+            spriteBatch.Point(previousPoint, thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments));
+            spriteBatch.FillRectangleCentered(previousPoint, Vector2.One * thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments), Geo.RAD_45);
+
+            previousPoint = currentPoint;
+        }
     }
 
     protected override void Initialize()

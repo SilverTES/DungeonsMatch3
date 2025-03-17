@@ -219,7 +219,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 16) && IsInGrid(_mapMouseOver))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius) && IsInGrid(_mapMouseOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -252,7 +252,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 16))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
@@ -411,10 +411,12 @@ namespace DungeonsMatch3
                     {
                         if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
                         {
-                            SelectGem(gem);
-                            new FxExplose(gem.AbsXY, gem.Color, 5, 10).AppendTo(this);
-
-                            Game1._soundClock.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
+                            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
+                            {
+                                SelectGem(gem);
+                                new FxExplose(gem.AbsXY, gem.Color, 5, 10).AppendTo(this);
+                                Game1._soundClock.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
+                            }
                         }
                     }
                     else // Select an already selected gem
@@ -647,14 +649,20 @@ namespace DungeonsMatch3
                 {
                     batch.FillRectangle(AbsRectF, Color.Black * .5f);
 
-                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
-
                     var enemy = _battleField.FindClosestEnemy();
                     if (enemy != null && IsInGrid(_mapPostionOver))
                     {
-                        batch.Line(AbsXY + _mousePos, _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2, _currentColor * .5f, 9f);
-                        batch.Line(AbsXY + _mousePos, _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2, Color.White * .5f, 5f);
+                        var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
+                        var B = AbsXY + _mousePos;
+
+                        //batch.Line(A, B, _currentColor * .5f, 9f);
+                        //batch.Line(A, B, Color.White * .5f, 5f);
+
+                        Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), _currentColor * .0f, _currentColor * 1f, 9f);
+                        Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * 1f, 3f);
                     }
+
+                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
                 }
 
                 if (_state == (int)States.SelectGems)

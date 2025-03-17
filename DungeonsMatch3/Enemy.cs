@@ -164,7 +164,7 @@ namespace DungeonsMatch3
                 case States.Move:
 
                     if (_timer.OnTimer((int)Timers.Trail))
-                        new Trail(AbsRectF.Center, Vector2.One, .025f, Color.WhiteSmoke).AppendTo(_parent);
+                        new Trail(AbsRectF.Center, Vector2.One * .5f, .025f, Color.WhiteSmoke).AppendTo(_parent);
 
                     _x = Easing.GetValue(Easing.QuarticEaseOut, _ticMove, _from.X, _goal.X, _tempoMove);
                     _y = Easing.GetValue(Easing.QuarticEaseOut, _ticMove, _from.Y, _goal.Y, _tempoMove);
@@ -267,7 +267,7 @@ namespace DungeonsMatch3
 
                 var tex = Game1._texMob00;
 
-                GFX.Draw(batch, tex, color * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * _scaleSpawn);
+                GFX.Draw(batch, tex, color * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 4) + Shake.GetVector2(), Position.CENTER, Vector2.One * .5f  * _scaleSpawn);
 
                 //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
                 

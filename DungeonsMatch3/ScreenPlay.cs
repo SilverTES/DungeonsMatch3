@@ -58,7 +58,7 @@ namespace DungeonsMatch3
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(8, 8, 64, 64));
+            _arena.Setup(new SizeTab(6, 8, 64, 64));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);
@@ -66,7 +66,7 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(10, 4, 128, 128));
+            _battlefield.Setup(new SizeTab(20, 8, 64, 64));
 
             _battlefield.AddRandomEnemy();
 
@@ -190,9 +190,12 @@ namespace DungeonsMatch3
             }
 
             // Debug
-            if (_battlefield.GroupOf<Enemy>().Count < 3)
+            //if (_battlefield.GroupOf<Enemy>().Count < 4)
+            if (_arena.NbTurns >= 10)
             {
+                _arena.NbTurns = 0;
                 _wave++;
+
                 _battlefield.AddRandomEnemy();
             }
 
@@ -208,7 +211,7 @@ namespace DungeonsMatch3
 
                 //batch.Grid(Vector2.Zero, Game1.ScreenW, Game1.ScreenH, 40, 40, Color.Black * .25f, 1f);
 
-
+                //Game1.DrawCurvedLine(batch, GFX._whitePixel, new Vector2(10, 10), new Vector2(100, 100), new Vector2(100, 0), Color.Yellow, 4f);
 
             }
 

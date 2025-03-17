@@ -108,16 +108,16 @@ namespace DungeonsMatch3
         }
         public void AddRandomEnemy()
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 6; i++)
             {
                 int x, y;
 
                 do
                 {
-                    x = Misc.Rng.Next(0, 2);
+                    x = Misc.Rng.Next(0, 4);
                     y = Misc.Rng.Next(0, GridSize.Y);
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), Misc.Rng.Next(2, 6), TimerEvent.Time(0, 0, .05f * i * 4))));
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), Misc.Rng.Next(1, 4), TimerEvent.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -324,7 +324,7 @@ namespace DungeonsMatch3
 
                 if (_rectOver != _prevRectOver && IsInGrid(_mousePos))
                 {
-                    new Trail(_rectOver.Center, Vector2.One, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
+                    new Trail(_rectOver.Center, Vector2.One *.5f, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
                     //new FxExplose(_rectOver.Center, Color.Gray).AppendTo(_parent);
                     //Console.WriteLine("RectOver !=");
                 }
