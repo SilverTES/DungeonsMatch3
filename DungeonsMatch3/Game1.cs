@@ -117,8 +117,8 @@ public class Game1 : Game
             [
             (int)Layers.BackFX,
             (int)Layers.Main, 
-            (int)Layers.HUD, 
             (int)Layers.FrontFX, 
+            (int)Layers.HUD, 
             (int)Layers.Debug,
             ]);
 

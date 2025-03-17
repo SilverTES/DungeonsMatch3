@@ -39,8 +39,9 @@ namespace DungeonsMatch3
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
         RectangleF _prevRectOver;
-        Point _mapPostionOver;
-        Vector2 _mapMouseOver;
+        Point _mapPositionOver;
+        public Point MapPositionOver => _mapPositionOver;
+        Vector2 _mouseCellCenterOver;
 
         MouseState _mouse;
 
@@ -143,16 +144,16 @@ namespace DungeonsMatch3
             _mousePos.X = Game1._mousePos.X - _x;
             _mousePos.Y = Game1._mousePos.Y - _y;
 
-            _mapPostionOver.X = (int)(_mousePos.X / CellSize.X);
-            _mapPostionOver.Y = (int)(_mousePos.Y / CellSize.Y);
+            _mapPositionOver.X = (int)Math.Floor(_mousePos.X / CellSize.X);
+            _mapPositionOver.Y = (int)Math.Floor(_mousePos.Y / CellSize.Y);
 
             _prevRectOver = _rectOver;
 
-            _rectOver.X = _mapPostionOver.X * CellSize.X + _x;
-            _rectOver.Y = _mapPostionOver.Y * CellSize.Y + _y;
+            _rectOver.X = _mapPositionOver.X * CellSize.X + _x;
+            _rectOver.Y = _mapPositionOver.Y * CellSize.Y + _y;
 
-            _mapMouseOver.X = _rectOver.X + CellSize.X / 2;
-            _mapMouseOver.Y = _rectOver.Y + CellSize.Y / 2;
+            _mouseCellCenterOver.X = _rectOver.X + CellSize.X / 2;
+            _mouseCellCenterOver.Y = _rectOver.Y + CellSize.Y / 2;
 
             RunState(gameTime);
 
@@ -171,9 +172,9 @@ namespace DungeonsMatch3
                     if (!IsInGrid(_mousePos))
                         break;
 
-                    if (ButtonControl.OnePress("Attack", _mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPostionOver)) && _arena.State == Arena.States.Action)
+                    if (ButtonControl.OnePress("Attack", _mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPositionOver)) && _arena.State == Arena.States.Action)
                     {
-                        if (Attack(_arena, _mapPostionOver))
+                        if (Attack(_arena, _mapPositionOver))
                         {
                             //_timer.StartTimer((int)Timers.Damage);
                             //ChangeState((int)States.DoDamage);
@@ -181,7 +182,7 @@ namespace DungeonsMatch3
                     }
 
 
-                    if (_rectOver != _prevRectOver && IsInGrid(_mousePos) && !IsNull(_mapPostionOver))
+                    if (_rectOver != _prevRectOver && IsInGrid(_mousePos) && !IsNull(_mapPositionOver))
                     {
                         Game1._soundClock.Play(.1f * Game1._volumeMaster, .5f, 0f);
                         //new Trail(_rectOver.Center, Vector2.One, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
@@ -308,6 +309,10 @@ namespace DungeonsMatch3
         {
             return _grid.Get(mapPosition.X, mapPosition.Y) == null;
         }
+        public T GetCell<T>(Point mapPosition) where T : Node
+        {
+            return (T)_grid.Get(mapPosition.X, mapPosition.Y);
+        }
         public Vector2 MapPositionToVector2(Point mapPosition)
         {
             return (mapPosition * CellSize).ToVector2();// + CellSize.ToVector2() / 2;
@@ -337,19 +342,29 @@ namespace DungeonsMatch3
 
             }
 
-            if (indexLayer == (int)Game1.Layers.Debug)
+            if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 var enemy = FindClosestEnemy();
-                if (enemy != null && !IsInGrid(_mapPostionOver))
+                if (enemy != null && !IsInGrid(_mapPositionOver))
                 {
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, Color.Red * 1f, 3f);
-
-                    //batch.Line(enemy.AbsRectF.TopCenter - Vector2.UnitY * _loop._current, enemy.AbsRectF.BottomCenter + Vector2.UnitY * _loop._current, Color.OrangeRed * .5f, 5f);
-                    //batch.Line(enemy.AbsRectF.LeftMiddle - Vector2.UnitX * _loop._current, enemy.AbsRectF.RightMiddle + Vector2.UnitX * _loop._current, Color.OrangeRed * .5f, 5f);
-
-                    //batch.Point(enemy.AbsRectF.Center, 4, Color.White);
                 }
+
+                if (_arena.GetState() == (int)Arena.States.Action && IsInGrid(_mapPositionOver))
+                {
+                    var target = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
+                    if (target != null) 
+                    {
+                        batch.BevelledRectangle(target.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
+                        batch.BevelledRectangle(target.AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, Color.Red * 1f, 3f);
+                    }
+                }
+            }
+
+            if (indexLayer == (int)Game1.Layers.Debug)
+            {
+
                 //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);

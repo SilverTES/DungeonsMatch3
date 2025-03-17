@@ -58,8 +58,8 @@ namespace DungeonsMatch3
 
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
-        Point _mapPostionOver;
-        Vector2 _mapMouseOver;
+        Point _mapPositionOver;
+        Vector2 _mouseCellCenterOver;
 
         Gem _currentGemOver;
         Color _currentColor = Color.Black;
@@ -76,6 +76,8 @@ namespace DungeonsMatch3
 
         BattleField _battleField;
 
+        Addon.Loop _loop;
+
         public Arena(BattleField battleField = null)
         {
             _battleField = battleField;
@@ -87,6 +89,11 @@ namespace DungeonsMatch3
 
             _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0, 0, 3), true);
             _timers.StartTimer((int)Timers.Help);
+
+            _loop = new Addon.Loop(this);
+            _loop.SetLoop(0, -2f, 2f, .5f, Mugen.Animation.Loops.PINGPONG);
+            _loop.Start();
+
         }
         public void SetBattlefield(BattleField battleField)
         { 
@@ -216,10 +223,11 @@ namespace DungeonsMatch3
         public override Node Update(GameTime gameTime)
         {
             _timers.Update();
+            _loop.Update(gameTime);
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius) && IsInGrid(_mapMouseOver))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mouseCellCenterOver, Gem.Radius) && IsInGrid(_mouseCellCenterOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -232,14 +240,14 @@ namespace DungeonsMatch3
             _mousePos.X = Game1._mousePos.X - _x;
             _mousePos.Y = Game1._mousePos.Y - _y;
 
-            _mapPostionOver.X = (int)(_mousePos.X / CellSize.X);
-            _mapPostionOver.Y = (int)(_mousePos.Y / CellSize.Y);
+            _mapPositionOver.X = (int)Math.Floor(_mousePos.X / CellSize.X);
+            _mapPositionOver.Y = (int)Math.Floor(_mousePos.Y / CellSize.Y);
 
-            _rectOver.X = _mapPostionOver.X * CellSize.X + _x; 
-            _rectOver.Y = _mapPostionOver.Y * CellSize.Y + _y;
+            _rectOver.X = _mapPositionOver.X * CellSize.X + _x; 
+            _rectOver.Y = _mapPositionOver.Y * CellSize.Y + _y;
 
-            _mapMouseOver.X = _rectOver.X + CellSize.X / 2;
-            _mapMouseOver.Y = _rectOver.Y + CellSize.Y / 2;
+            _mouseCellCenterOver.X = _rectOver.X + CellSize.X / 2;
+            _mouseCellCenterOver.Y = _rectOver.Y + CellSize.Y / 2;
 
             RunState(gameTime);
 
@@ -252,14 +260,14 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mouseCellCenterOver, Gem.Radius))
             {
-                var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+                var gemOver = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
                 if (gemOver != null)
                 {
                     _currentGemOver = gemOver;
                     
-                    if (_mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPostionOver))
+                    if (_mouse.LeftButton == ButtonState.Pressed && IsInGrid(_mapPositionOver))
                     {
                         if (!_gemSelecteds.Contains(gemOver))
                         {
@@ -402,7 +410,7 @@ namespace DungeonsMatch3
             }
             else
             {
-                var gem = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
+                var gem = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
 
                 if (gem != null)
                 {
@@ -411,7 +419,7 @@ namespace DungeonsMatch3
                     {
                         if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
                         {
-                            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius))
+                            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mouseCellCenterOver, Gem.Radius))
                             {
                                 SelectGem(gem);
                                 new FxExplose(gem.AbsXY, gem.Color, 5, 10).AppendTo(this);
@@ -649,26 +657,41 @@ namespace DungeonsMatch3
                 {
                     batch.FillRectangle(AbsRectF, Color.Black * .5f);
 
-                    var enemy = _battleField.FindClosestEnemy();
-                    if (enemy != null && IsInGrid(_mapPostionOver))
+                    batch.BevelledRectangle(AbsRectF.Extend(_loop._current), Vector2.One * 4, _currentColor * 1f, 3f);
+                    batch.BevelledRectangle(AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, _currentColor * .5f, 1f);
+
+                    if (IsInGrid(_mapPositionOver))
                     {
-                        var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
-                        var B = AbsXY + _mousePos;
+                        var enemy = _battleField.FindClosestEnemy();
+                        if (enemy != null)
+                        {
+                            var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
+                            var B = AbsXY + _mousePos;
 
-                        //batch.Line(A, B, _currentColor * .5f, 9f);
-                        //batch.Line(A, B, Color.White * .5f, 5f);
-
-                        Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), _currentColor * .0f, _currentColor * 1f, 9f, 100);
-                        Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * 1f, 3f, 100);
+                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), _currentColor * .0f, _currentColor * 1f, 9f, 100);
+                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * 1f, 3f, 100);
+                        }
                     }
-                    
+                    else
+                    {
+                        var enemy = _battleField.GetCell<Enemy>(_battleField.MapPositionOver);
+                        if (enemy != null)
+                        {
+                            var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
+                            var B = AbsRectF.Center;
 
-                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
+                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), _currentColor * .0f, _currentColor * 1f, 9f, 100);
+                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * 1f, 3f, 100);
+                        }
+                    }
+
                 }
+            }
 
-                if (_state == (int)States.SelectGems)
-                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
-
+            if (indexLayer == (int)Game1.Layers.HUD)
+            {
+                if (_state == (int)States.SelectGems || _state == (int)States.Action)
+                    DrawAttack(batch, AbsXY + _mousePos + Vector2.UnitY * 120);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -703,11 +726,11 @@ namespace DungeonsMatch3
         {
             //batch.Point(position, 24, Color.Black * .5f);
             var text = $"{TotalAttack}";
-            var textSize = Game1._fontMain.MeasureString(text);
+            var textSize = Game1._fontMedium.MeasureString(text);
 
             batch.FillRectangleCentered(position, textSize * 2.2f, Color.Black * .8f, 0);
             batch.RectangleCentered(position, textSize * 2.0f, _currentColor, 3f);
-            batch.CenterBorderedStringXY(Game1._fontMain, text , position, _currentColor, Color.White);
+            batch.CenterBorderedStringXY(Game1._fontMedium, text , position, _currentColor, Color.White);
         }
         public void DrawGemsLink(SpriteBatch batch)
         {
