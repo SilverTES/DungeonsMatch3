@@ -668,8 +668,7 @@ namespace DungeonsMatch3
                             var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
                             var B = AbsXY + _mousePos;
 
-                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), _currentColor * .0f, _currentColor * 1f, 9f, 100);
-                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * 1f, 3f, 100);
+                            DrawCurve(batch, A, B);
                         }
                     }
                     else
@@ -680,8 +679,7 @@ namespace DungeonsMatch3
                             var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
                             var B = AbsRectF.Center;
 
-                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), _currentColor * .0f, _currentColor * 1f, 9f, 100);
-                            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * 1f, 3f, 100);
+                            DrawCurve(batch, A, B);
                         }
                     }
 
@@ -691,7 +689,7 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.HUD)
             {
                 if (_state == (int)States.SelectGems || _state == (int)States.Action)
-                    DrawAttack(batch, AbsXY + _mousePos + Vector2.UnitY * 120);
+                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 40 + Vector2.UnitX * 40);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
@@ -722,6 +720,11 @@ namespace DungeonsMatch3
 
             return base.Draw(batch, gameTime, indexLayer);
         }
+        public void DrawCurve(SpriteBatch batch, Vector2 A, Vector2 B)
+        {
+            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.Transparent, _currentColor * 1f, 9f, 100);
+            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * .5f, 3f, 100);
+        }
         public void DrawAttack(SpriteBatch batch, Vector2 position)
         {
             //batch.Point(position, 24, Color.Black * .5f);
@@ -729,7 +732,7 @@ namespace DungeonsMatch3
             var textSize = Game1._fontMedium.MeasureString(text);
 
             batch.FillRectangleCentered(position, textSize * 2.2f, Color.Black * .8f, 0);
-            batch.RectangleCentered(position, textSize * 2.0f, _currentColor, 3f);
+            //batch.RectangleCentered(position, textSize * 2.0f, _currentColor, 3f);
             batch.CenterBorderedStringXY(Game1._fontMedium, text , position, _currentColor, Color.White);
         }
         public void DrawGemsLink(SpriteBatch batch)

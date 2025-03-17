@@ -191,7 +191,7 @@ namespace DungeonsMatch3
 
             // Debug
             //if (_battlefield.GroupOf<Enemy>().Count < 4)
-            if (_arena.NbTurns >= 10)
+            if (_arena.NbTurns >= 8)
             {
                 _arena.NbTurns = 0;
                 _wave++;
