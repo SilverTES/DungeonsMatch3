@@ -58,7 +58,7 @@ namespace DungeonsMatch3
         public ScreenPlay()
         {
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(6, 8, 64, 64));
+            _arena.Setup(new SizeTab(8, 8, 64, 64));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);

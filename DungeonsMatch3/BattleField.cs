@@ -106,9 +106,9 @@ namespace DungeonsMatch3
 
             KillAll(UID.Get<Enemy>());
         }
-        public void AddRandomEnemy()
+        public void AddRandomEnemy(int nbEnemy = 3)
         {
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < nbEnemy; i++)
             {
                 int x, y;
 
@@ -123,6 +123,9 @@ namespace DungeonsMatch3
         public Enemy FindClosestEnemy()
         {
             var enemies = GroupOf<Enemy>();
+
+            if (enemies.Count == 0) 
+                return null;
 
             enemies.Sort((e1, e2) => e1.MapPosition.X.CompareTo(e2.MapPosition.X));
 
@@ -345,7 +348,7 @@ namespace DungeonsMatch3
                     //batch.Line(enemy.AbsRectF.TopCenter - Vector2.UnitY * _loop._current, enemy.AbsRectF.BottomCenter + Vector2.UnitY * _loop._current, Color.OrangeRed * .5f, 5f);
                     //batch.Line(enemy.AbsRectF.LeftMiddle - Vector2.UnitX * _loop._current, enemy.AbsRectF.RightMiddle + Vector2.UnitX * _loop._current, Color.OrangeRed * .5f, 5f);
 
-                    batch.Point(enemy.AbsRectF.Center, 4, Color.White);
+                    //batch.Point(enemy.AbsRectF.Center, 4, Color.White);
                 }
                 //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
