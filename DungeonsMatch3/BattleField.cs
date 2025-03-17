@@ -8,6 +8,7 @@ using Mugen.Input;
 using Mugen.Physics;
 using System;
 using System.Linq;
+using System.Net.Http.Headers;
 
 
 namespace DungeonsMatch3
@@ -28,6 +29,8 @@ namespace DungeonsMatch3
 
         }
 
+        //public Point Target = new Point();
+
         public Point GridSize = new Point(14, 5);
         public Point CellSize = new Point(128, 128);
 
@@ -44,6 +47,8 @@ namespace DungeonsMatch3
         public RectangleF Rect => _rect;
 
         Arena _arena;
+
+        Addon.Loop _loop;
         public BattleField(Arena arena) 
         {
             _arena = arena;
@@ -59,6 +64,10 @@ namespace DungeonsMatch3
 
             _timer = new TimerEvent(Enums.Count<Timers>());
             _timer.SetTimer((int)Timers.Damage, TimerEvent.Time(0, 0, 1));
+
+            _loop = new Addon.Loop(this);
+            _loop.SetLoop(0, -2f, 2f, .5f, Mugen.Animation.Loops.PINGPONG);
+            _loop.Start();
 
         }
         public void Setup(SizeTab sizeTab)
@@ -115,13 +124,14 @@ namespace DungeonsMatch3
         {
             var enemies = GroupOf<Enemy>();
 
-            enemies.Sort((e1, e2) => e1.MapPosition.Y.CompareTo(e2.MapPosition.Y));
+            enemies.Sort((e1, e2) => e1.MapPosition.X.CompareTo(e2.MapPosition.X));
 
             return enemies.Last();
         }
         public override Node Update(GameTime gameTime)
         {
             _timer.Update();
+            _loop.Update(gameTime);
 
             _mouse = Game1.Mouse;
 
@@ -162,8 +172,8 @@ namespace DungeonsMatch3
                     {
                         if (Attack(_arena, _mapPostionOver))
                         {
-                            _timer.StartTimer((int)Timers.Damage);
-                            ChangeState((int)States.DoDamage);
+                            //_timer.StartTimer((int)Timers.Damage);
+                            //ChangeState((int)States.DoDamage);
                         }
                     }
 
@@ -247,6 +257,9 @@ namespace DungeonsMatch3
 
                     arena.ChangeState((int)Arena.States.FinishTurn);
 
+                    _timer.StartTimer((int)Timers.Damage);
+                    ChangeState((int)States.DoDamage);
+
                     return true;
                 }
             }
@@ -323,6 +336,17 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
+                var enemy = FindClosestEnemy();
+                if (enemy != null && !IsInGrid(_mapPostionOver))
+                {
+                    batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
+                    batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, Color.Red * 1f, 3f);
+
+                    //batch.Line(enemy.AbsRectF.TopCenter - Vector2.UnitY * _loop._current, enemy.AbsRectF.BottomCenter + Vector2.UnitY * _loop._current, Color.OrangeRed * .5f, 5f);
+                    //batch.Line(enemy.AbsRectF.LeftMiddle - Vector2.UnitX * _loop._current, enemy.AbsRectF.RightMiddle + Vector2.UnitX * _loop._current, Color.OrangeRed * .5f, 5f);
+
+                    batch.Point(enemy.AbsRectF.Center, 4, Color.White);
+                }
                 //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);

@@ -97,7 +97,7 @@ namespace DungeonsMatch3
         }
         public override Node Init()
         {
-            _specs.MaxEnergy = 32;
+            _specs.MaxEnergy = 18;
             _specs.Energy = _specs.MaxEnergy;
 
             _ticTurn = NbTurn;

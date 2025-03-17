@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Mugen.Core;
 using Mugen.Event;
 using Mugen.GFX;
+using Mugen.Input;
 using Mugen.Physics;
 using System;
 using System.Collections.Generic;
@@ -73,17 +74,23 @@ namespace DungeonsMatch3
 
         public int TotalAttack = 0;
 
-        public Arena()
+        BattleField _battleField;
+
+        public Arena(BattleField battleField = null)
         {
+            _battleField = battleField;
             _grid = new List2D<Gem>(GridSize.X, GridSize.Y);
 
             SetState((int)States.Play);
 
             _timers = new TimerEvent(Enums.Count<Timers>());
 
-            _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0,0,3), true);
+            _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0, 0, 3), true);
             _timers.StartTimer((int)Timers.Help);
-
+        }
+        public void SetBattlefield(BattleField battleField)
+        { 
+            _battleField = battleField; 
         }
         public void Setup(SizeTab sizeTab)
         {
@@ -182,6 +189,16 @@ namespace DungeonsMatch3
 
                 case States.Action:
 
+                    if (IsInGrid(_mousePos))
+                    {
+                        if (ButtonControl.OnePress("AutoAttack", _mouse.LeftButton == ButtonState.Pressed))
+                        {
+                            var enemy = _battleField.FindClosestEnemy();
+
+                            if (enemy != null)
+                                _battleField.Attack(this, enemy.MapPosition);
+                        }
+                    }
 
                     break;
 
@@ -202,7 +219,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 8) && IsInGrid(_mapMouseOver))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 16) && IsInGrid(_mapMouseOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -235,7 +252,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 8))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mapMouseOver, Gem.Radius - 16))
             {
                 var gemOver = _grid.Get(_mapPostionOver.X, _mapPostionOver.Y);
                 if (gemOver != null)
@@ -627,13 +644,22 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 if (_state == (int)States.Action)
+                {
                     batch.FillRectangle(AbsRectF, Color.Black * .5f);
+
+                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
+
+                    var enemy = _battleField.FindClosestEnemy();
+                    if (enemy != null && IsInGrid(_mapPostionOver))
+                    {
+                        batch.Line(AbsXY + _mousePos, _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2, _currentColor * .5f, 9f);
+                        batch.Line(AbsXY + _mousePos, _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2, Color.White * .5f, 5f);
+                    }
+                }
 
                 if (_state == (int)States.SelectGems)
                     DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
 
-                if (_state == (int)States.Action)
-                    DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 20);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)

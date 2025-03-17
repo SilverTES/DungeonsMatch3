@@ -66,9 +66,12 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(8, 4, 128, 128));
+            _battlefield.Setup(new SizeTab(10, 4, 128, 128));
 
             _battlefield.AddRandomEnemy();
+
+
+            _arena.SetBattlefield(_battlefield);
 
             _divMain = new Container(Style.Space.One * 4, Style.Space.One * 0, Position.VERTICAL);
             
