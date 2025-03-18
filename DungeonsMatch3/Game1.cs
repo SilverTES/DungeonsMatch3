@@ -79,7 +79,7 @@ public class Game1 : Game
     /// <param name="segments">Nombre de segments pour la ligne.</param>
     /// <param name="maxOffset">Amplitude maximale du décalage aléatoire.</param>
     /// <param name="time">Temps pour l'animation.</param>
-    public static void DrawElectricEffect(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Color color, int segments, float maxOffset, float time)
+    public static void DrawElectricEffect(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Color color, int segments, float maxOffset, float time, float thickness = 2f)
     {
         Vector2[] points = new Vector2[segments + 1];
 
@@ -119,7 +119,7 @@ public class Game1 : Game
                 color * (0.8f + (float)Misc.Rng.NextDouble() * 0.2f), // Variation légère de l'opacité
                 angle,
                 Vector2.Zero,
-                new Vector2(distance, 2), // Épaisseur de 2 pixels
+                new Vector2(distance, thickness), // Épaisseur de 2 pixels
                 SpriteEffects.None,
                 0f
             );

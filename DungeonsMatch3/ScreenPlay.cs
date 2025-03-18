@@ -47,12 +47,13 @@ namespace DungeonsMatch3
         Slot[] _slot = new Slot[10];
 
         Container _divMain;
-        //Container _divSlotLeft;
-        //Container _divSlotRight;
+        Container _divSlotLeft;
+        Container _divSlotRight;
         Container _divArena;
         Container _divBattle;
 
         int _wave = 1;
+        int _maxWave = 3;
         public int Wave => _wave;
 
         public ScreenPlay()
@@ -66,7 +67,7 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(20, 8, 64, 64));
+            _battlefield.Setup(new SizeTab(16, 8, 64, 64));
 
             _battlefield.AddRandomEnemy();
 
@@ -75,8 +76,8 @@ namespace DungeonsMatch3
 
             _divMain = new Container(Style.Space.One * 4, Style.Space.One * 0, Position.VERTICAL);
             
-            //_divSlotLeft = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
-            //_divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divSlotLeft = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
             _divArena = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
             _divBattle = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
 
@@ -89,14 +90,14 @@ namespace DungeonsMatch3
             //_container.Add(new Hero().SetSize(80, 140).AppendTo(this));
             //_container.Add(new Hero().SetSize(180, 80).AppendTo(this));
 
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    _slot[i] = (Slot)new Slot(_arena, _battlefield).AppendTo(this);
-            //    _divSlotLeft.Insert(_slot[i]);
+            for (int i = 0; i < 2; i++)
+            {
+                _slot[i] = (Slot)new Slot(_arena, _battlefield).AppendTo(this);
+                _divSlotLeft.Insert(_slot[i]);
 
-            //    _slot[i] = (Slot)new Slot(_arena, _battlefield).Flip().AppendTo(this);
-            //    _divSlotRight.Insert(_slot[i]);
-            //}
+                _slot[i] = (Slot)new Slot(_arena, _battlefield).Flip().AppendTo(this);
+                _divSlotRight.Insert(_slot[i]);
+            }
 
             //_slot[4] = (Slot)new Slot().AppendTo(this);
             //_divArena.Insert(_slot[4]);
@@ -107,9 +108,9 @@ namespace DungeonsMatch3
             _divBattle.Insert(_battlefield);
             //_divBattle.Insert(_divSlotRight);
 
-            //_divArena.Insert(_divSlotLeft);
+            _divArena.Insert(_divSlotLeft);
             _divArena.Insert(_arena);
-            //_divArena.Insert(_divSlotRight);
+            _divArena.Insert(_divSlotRight);
 
             //_divMain.Insert(_divSlotLeft);
             _divMain.Insert(_divBattle);
@@ -196,7 +197,11 @@ namespace DungeonsMatch3
                 _arena.NbTurns = 0;
                 _wave++;
 
-                _battlefield.AddRandomEnemy();
+                if (_wave <= _maxWave)
+                {
+                    _battlefield.AddRandomEnemy(4);
+                    _arena.MaxTurns++;
+                }
             }
 
             return base.Update(gameTime);
@@ -217,7 +222,12 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
-                batch.String(Game1._fontMain2, $"Wave {Wave}", Vector2.One * 20 + Vector2.UnitY * 10, Color.Yellow, Style.HorizontalAlign.Left);
+                var str = $"Wave {Wave}";
+
+                if (_wave >= _maxWave)
+                    str = "Final Wave";
+
+                batch.String(Game1._fontMain2, str, Vector2.One * 20 + Vector2.UnitY * 10, Color.Gold, Style.HorizontalAlign.Left);
 
                 //batch.String(Game1._fontMain, $"Nb Node = {_arena.NbActive()}/{_arena.NbNode()}", Vector2.One * 20 + Vector2.UnitY * 40, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Left);
                 //batch.String(Game1._fontMain, $"Format Index = {_indexFormat} {_format[_indexFormat].GridSize}", Game1.ScreenW / 2, 20, Color.Yellow, Mugen.GUI.Style.HorizontalAlign.Center);

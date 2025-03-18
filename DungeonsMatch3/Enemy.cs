@@ -311,7 +311,7 @@ namespace DungeonsMatch3
 
             }
 
-            if (indexLayer == (int)Game1.Layers.Main)
+            if (indexLayer == (int)Game1.Layers.HUD)
             {
                 DrawEnergyBar(batch);
                 

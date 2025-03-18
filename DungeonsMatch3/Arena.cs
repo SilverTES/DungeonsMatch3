@@ -213,6 +213,9 @@ namespace DungeonsMatch3
                 case States.FinishTurn:
 
                     OnFinishTurn = true;
+
+                    NbTurns++;
+
                     ChangeState((int)States.Play);
 
                     break;
@@ -400,7 +403,7 @@ namespace DungeonsMatch3
                 {
                     ChangeState((int)States.ExploseSelectedGems);
 
-                    NbTurns++;
+                    //NbTurns++;
                 }
                 else
                 {
@@ -650,7 +653,7 @@ namespace DungeonsMatch3
 
                 //batch.Rectangle(AbsRectF.Extend(4), Color.Black, 3);
 
-                DrawGemsLink(batch);
+                DrawGemsLink(batch, gameTime);
             }
 
             if (indexLayer == (int)Game1.Layers.FrontFX)
@@ -686,6 +689,9 @@ namespace DungeonsMatch3
                     }
 
                 }
+
+                
+
             }
 
             if (indexLayer == (int)Game1.Layers.HUD)
@@ -734,19 +740,64 @@ namespace DungeonsMatch3
             var textSize = Game1._fontMedium.MeasureString(text);
 
             batch.FillRectangleCentered(position, textSize * 2.2f, Color.Black * .8f, 0);
-            //batch.RectangleCentered(position, textSize * 2.0f, _currentColor, 3f);
+            batch.RectangleCentered(position, textSize * 2.0f, _currentColor, 3f);
             batch.CenterBorderedStringXY(Game1._fontMedium, text , position, _currentColor, Color.White);
         }
-        public void DrawGemsLink(SpriteBatch batch)
+        public void DrawGemsLink(SpriteBatch batch, GameTime gameTime)
         {
             for (int i = 0; i < _gemSelecteds.Count - 1; i++)
             {
-                batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition), AbsXY + MapPositionToVector2(_gemSelecteds[i + 1].MapPosition), _currentColor, 15f);
-                batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition), AbsXY + MapPositionToVector2(_gemSelecteds[i + 1].MapPosition), Color.White, 5f);
+                var p1 = AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition);
+                var p2 = AbsXY + MapPositionToVector2(_gemSelecteds[i + 1].MapPosition);
+
+                batch.Line(p1, p2, _currentColor, 15f);
+                //batch.Line(p1, p2, Color.White, 5f);
+
+                Game1.DrawElectricEffect(
+                    batch,
+                    GFX._whitePixel,
+                    p1,  // Point A
+                    p2,  // Point B
+                    _currentColor,            // Couleur de l'éclair
+                    10,                     // Nombre de segments
+                    20f,                    // Amplitude maximale du décalage
+                    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
+                    4f
+                );
+
+                Game1.DrawElectricEffect(
+                    batch,
+                    GFX._whitePixel,
+                    p1,  // Point A
+                    p2,  // Point B
+                    Color.White,            // Couleur de l'éclair
+                    10,                     // Nombre de segments
+                    20f,                    // Amplitude maximale du décalage
+                    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
+                    2f
+                );
             }
 
             if (_state == (int)States.SelectGems && _gemSelecteds.Count > 0)
-                batch.Line(AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition), AbsXY + _mousePos, _currentColor, 15f);
+            {
+                var p1 = AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition);
+                var p2 = AbsXY + _mousePos;
+
+                batch.Line(p1, p2, _currentColor, 15f);
+
+                Game1.DrawElectricEffect(
+                    batch,
+                    GFX._whitePixel,
+                    p1,  // Point A
+                    p2,  // Point B
+                    Color.White,            // Couleur de l'éclair
+                    10,                     // Nombre de segments
+                    20f,                    // Amplitude maximale du décalage
+                    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
+                    4f
+                );
+
+            }
         }
     }
 }

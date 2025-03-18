@@ -408,7 +408,8 @@ namespace DungeonsMatch3
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.Red * 1f, 3f);
                 }
 
-                if (_arena.GetState() == (int)Arena.States.Action && IsInGrid(_mapPositionOver))
+                //if (_arena.GetState() == (int)Arena.States.Action && IsInGrid(_mapPositionOver))
+                if (IsInGrid(_mapPositionOver))
                 {
                     var target = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
                     if (target != null) 
