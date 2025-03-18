@@ -48,7 +48,7 @@ namespace DungeonsMatch3
             ];
 
         public Point GridSize;
-        public Point CellSize;
+        public Vector2 CellSize;
 
         public int NbTurns = 0;
         public bool OnFinishTurn = false;
@@ -580,7 +580,8 @@ namespace DungeonsMatch3
         }
         public Gem AddInGrid(Gem gem)
         {
-            _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
+            //_grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
+            SetInGrid(gem);
             gem.SetPosition(MapPositionToVector2(gem.MapPosition)).AppendTo(this);
 
             return gem;
@@ -630,7 +631,7 @@ namespace DungeonsMatch3
         }
         public Vector2 MapPositionToVector2(Point mapPosition)
         {
-            return (mapPosition * CellSize).ToVector2() + CellSize.ToVector2() / 2;
+            return (mapPosition.ToVector2() * CellSize) + CellSize / 2;
         }
         public Vector2 MapPositionToVector2(int i, int j)
         {
@@ -665,7 +666,7 @@ namespace DungeonsMatch3
                         var enemy = _battleField.FindClosestEnemy();
                         if (enemy != null)
                         {
-                            var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
+                            var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy) + enemy.SizeVector2 / 2;
                             var B = AbsXY + _mousePos;
 
                             DrawCurve(batch, A, B);
@@ -676,7 +677,7 @@ namespace DungeonsMatch3
                         var enemy = _battleField.GetCell<Enemy>(_battleField.MapPositionOver);
                         if (enemy != null)
                         {
-                            var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy.MapPosition) + _battleField.CellSize.ToVector2() / 2;
+                            var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy) + enemy.SizeVector2 / 2;
                             var B = AbsRectF.Center;
 
                             DrawCurve(batch, A, B);

@@ -10,15 +10,19 @@ namespace DungeonsMatch3
     public class Trail : Node
     {
         Color _color;
-        Vector2 _position = new Vector2();
-        Vector2 _scale;
+        //Vector2 _position = new Vector2();
+        //Vector2 _scale;
         float _stepAlpha;
-        public Trail(Vector2 position, Vector2 scale, float stepAplha = 0.5f, Color color = default)
+        Rectangle _bounds;
+        //public Trail(Vector2 position, Vector2 scale, float stepAplha = 0.5f, Color color = default)
+        public Trail(Rectangle bound, float stepAplha = 0.5f, Color color = default)
         {
-            _position = position;
-            _scale = scale;
+            //_position = position;
+            //_scale = scale;
             _color = color;
             _stepAlpha = stepAplha;
+            _bounds = bound;
+
         }
 
         public override Node Update(GameTime gameTime)
@@ -28,7 +32,10 @@ namespace DungeonsMatch3
             _alpha += -_stepAlpha;
 
             if (_alpha <= 0f)
+            {
                 KillMe();
+                
+            }
 
             return base.Update(gameTime);
         }
@@ -44,7 +51,9 @@ namespace DungeonsMatch3
                 //GFX.Draw(batch, Game1._texTrail, _color * _alpha, 0, pos, Mugen.Physics.Position.CENTER, Vector2.One * (_alpha/2));
                 //GFX.Draw(batch, Game1._texTrail, _color * _alpha, 0, pos, Mugen.Physics.Position.CENTER, Vector2.One * _alpha);
 
-                GFX.Draw(batch, Game1._texTrail, _color * _alpha, 0, _position, Mugen.Physics.Position.CENTER, _scale);
+                //GFX.Draw(batch, _texTrail, _color * _alpha, 0, _position, Mugen.Physics.Position.CENTER, _scale);
+
+                batch.Draw(_texTrail, _bounds, _color * _alpha);
 
             }
 

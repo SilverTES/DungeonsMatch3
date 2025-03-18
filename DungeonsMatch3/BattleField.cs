@@ -31,8 +31,8 @@ namespace DungeonsMatch3
 
         //public Point Target = new Point();
 
-        public Point GridSize = new Point(14, 5);
-        public Point CellSize = new Point(128, 128);
+        public Point GridSize;
+        public Vector2 CellSize;
 
         List2D<Node> _grid;
 
@@ -69,6 +69,7 @@ namespace DungeonsMatch3
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0, -2f, 2f, .5f, Mugen.Animation.Loops.PINGPONG);
             _loop.Start();
+            AddAddon(_loop);
 
         }
         public void Setup(SizeTab sizeTab)
@@ -112,13 +113,16 @@ namespace DungeonsMatch3
             for (int i = 0; i < nbEnemy; i++)
             {
                 int x, y;
+                Point size;
 
                 do
                 {
-                    x = Misc.Rng.Next(0, 4);
+                    x = Misc.Rng.Next(0, 5);
                     y = Misc.Rng.Next(0, GridSize.Y);
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), Misc.Rng.Next(1, 4), TimerEvent.Time(0, 0, .05f * i * 4))));
+                    size = Enemy.Sizes[Misc.Rng.Next(0, Enemy.Sizes.Length)];                
+
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, Misc.Rng.Next(1, 4), TimerEvent.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -135,8 +139,6 @@ namespace DungeonsMatch3
         public override Node Update(GameTime gameTime)
         {
             _timer.Update();
-            _loop.Update(gameTime);
-
             _mouse = Game1.Mouse;
 
             UpdateRect();
@@ -273,26 +275,72 @@ namespace DungeonsMatch3
         }
         public bool AddInGrid(Enemy enemy)
         {
-            if (!IsNull(enemy.MapPosition))
+            //if (!IsNull(enemy.MapPosition))
+            //    return false;
+            if (!CanAddInGrid(enemy))
                 return false;
 
-            _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
+            //_grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
+            SetInGrid(enemy);
+
             enemy.SetPosition(MapPositionToVector2(enemy.MapPosition));
             enemy.AppendTo(this);
 
             return true;
         }
+        public bool CanAddInGrid(Enemy enemy)
+        {
+            for (int i = 0; i < enemy.Size.X; i++)
+            {
+                for (int j = 0; j < enemy.Size.Y; j++)
+                {
+                    if (!IsNull(enemy.MapPosition + new Point(i, j)))
+                        return false;
+                }
+            }
+
+            return true;
+        }
         public void SetInGrid(Enemy enemy)
         {
-            _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
+            if (!CanSetInGrid(enemy)) 
+                return;
+
+            for (int i = 0; i < enemy.Size.X; i++)
+            {
+                for (int j = 0; j < enemy.Size.Y; j++)
+                {
+                    _grid.Put(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, enemy);
+                }
+            }
+
         }
         public void DeleteInGrid(Enemy enemy)
         {
-            _grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, null);
+            for (int i = 0; i < enemy.Size.X; i++)
+            {
+                for (int j = 0; j < enemy.Size.Y; j++)
+                {
+                    _grid.Put(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, null);
+                }
+            }
         }
         public void DeleteInGrid(Point mapPosition)
         {
             _grid.Put(mapPosition.X, mapPosition.Y, null);
+        }
+        public bool CanSetInGrid(Enemy enemy)
+        {
+            for (int i = 0; i < enemy.Size.X; i++)
+            {
+                for (int j = 0; j < enemy.Size.Y; j++)
+                {
+                    if (!IsInGrid(enemy.MapPosition + new Point(i, j)))
+                        return false;
+                }
+            }
+
+            return true;
         }
         public bool IsInGrid(Vector2 position)
         {
@@ -307,15 +355,23 @@ namespace DungeonsMatch3
         }
         public bool IsNull(Point mapPosition)
         {
+            if (!IsInGrid(mapPosition))
+                return false;
+
             return _grid.Get(mapPosition.X, mapPosition.Y) == null;
         }
         public T GetCell<T>(Point mapPosition) where T : Node
         {
             return (T)_grid.Get(mapPosition.X, mapPosition.Y);
         }
+        public Vector2 MapPositionToVector2(Enemy enemy)
+        {
+
+            return enemy.MapPosition.ToVector2() * CellSize;
+        }
         public Vector2 MapPositionToVector2(Point mapPosition)
         {
-            return (mapPosition * CellSize).ToVector2();// + CellSize.ToVector2() / 2;
+            return mapPosition.ToVector2() * CellSize;
         }
         public Vector2 MapPositionToVector2(int i, int j)
         {
@@ -332,7 +388,8 @@ namespace DungeonsMatch3
 
                 if (_rectOver != _prevRectOver && IsInGrid(_mousePos))
                 {
-                    new Trail(_rectOver.Center, Vector2.One *.5f, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
+                    //new Trail(_rectOver.Center, Vector2.One *.5f, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
+                    new Trail((Rectangle)_rectOver, .025f, Color.WhiteSmoke * .75f).AppendTo(_parent);
                     //new FxExplose(_rectOver.Center, Color.Gray).AppendTo(_parent);
                     //Console.WriteLine("RectOver !=");
                 }
@@ -345,7 +402,7 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 var enemy = FindClosestEnemy();
-                if (enemy != null && !IsInGrid(_mapPositionOver))
+                if (enemy != null && !IsInGrid(_mapPositionOver) && _arena.GetState() == (int)Arena.States.Action)
                 {
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, Color.Red * 1f, 3f);
@@ -377,7 +434,7 @@ namespace DungeonsMatch3
                         var node = _grid.Get(i, j);
                         if (node != null)
                         {
-                            //batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize.ToVector2() / 2, Color.White * .5f);
+                            //batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
                         }
                     }
                 }

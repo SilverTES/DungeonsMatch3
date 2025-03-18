@@ -13,12 +13,12 @@ namespace DungeonsMatch3
     public struct SizeTab
     {
         public Point Grid;
-        public Point Cell;
+        public Vector2 Cell;
 
         public SizeTab(int gridW, int gridH, int cellW, int cellH)
         {
             Grid = new Point(gridW, gridH);
-            Cell = new Point(cellW, cellH);
+            Cell = new Vector2(cellW, cellH);
         }
     }
 
@@ -227,6 +227,20 @@ namespace DungeonsMatch3
                 //_mainContainer.DrawDebug(batch, Color.Red);
                 //_slotContainer.DrawDebug(batch, Color.Red);
                 //_battleContainer.DrawDebug(batch, Color.Red);
+                // Exemple d'appel pour un effet électrique
+
+                //Game1.DrawElectricEffect(
+                //    batch,
+                //    GFX._whitePixel,
+                //    new Vector2(100, 300),  // Point A
+                //    new Vector2(700, 400),  // Point B
+                //    Color.Cyan,             // Couleur de l'éclair
+                //    40,                     // Nombre de segments
+                //    80f,                    // Amplitude maximale du décalage
+                //    (float)gameTime.TotalGameTime.TotalSeconds // Pour l'animation
+                //);
+
+                //batch.Draw(Game1._texTrail, new Rectangle(500, 50, 128, 128), Color.White);
             }
 
             if (indexLayer == (int)Game1.Layers.BackFX)

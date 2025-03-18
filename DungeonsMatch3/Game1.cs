@@ -28,10 +28,15 @@ public class Game1 : Game
     static public SpriteFont _fontMain2;
     static public SpriteFont _fontMedium;
 
+    static public Texture2D _texAvatar1x1;
+    static public Texture2D _texAvatar2x2;
+    static public Texture2D _texAvatar2x3;
+
     static public Texture2D _texBG;
     static public Texture2D _texCursorA;
     static public Texture2D _texCursorB;
     static public Texture2D _texTrail;
+    static public Texture2D _texLightning;
     
     static public Texture2D _texMob00;
     static public Texture2D _texHero00;
@@ -62,6 +67,64 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
+    /// <summary>
+    /// Dessine un effet électrique entre pointA et pointB.
+    /// </summary>
+    /// <param name="spriteBatch">Le SpriteBatch pour dessiner.</param>
+    /// <param name="pixel">Texture d'un pixel pour le rendu.</param>
+    /// <param name="pointA">Point de départ.</param>
+    /// <param name="pointB">Point d'arrivée.</param>
+    /// <param name="color">Couleur de l'effet.</param>
+    /// <param name="segments">Nombre de segments pour la ligne.</param>
+    /// <param name="maxOffset">Amplitude maximale du décalage aléatoire.</param>
+    /// <param name="time">Temps pour l'animation.</param>
+    public static void DrawElectricEffect(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Color color, int segments, float maxOffset, float time)
+    {
+        Vector2[] points = new Vector2[segments + 1];
+
+        points[0] = pointA; // Premier point
+        points[segments] = pointB; // Dernier point
+
+        // Calculer la direction de la ligne
+        Vector2 direction = pointB - pointA;
+        float length = direction.Length();
+        Vector2 normalizedDirection = Vector2.Normalize(direction);
+        Vector2 perpendicular = new Vector2(-normalizedDirection.Y, normalizedDirection.X); // Vecteur perpendiculaire
+
+        // Générer les points intermédiaires avec décalage aléatoire
+        for (int i = 1; i < segments; i++)
+        {
+            float t = i / (float)segments;
+            Vector2 basePoint = pointA + direction * t;
+
+            // Ajouter un décalage aléatoire avec animation
+            float offset = (float)(Misc.Rng.NextDouble() - 0.5) * maxOffset * (float)Math.Sin(time * 5 + i);
+            points[i] = basePoint + perpendicular * offset;
+        }
+
+        // Dessiner les segments entre les points
+        for (int i = 0; i < segments; i++)
+        {
+            Vector2 start = points[i];
+            Vector2 end = points[i + 1];
+
+            float distance = Vector2.Distance(start, end);
+            float angle = (float)Math.Atan2(end.Y - start.Y, end.X - start.X);
+
+            spriteBatch.Draw(
+                pixel,
+                start,
+                null,
+                color * (0.8f + (float)Misc.Rng.NextDouble() * 0.2f), // Variation légère de l'opacité
+                angle,
+                Vector2.Zero,
+                new Vector2(distance, 2), // Épaisseur de 2 pixels
+                SpriteEffects.None,
+                0f
+            );
+        }
+    }
+
 
     /// <summary>
     /// Dessine une ligne incurvée entre pointA et pointB avec un point de contrôle pointC.
@@ -150,6 +213,10 @@ public class Game1 : Game
         _fontMain2 = Content.Load<SpriteFont>("Fonts/fontMain2");
         _fontMedium = Content.Load<SpriteFont>("Fonts/fontMedium");
 
+        _texAvatar1x1 = Content.Load<Texture2D>("Images/avatar1x1");
+        _texAvatar2x2 = Content.Load<Texture2D>("Images/avatar2x2");
+        _texAvatar2x3 = Content.Load<Texture2D>("Images/avatar2x3");
+
         _texBG = Content.Load<Texture2D>("Images/background00");
         _texCursorA = Content.Load<Texture2D>("Images/mouse_cursor");
         _texCursorB = Content.Load<Texture2D>("Images/mouse_cursor2");
@@ -157,6 +224,7 @@ public class Game1 : Game
         _texMob00 = Content.Load<Texture2D>("Images/mob00");
         _texHero00 = Content.Load<Texture2D>("Images/hero00");
         _texTrail = Content.Load<Texture2D>("Images/trail");
+        _texLightning = Content.Load<Texture2D>("Images/lightning");
 
         CursorA = MouseCursor.FromTexture2D(_texCursorA, 0, 0);
         CursorB = MouseCursor.FromTexture2D(_texCursorB, 0, 0);

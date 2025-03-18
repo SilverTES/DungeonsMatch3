@@ -5,7 +5,6 @@ using Mugen.Core;
 using Mugen.GFX;
 using Mugen.Input;
 using Mugen.Physics;
-using System;
 
 namespace DungeonsMatch3
 {
