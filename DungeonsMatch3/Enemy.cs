@@ -61,8 +61,6 @@ namespace DungeonsMatch3
         public Vector2 SizeVector2 => _size.ToVector2() * _battleField.CellSize;
 
         //int _energy;
-        public int NbTurn;
-        int _ticTurn;
 
         public Point MapPosition;
         public Point GoalPosition;
@@ -85,7 +83,7 @@ namespace DungeonsMatch3
 
         Loop _loop;
 
-        public Enemy(BattleField battleField, Point mapPosition, Point size, int nbTurn = 2, float tempoBeforeSpawn = 0f)
+        public Enemy(BattleField battleField, Point mapPosition, Point size, int nbTurn = 2, int maxEnergy = 32, float tempoBeforeSpawn = 0f)
         {
             _type = UID.Get<Enemy>();
             _battleField = battleField;
@@ -94,7 +92,8 @@ namespace DungeonsMatch3
             SetSize(_size.ToVector2() * _battleField.CellSize);
 
             MapPosition = mapPosition;
-            NbTurn = nbTurn;
+            _specs.NbTurn = nbTurn;
+            _specs.MaxEnergy = maxEnergy;
 
             float angleDelta = .005f;
 
@@ -121,10 +120,8 @@ namespace DungeonsMatch3
         }
         public override Node Init()
         {
-            _specs.MaxEnergy = 32;
             _specs.Energy = _specs.MaxEnergy;
-
-            _ticTurn = NbTurn;
+            _specs._ticTurn = _specs.NbTurn;
 
             return base.Init();
         }
@@ -143,10 +140,10 @@ namespace DungeonsMatch3
         {
             //Shake.SetIntensity(4);
 
-            _ticTurn--;
-            if (_ticTurn <= 0)
+            _specs._ticTurn--;
+            if (_specs._ticTurn <= 0)
             {
-                _ticTurn = NbTurn;
+                _specs._ticTurn = _specs.NbTurn;
                 Action();
             }
         }
@@ -305,6 +302,7 @@ namespace DungeonsMatch3
                 if (_size == Size1x1) tex = Game1._texAvatar1x1;
                 if (_size == Size2x2) tex = Game1._texAvatar2x2;
                 if (_size == Size2x3) tex = Game1._texAvatar2x3;
+                if (_size == Size3x3) tex = Game1._texAvatar3x3;
 
                 if (tex != null)
                     GFX.Draw(batch, tex, color * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * _scaleSpawn);
@@ -344,17 +342,17 @@ namespace DungeonsMatch3
 
             GFX.Bar(batch, canvas.TopCenter + (Vector2.UnitY * -0.25f) - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 2, Color.White * .5f * _alphaSpawn);
 
-            batch.CenterBorderedStringXY(Game1._fontMain, $"{_specs.Energy}", canvas.TopLeft + Vector2.One * (Size.ToVector2() * 10) + shake * .5f, fg * _alphaSpawn, bg * _alphaSpawn);
+            batch.CenterBorderedStringXY(Game1._fontMain, $"{_specs.Energy}", canvas.TopLeft + Vector2.One * 10 + shake * .5f, fg * _alphaSpawn, bg * _alphaSpawn);
         }
         void DrawTicTurn(SpriteBatch batch)
         {
-            for (int i = 1; i < NbTurn; i++)
+            for (int i = 1; i < _specs.NbTurn; i++)
             {
                 var pos = AbsRectF.BottomLeft;
 
-                batch.Point(pos.X + i * 10, pos.Y - 10, 5, _ticTurn == 1 ? Color.Red * _alphaSpawn : Color.Black * _alphaSpawn);
+                batch.Point(pos.X + i * 10, pos.Y - 10, 5, _specs._ticTurn == 1 ? Color.Red * _alphaSpawn : Color.Black * _alphaSpawn);
 
-                if (i < _ticTurn)
+                if (i < _specs._ticTurn)
                     batch.Point(pos.X + i * 10, pos.Y - 10, 3, Color.Yellow * _alphaSpawn);
 
                 batch.Circle(pos.X + i * 10, pos.Y - 10, 5, 8, Color.White * _alphaSpawn);

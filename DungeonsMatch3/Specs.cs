@@ -5,6 +5,9 @@ namespace DungeonsMatch3
 {
     public class Specs
     {
+        public int NbTurn;
+        public int _ticTurn;
+
         public int NbAction = 1;
         public int MaxEnergy = 80;
         public int Energy = 80;

@@ -51,6 +51,7 @@ namespace DungeonsMatch3
         public Vector2 CellSize;
 
         public int NbTurns = 0;
+        public int MaxTurns = 8;
         public bool OnFinishTurn = false;
         public RectangleF Rect => _rect;
 
@@ -697,7 +698,7 @@ namespace DungeonsMatch3
             {
                 //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
-                batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.TopCenter - Vector2.UnitY * 20, Color.Cyan);
+                batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.BottomCenter - Vector2.UnitY * 20, Color.Cyan);
                 //batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
                 //for (int i = 0; i < _grid._width; i++)
@@ -714,7 +715,7 @@ namespace DungeonsMatch3
 
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
 
-                batch.CenterStringXY(Game1._fontMain, $"Nb Turns = {NbTurns}", AbsRectF.BottomCenter, Color.Yellow);
+                batch.CenterStringXY(Game1._fontMain2, $"Turns {NbTurns} / {MaxTurns}", AbsRectF.TopCenter, Color.Yellow);
             }
 
             DrawChilds(batch, gameTime, indexLayer);

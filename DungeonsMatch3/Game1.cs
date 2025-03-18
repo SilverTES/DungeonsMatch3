@@ -31,6 +31,7 @@ public class Game1 : Game
     static public Texture2D _texAvatar1x1;
     static public Texture2D _texAvatar2x2;
     static public Texture2D _texAvatar2x3;
+    static public Texture2D _texAvatar3x3;
 
     static public Texture2D _texBG;
     static public Texture2D _texCursorA;
@@ -216,6 +217,7 @@ public class Game1 : Game
         _texAvatar1x1 = Content.Load<Texture2D>("Images/avatar1x1");
         _texAvatar2x2 = Content.Load<Texture2D>("Images/avatar2x2");
         _texAvatar2x3 = Content.Load<Texture2D>("Images/avatar2x3");
+        _texAvatar3x3 = Content.Load<Texture2D>("Images/avatar3x3");
 
         _texBG = Content.Load<Texture2D>("Images/background00");
         _texCursorA = Content.Load<Texture2D>("Images/mouse_cursor");

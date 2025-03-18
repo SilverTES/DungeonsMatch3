@@ -122,7 +122,7 @@ namespace DungeonsMatch3
 
                     size = Enemy.Sizes[Misc.Rng.Next(0, Enemy.Sizes.Length)];                
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, Misc.Rng.Next(1, 4), TimerEvent.Time(0, 0, .05f * i * 4))));
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, size.X * size.Y, size.X * size.Y * 16, TimerEvent.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -404,8 +404,8 @@ namespace DungeonsMatch3
                 var enemy = FindClosestEnemy();
                 if (enemy != null && !IsInGrid(_mapPositionOver) && _arena.GetState() == (int)Arena.States.Action)
                 {
-                    batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
-                    batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, Color.Red * 1f, 3f);
+                    batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 8), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
+                    batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.Red * 1f, 3f);
                 }
 
                 if (_arena.GetState() == (int)Arena.States.Action && IsInGrid(_mapPositionOver))
@@ -413,8 +413,8 @@ namespace DungeonsMatch3
                     var target = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
                     if (target != null) 
                     {
-                        batch.BevelledRectangle(target.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
-                        batch.BevelledRectangle(target.AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, Color.Red * 1f, 3f);
+                        batch.BevelledRectangle(target.AbsRectF.Extend(_loop._current + 8), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
+                        batch.BevelledRectangle(target.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.Red * 1f, 3f);
                     }
                 }
             }
