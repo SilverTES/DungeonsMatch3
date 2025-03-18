@@ -164,17 +164,29 @@ namespace DungeonsMatch3
             {
                 var shake = Shake.GetVector2();
 
-                batch.Point(AbsXY + shake, _radius / 2, Color);
+                //batch.Point(AbsXY + shake, _radius / 2, Color);
 
-                batch.Circle(AbsXY + shake, _radius - 12, 8, Color, 4, _angle);
-                batch.Circle(AbsXY + shake, _radius - 4, 8, Color, 4, _angle);
-                batch.Circle(AbsXY + shake, _radius, 8, Color.Black, 2, _angle);
+                //batch.Circle(AbsXY + shake, _radius - 12, 8, Color, 4, _angle);
+                //batch.Circle(AbsXY + shake, _radius - 4, 8, Color, 4, _angle);
+                //batch.Circle(AbsXY + shake, _radius, 8, Color.Black, 2, _angle);
 
-                if (IsSelected)
-                    batch.Point(AbsXY + shake, _radius / 4, Color.White);
+
+                GFX.Draw(batch, Game1._texGem, Color, 0, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
+
+
+
+            }
+
+            if (indexLayer == (int)Game1.Layers.FrontFX)
+            {
+                var shake = Shake.GetVector2();
 
                 if (IsSameColor && NbSameColor > 2)
-                    batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
+                    GFX.Draw(batch, Game1._texGemLight, Color.White, 0, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
+                    //batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
+
+                if (IsSelected)
+                    batch.Point(AbsXY + shake, _radius / 4, Color);
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)

@@ -730,8 +730,8 @@ namespace DungeonsMatch3
         }
         public void DrawCurve(SpriteBatch batch, Vector2 A, Vector2 B)
         {
-            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.Transparent, _currentColor * 1f, 9f, 100);
-            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * .5f, 3f, 100);
+            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.Transparent, _currentColor * 1f, 9f);
+            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * .5f, 3f);
         }
         public void DrawAttack(SpriteBatch batch, Vector2 position)
         {
@@ -751,31 +751,31 @@ namespace DungeonsMatch3
                 var p2 = AbsXY + MapPositionToVector2(_gemSelecteds[i + 1].MapPosition);
 
                 batch.Line(p1, p2, _currentColor, 15f);
-                //batch.Line(p1, p2, Color.White, 5f);
+                batch.Line(p1, p2, Color.White, 5f);
 
-                Game1.DrawElectricEffect(
-                    batch,
-                    GFX._whitePixel,
-                    p1,  // Point A
-                    p2,  // Point B
-                    _currentColor,            // Couleur de l'éclair
-                    10,                     // Nombre de segments
-                    20f,                    // Amplitude maximale du décalage
-                    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
-                    4f
-                );
+                //Game1.DrawElectricEffect(
+                //    batch,
+                //    GFX._whitePixel,
+                //    p1,  // Point A
+                //    p2,  // Point B
+                //    _currentColor,            // Couleur de l'éclair
+                //    10,                     // Nombre de segments
+                //    20f,                    // Amplitude maximale du décalage
+                //    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
+                //    4f
+                //);
 
-                Game1.DrawElectricEffect(
-                    batch,
-                    GFX._whitePixel,
-                    p1,  // Point A
-                    p2,  // Point B
-                    Color.White,            // Couleur de l'éclair
-                    10,                     // Nombre de segments
-                    20f,                    // Amplitude maximale du décalage
-                    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
-                    2f
-                );
+                //Game1.DrawElectricEffect(
+                //    batch,
+                //    GFX._whitePixel,
+                //    p1,  // Point A
+                //    p2,  // Point B
+                //    Color.White,            // Couleur de l'éclair
+                //    10,                     // Nombre de segments
+                //    20f,                    // Amplitude maximale du décalage
+                //    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
+                //    2f
+                //);
             }
 
             if (_state == (int)States.SelectGems && _gemSelecteds.Count > 0)
@@ -785,17 +785,17 @@ namespace DungeonsMatch3
 
                 batch.Line(p1, p2, _currentColor, 15f);
 
-                Game1.DrawElectricEffect(
-                    batch,
-                    GFX._whitePixel,
-                    p1,  // Point A
-                    p2,  // Point B
-                    Color.White,            // Couleur de l'éclair
-                    10,                     // Nombre de segments
-                    20f,                    // Amplitude maximale du décalage
-                    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
-                    4f
-                );
+                //Game1.DrawElectricEffect(
+                //    batch,
+                //    GFX._whitePixel,
+                //    p1,  // Point A
+                //    p2,  // Point B
+                //    Color.White,            // Couleur de l'éclair
+                //    10,                     // Nombre de segments
+                //    20f,                    // Amplitude maximale du décalage
+                //    (float)gameTime.TotalGameTime.TotalSeconds, // Pour l'animation
+                //    4f
+                //);
 
             }
         }

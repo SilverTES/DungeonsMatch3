@@ -28,6 +28,10 @@ public class Game1 : Game
     static public SpriteFont _fontMain2;
     static public SpriteFont _fontMedium;
 
+    static public Texture2D _texGem;
+    static public Texture2D _texGemLight;
+    static public Texture2D _texGlow;
+
     static public Texture2D _texAvatar1x1;
     static public Texture2D _texAvatar2x2;
     static public Texture2D _texAvatar2x3;
@@ -136,7 +140,7 @@ public class Game1 : Game
     /// <param name="pointB">Point d'arrivée.</param>
     /// <param name="pointC">Point de contrôle pour la courbure.</param>
     /// <param name="color">Couleur de la ligne.</param>
-    public static void DrawCurvedLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Vector2 pointC, Color colorA, Color colorB, float thickness = 1f, int nbSegments = 50)
+    public static void DrawCurvedLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Vector2 pointC, Color colorA, Color colorB, float thickness = 1f, int nbSegments = 200)
     {
         int segments = nbSegments; // Nombre de segments pour la courbe
         Vector2 previousPoint = pointA;
@@ -167,8 +171,10 @@ public class Game1 : Game
             //    0f
             //);
 
-            spriteBatch.Point(previousPoint, thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments));
-            spriteBatch.FillRectangleCentered(previousPoint, Vector2.One * thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments), Geo.RAD_45);
+            //spriteBatch.Point(previousPoint, thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments));
+            //spriteBatch.FillRectangleCentered(previousPoint, Vector2.One * thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments), Geo.RAD_45);
+
+            GFX.Draw(spriteBatch, Game1._texGlow, Color.Lerp(colorA, colorB, (float)i / (float)segments), 0, previousPoint, Position.CENTER, Vector2.One * .2f);
 
             previousPoint = currentPoint;
         }
@@ -213,6 +219,10 @@ public class Game1 : Game
         _fontMain = Content.Load<SpriteFont>("Fonts/fontMain");
         _fontMain2 = Content.Load<SpriteFont>("Fonts/fontMain2");
         _fontMedium = Content.Load<SpriteFont>("Fonts/fontMedium");
+
+        _texGem = Content.Load<Texture2D>("Images/gem");
+        _texGemLight = Content.Load<Texture2D>("Images/gemlight");
+        _texGlow = Content.Load<Texture2D>("Images/glow");
 
         _texAvatar1x1 = Content.Load<Texture2D>("Images/avatar1x1");
         _texAvatar2x2 = Content.Load<Texture2D>("Images/avatar2x2");
