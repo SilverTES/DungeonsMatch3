@@ -4,7 +4,6 @@ using Mugen.Core;
 using Mugen.Physics;
 using Mugen.GFX;
 using Mugen.Animation;
-using System;
 
 namespace DungeonsMatch3
 {
@@ -50,7 +49,7 @@ namespace DungeonsMatch3
         public Point GoalPosition;
         public bool IsFall = false;
 
-        static public float Radius = 30;
+        static public float Radius = 36;
         float _radius;
         float _ticRadius = 0;
 
@@ -171,7 +170,7 @@ namespace DungeonsMatch3
                 //batch.Circle(AbsXY + shake, _radius, 8, Color.Black, 2, _angle);
 
 
-                GFX.Draw(batch, Game1._texGem, Color, 0, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
+                GFX.Draw(batch, Game1._texGem, Color, 0, AbsXY + shake, Position.CENTER, Vector2.One * .5f);
 
 
             }
@@ -181,11 +180,14 @@ namespace DungeonsMatch3
                 var shake = Shake.GetVector2();
 
                 if (IsSameColor && NbSameColor > 2 && _arena.GetState() == (int)Arena.States.SelectGems)
-                    GFX.Draw(batch, Game1._texGemLight, Color.White, 0, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
+                    GFX.Draw(batch, Game1._texGemLight, Color.White, 0, AbsXY + shake, Position.CENTER, Vector2.One * .5f);
                     //batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
 
                 if (IsSelected)
-                    batch.Point(AbsXY + shake, _radius / 4, Color);
+                {
+                    //batch.Point(AbsXY + shake, _radius / 4, Color.White);
+                    GFX.Draw(batch, Game1._texGlow, Color.White, 0, AbsXY + shake, Position.CENTER, Vector2.One * .3f);
+                }
             }
 
             if (indexLayer == (int)Game1.Layers.Debug)
