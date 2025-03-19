@@ -260,7 +260,7 @@ namespace DungeonsMatch3
                 ChangeState((int)States.IsSpawn);
                 _ticScale = 0f;
 
-                Game1._soundPop.Play(.2f * Game1._volumeMaster, .5f, 0f);
+                Game1._soundSword.Play(.2f * Game1._volumeMaster, .5f, 0f);
             }
         }
         void IsSpawn(GameTime gameTime)

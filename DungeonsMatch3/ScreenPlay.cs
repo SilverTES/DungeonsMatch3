@@ -53,7 +53,7 @@ namespace DungeonsMatch3
         Container _divBattle;
 
         int _wave = 1;
-        int _maxWave = 3;
+        int _maxWave = 8;
         public int Wave => _wave;
 
         public ScreenPlay()

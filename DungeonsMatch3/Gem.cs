@@ -23,7 +23,7 @@ namespace DungeonsMatch3
             Color.DodgerBlue,
             Color.ForestGreen,
             //Color.DarkOrange,
-            Color.BlueViolet,
+            //Color.BlueViolet,
             Color.Gold,
             //Color.Gray, // Gem do nothing !
             //Color.HotPink,
@@ -174,14 +174,13 @@ namespace DungeonsMatch3
                 GFX.Draw(batch, Game1._texGem, Color, 0, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
 
 
-
             }
 
             if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 var shake = Shake.GetVector2();
 
-                if (IsSameColor && NbSameColor > 2)
+                if (IsSameColor && NbSameColor > 2 && _arena.GetState() == (int)Arena.States.SelectGems)
                     GFX.Draw(batch, Game1._texGemLight, Color.White, 0, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
                     //batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
 
@@ -196,6 +195,9 @@ namespace DungeonsMatch3
 
                 //batch.CenterStringXY(Game1._fontMain, MapPosition.ToString(), AbsXY , Color.White);
                 //batch.CenterStringXY(Game1._fontMain, NbSameColor.ToString(), AbsXY , Color.White);
+
+                //batch.Circle(AbsXY, Arena.RadiusGemOver, 24, Color.White, 1, _angle);
+
             }
 
             return base.Draw(batch, gameTime, indexLayer);

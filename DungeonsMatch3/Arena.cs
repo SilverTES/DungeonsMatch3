@@ -60,13 +60,15 @@ namespace DungeonsMatch3
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
         Point _mapPositionOver;
-        Vector2 _mouseCellCenterOver;
+        Vector2 _centerCellOver;
 
         Gem _currentGemOver;
         Color _currentColor = Color.Black;
         public Color CurrentColor => _currentColor;
 
         List<Gem> _gemSelecteds = [];
+
+        public static float RadiusGemOver = Gem.Radius - 8;
 
         MouseState _mouse;
 
@@ -223,7 +225,15 @@ namespace DungeonsMatch3
                 default:
                     break;
             }
-        } 
+        }
+        private bool IsPointInCircle(Vector2 point, Vector2 circleCenter, float radius)
+        {
+            float dx = point.X - circleCenter.X;
+            float dy = point.Y - circleCenter.Y;
+            float distanceSquared = dx * dx + dy * dy;
+            float radiusSquared = radius * radius;
+            return distanceSquared <= radiusSquared;
+        }
         public override Node Update(GameTime gameTime)
         {
             _timers.Update();
@@ -231,7 +241,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mouseCellCenterOver, Gem.Radius) && IsInGrid(_mouseCellCenterOver))
+            if (IsPointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver) && IsInGrid(_centerCellOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -250,8 +260,8 @@ namespace DungeonsMatch3
             _rectOver.X = _mapPositionOver.X * CellSize.X + _x; 
             _rectOver.Y = _mapPositionOver.Y * CellSize.Y + _y;
 
-            _mouseCellCenterOver.X = _rectOver.X + CellSize.X / 2;
-            _mouseCellCenterOver.Y = _rectOver.Y + CellSize.Y / 2;
+            _centerCellOver.X = _rectOver.X + CellSize.X / 2;
+            _centerCellOver.Y = _rectOver.Y + CellSize.Y / 2;
 
             RunState(gameTime);
 
@@ -264,7 +274,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mouseCellCenterOver, Gem.Radius))
+            if (IsPointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver))
             {
                 var gemOver = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
                 if (gemOver != null)
@@ -423,7 +433,7 @@ namespace DungeonsMatch3
                     {
                         if (gem.Color == _currentColor && IsClose(_gemSelecteds.Last().MapPosition, gem.MapPosition))
                         {
-                            if (Collision2D.PointInCircle(_mousePos + AbsXY, _mouseCellCenterOver, Gem.Radius))
+                            if (Collision2D.PointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver))
                             {
                                 SelectGem(gem);
                                 new FxExplose(gem.AbsXY, gem.Color, 5, 10).AppendTo(this);
@@ -660,7 +670,7 @@ namespace DungeonsMatch3
             {
                 if (_state == (int)States.Action)
                 {
-                    batch.FillRectangle(AbsRectF, Color.Black * .5f);
+                    batch.FillRectangle(AbsRectF, Color.Black * .25f);
 
                     batch.BevelledRectangle(AbsRectF.Extend(_loop._current), Vector2.One * 4, _currentColor * 1f, 3f);
                     batch.BevelledRectangle(AbsRectF.Extend(_loop._current + 2), Vector2.One * 4, _currentColor * .5f, 1f);
@@ -722,6 +732,8 @@ namespace DungeonsMatch3
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
 
                 batch.CenterStringXY(Game1._fontMain2, $"Turns {NbTurns} / {MaxTurns}", AbsRectF.TopCenter, Color.Yellow);
+
+                //batch.Point(_mousePos + AbsXY, 4, Color.Red);
             }
 
             DrawChilds(batch, gameTime, indexLayer);
@@ -750,7 +762,7 @@ namespace DungeonsMatch3
                 var p1 = AbsXY + MapPositionToVector2(_gemSelecteds[i].MapPosition);
                 var p2 = AbsXY + MapPositionToVector2(_gemSelecteds[i + 1].MapPosition);
 
-                batch.Line(p1, p2, _currentColor, 15f);
+                batch.Line(p1, p2, _currentColor, 13f);
                 batch.Line(p1, p2, Color.White, 5f);
 
                 //Game1.DrawElectricEffect(
@@ -783,7 +795,7 @@ namespace DungeonsMatch3
                 var p1 = AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition);
                 var p2 = AbsXY + _mousePos;
 
-                batch.Line(p1, p2, _currentColor, 15f);
+                batch.Line(p1, p2, _currentColor, 13f);
 
                 //Game1.DrawElectricEffect(
                 //    batch,
