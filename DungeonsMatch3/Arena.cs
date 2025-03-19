@@ -655,7 +655,7 @@ namespace DungeonsMatch3
         {
             if (indexLayer == (int)Game1.Layers.Main)
             {
-                batch.FillRectangle(AbsRectF, Color.Black * .8f);
+                batch.FillRectangle(AbsRectF, Color.Black * .5f);
                 //batch.Grid(AbsXY, AbsRectF.Width, AbsRectF.Height, CellSize.X, CellSize.Y, Color.Gray * .5f, 1);
 
                 //if (IsInGrid(_mousePos))

@@ -305,7 +305,10 @@ namespace DungeonsMatch3
                 if (_size == Size3x3) tex = Game1._texAvatar3x3;
 
                 if (tex != null)
+                {
+                    GFX.Draw(batch, tex, Color.Black * .5f * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 2) + Shake.GetVector2() + Vector2.One * 4, Position.CENTER, Vector2.One * _scaleSpawn);
                     GFX.Draw(batch, tex, color * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * _scaleSpawn);
+                }
 
                 //batch.CenterBorderedStringXY(Game1._fontMain, "Enemy", shake + AbsRectF.TopCenter, Color.Yellow, Color.Black);
 
