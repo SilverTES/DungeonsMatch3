@@ -68,7 +68,7 @@ namespace DungeonsMatch3
 
         List<Gem> _gemSelecteds = [];
 
-        public static float RadiusGemOver = Gem.Radius - 8;
+        public static float RadiusGemOver = Gem.Radius - 10;
 
         MouseState _mouse;
 
@@ -226,14 +226,14 @@ namespace DungeonsMatch3
                     break;
             }
         }
-        private bool IsPointInCircle(Vector2 point, Vector2 circleCenter, float radius)
-        {
-            float dx = point.X - circleCenter.X;
-            float dy = point.Y - circleCenter.Y;
-            float distanceSquared = dx * dx + dy * dy;
-            float radiusSquared = radius * radius;
-            return distanceSquared <= radiusSquared;
-        }
+        //private bool IsPointInCircle(Vector2 point, Vector2 circleCenter, float radius)
+        //{
+        //    float dx = point.X - circleCenter.X;
+        //    float dy = point.Y - circleCenter.Y;
+        //    float distanceSquared = dx * dx + dy * dy;
+        //    float radiusSquared = radius * radius;
+        //    return distanceSquared <= radiusSquared;
+        //}
         public override Node Update(GameTime gameTime)
         {
             _timers.Update();
@@ -241,7 +241,7 @@ namespace DungeonsMatch3
 
             _mouse = Game1.Mouse;
 
-            if (IsPointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver) && IsInGrid(_centerCellOver))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver) && IsInGrid(_centerCellOver))
                 Mouse.SetCursor(Game1.CursorB);
             else
                 Mouse.SetCursor(Game1.CursorA);
@@ -274,7 +274,7 @@ namespace DungeonsMatch3
             if (!IsInGrid(_mousePos))
                 ResetGridGemsAsSameColor();
 
-            if (IsPointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver))
+            if (Collision2D.PointInCircle(_mousePos + AbsXY, _centerCellOver, RadiusGemOver))
             {
                 var gemOver = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
                 if (gemOver != null)

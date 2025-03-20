@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using AsepriteDotNet.Aseprite;
+using MonoGame.Aseprite;
 using Mugen.Core;
 using Mugen.GFX;
 using Mugen.Input;
@@ -27,6 +29,8 @@ public class Game1 : Game
     static public SpriteFont _fontMain;
     static public SpriteFont _fontMain2;
     static public SpriteFont _fontMedium;
+
+    public static SpriteSheet _spriteSheetFireExplosion;
 
     static public Texture2D _texGem;
     static public Texture2D _texGemLight;
@@ -246,6 +250,8 @@ public class Game1 : Game
         _soundBlockHit = Content.Load<SoundEffect>("Sounds/blockhit");
         _soundSword = Content.Load<SoundEffect>("Sounds/sword");
         _soundRockSlide = Content.Load<SoundEffect>("Sounds/rock_slide");
+
+        _spriteSheetFireExplosion = Content.Load<AsepriteFile>("Animations/FireExplosion").CreateSpriteSheet(GraphicsDevice, true);
     }
 
     protected override void Update(GameTime gameTime)

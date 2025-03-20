@@ -134,6 +134,9 @@ namespace DungeonsMatch3
         public void ExploseMe()
         {
             _battleField.DeleteInGrid(this);
+
+            new FireExplosion().AppendTo(_parent).SetPosition(_rect.Center);
+
             KillMe();
         }
         public void TicTurn()

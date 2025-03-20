@@ -10,8 +10,15 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:C:\Users\MugenS30\.nuget\packages\monogame.aseprite\6.1.0\content\Monogame.Aseprite.Content.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
+
+#begin Animations/FireExplosion.aseprite
+/importer:AsepriteFileContentImporter
+/processor:AsepriteFileContentProcessor
+/processorParam:PremultiplyAlpha=True
+/build:Animations/FireExplosion.aseprite
 
 #begin Fonts/fontMain.spritefont
 /importer:FontDescriptionImporter
