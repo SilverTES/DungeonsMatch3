@@ -1,6 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AsepriteDotNet;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Aseprite;
+using Mugen.Animation;
 using Mugen.Core;
 using Mugen.GFX;
 using Mugen.GUI;
@@ -56,8 +59,21 @@ namespace DungeonsMatch3
         int _maxWave = 8;
         public int Wave => _wave;
 
+        //AnimatedSprite _sprite;
+
         public ScreenPlay()
         {
+
+            //_sprite = Game1._spriteSheetDemonRun.CreateAnimatedSprite("Run");
+            //_sprite.Play(0);
+
+            //_sprite.ScaleX = 1f;
+            //_sprite.ScaleY = 1f;
+            //_sprite.Origin = new Vector2(_sprite.Width / 2, _sprite.Height / 2);
+            ////_spriteSlash.Origin = origin;
+            //_sprite.Play(1);
+            //_sprite.Color = Color.White * .95f;
+
             _arena = (Arena)new Arena().AppendTo(this);
             _arena.Setup(new SizeTab(8, 8, 64, 64));
             _arena.InitGrid();
@@ -67,7 +83,7 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(16, 8, 64, 64));
+            _battlefield.Setup(new SizeTab(24, 8, 64, 64));
 
             _battlefield.AddRandomEnemy();
 
@@ -76,8 +92,8 @@ namespace DungeonsMatch3
 
             _divMain = new Container(Style.Space.One * 4, Style.Space.One * 0, Position.VERTICAL);
             
-            _divSlotLeft = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
-            _divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.VERTICAL);
+            _divSlotLeft = new Container(Style.Space.One * 4, Style.Space.One * 10, Position.VERTICAL);
+            _divSlotRight = new Container(Style.Space.One * 4, Style.Space.One * 10, Position.VERTICAL);
             _divArena = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
             _divBattle = new Container(Style.Space.One * 4, Style.Space.One * 4, Position.HORIZONTAL);
 
@@ -147,6 +163,8 @@ namespace DungeonsMatch3
         }
         public override Node Update(GameTime gameTime)
         {
+            //_sprite.Update(gameTime);
+
             _loop.Update(gameTime);
             UpdateRect();
 
@@ -251,6 +269,8 @@ namespace DungeonsMatch3
                 //);
 
                 //batch.Draw(Game1._texTrail, new Rectangle(500, 50, 128, 128), Color.White);
+
+                //batch.Draw(_sprite, Game1._mousePos);
             }
 
             if (indexLayer == (int)Game1.Layers.BackFX)

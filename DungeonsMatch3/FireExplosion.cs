@@ -10,7 +10,7 @@ namespace DungeonsMatch3
     {
         AnimatedSprite _sprite;
 
-        public FireExplosion(float scale = 4f)
+        public FireExplosion(float scale = 2f)
         {
             _sprite = _spriteSheetFireExplosion.CreateAnimatedSprite("FireExplosion");
             _sprite.Speed = 1.5f;

@@ -24,7 +24,7 @@ namespace DungeonsMatch3
         BattleField _battleField;
         public Slot(Arena arena, BattleField battleField) 
         {
-            SetSize(320, 240);
+            SetSize(320, 160);
             _arena = arena;
             _battleField = battleField;
         }
@@ -73,9 +73,9 @@ namespace DungeonsMatch3
 
                 //batch.Draw(Game1._texHero00, AbsRect, Color.White);
 
-                var tex = Game1._texHero00;
+                //var tex = Game1._texHero00;
 
-                GFX.Draw(batch, tex, Color.White, 0, AbsXY + (tex.Bounds.Size.ToVector2() / 2), Position.CENTER, Vector2.One, _flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
+                //GFX.Draw(batch, tex, Color.White, 0, AbsXY + (tex.Bounds.Size.ToVector2() / 2), Position.CENTER, Vector2.One, _flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
 
                 batch.BevelledRectangle(AbsRectF, Vector2.One * 8, Color.DarkSlateBlue, 3f);
 

@@ -31,6 +31,7 @@ public class Game1 : Game
     static public SpriteFont _fontMedium;
 
     public static SpriteSheet _spriteSheetFireExplosion;
+    //public static SpriteSheet _spriteSheetDemonRun;
 
     static public Texture2D _texGem;
     static public Texture2D _texGemLight;
@@ -186,6 +187,8 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        base.Initialize();
+
         _screenPlay = new ScreenPlay();
         ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), 
             [
@@ -215,7 +218,6 @@ public class Game1 : Game
             Console.WriteLine((Layers)layerOrder[i]);
         }
 
-        base.Initialize();
     }
 
     protected override void LoadContent()
@@ -252,6 +254,7 @@ public class Game1 : Game
         _soundRockSlide = Content.Load<SoundEffect>("Sounds/rock_slide");
 
         _spriteSheetFireExplosion = Content.Load<AsepriteFile>("Animations/FireExplosion").CreateSpriteSheet(GraphicsDevice, true);
+        //_spriteSheetDemonRun = Content.Load<AsepriteFile>("Animations/Demon_run").CreateSpriteSheet(GraphicsDevice, true);
     }
 
     protected override void Update(GameTime gameTime)

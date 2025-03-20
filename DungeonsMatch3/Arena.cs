@@ -206,7 +206,7 @@ namespace DungeonsMatch3
                             var enemy = _battleField.FindClosestEnemy();
 
                             if (enemy != null)
-                                _battleField.Attack(this, enemy.MapPosition);
+                                _battleField.AttackEnemy(this, enemy.MapPosition);
                         }
                     }
 
@@ -688,7 +688,7 @@ namespace DungeonsMatch3
                     }
                     else
                     {
-                        var enemy = _battleField.GetCell<Enemy>(_battleField.MapPositionOver);
+                        var enemy = _battleField.GetCell<Unit>(_battleField.MapPositionOver);
                         if (enemy != null)
                         {
                             var A = _battleField.AbsXY + _battleField.MapPositionToVector2(enemy) + enemy.SizeVector2 / 2;
