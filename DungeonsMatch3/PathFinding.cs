@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using Mugen.Core;
 using Mugen.AI;
+using System.Linq;
 
 namespace DungeonsMatch3
 {
@@ -27,7 +28,7 @@ namespace DungeonsMatch3
         }
 
         // Pathfinding A* pour unité multi-cases
-        public static List<Point> FindPath<T>(Grid2D<T> grid, Point start, Point goal, Point unitSize, int passLevel = 1) where T : Mugen.Core.Node
+        public static List<Point> FindPath<T>(Grid2D<T> grid, Point start, Point goal, Point unitSize, int passLevel = 1, int indexToIgnore = Const.NoIndex) where T : Mugen.Core.Node
         {
             List<Node> openList = new List<Node>();
             HashSet<Point> closedList = new HashSet<Point>();
@@ -69,7 +70,7 @@ namespace DungeonsMatch3
                     Point newPos = currentNode.Position + dir;
 
                     // Vérifier si la nouvelle position est valide pour l'unité entière
-                    if (!IsValidPosition(grid, newPos, unitSize, passLevel))
+                    if (!IsValidPosition(grid, newPos, unitSize, passLevel, indexToIgnore))
                         continue;
 
                     if (closedList.Contains(newPos))
@@ -98,9 +99,53 @@ namespace DungeonsMatch3
 
             return null; // Aucun chemin trouvé
         }
+        // Cherche tout les voisins qui touche l'unité, seul cela bloque le passage;
+        public static List<T> Neighbours<T>(Grid2D<T> grid, Point position, Point unitSize, out bool Top, out bool Bottom, out bool Left, out bool Right) where T : Mugen.Core.Node
+        {
+            HashSet<T> neighbours = new();
 
+            int x = position.X;
+            int y = position.Y;
+
+            Top = false;
+            Bottom = false;
+            Left = false; 
+            Right = false;
+
+            // voisin en haut et en bas
+            for (int i = 0; i < unitSize.X; i++)
+            {
+                var cellTop = grid.Get(x + i, y - 1);
+                var cellBottom = grid.Get(x + i, y + unitSize.Y);
+
+                if (cellTop != null) 
+                    //if (cellTop._type == type || type == Const.NoIndex)
+                        { Top = true; neighbours.Add(cellTop); }
+
+                if (cellBottom != null)
+                    //if (cellBottom._type == type || type == Const.NoIndex)
+                        { Bottom = true; neighbours.Add(cellBottom); }
+            }
+
+            // voisin à gauche et à droite
+            for (int j = 0; j < unitSize.Y; j++)
+            {
+                var cellLeft = grid.Get(x - 1, y + j);
+                var cellRight = grid.Get(x + unitSize.X, y + j);
+
+                if (cellLeft != null)
+                    //if (cellLeft._type == type || type == Const.NoIndex)
+                        { Left = true; neighbours.Add(cellLeft); }
+
+                if (cellRight != null)
+                    //if (cellRight._type == type || type == Const.NoIndex)
+                        { Right = true; neighbours.Add(cellRight); }
+            }
+
+            return neighbours.ToList();
+        }
         // Vérifier si une position est valide pour l'unité entière
-        private static bool IsValidPosition<T>(Grid2D<T> grid, Point position, Point unitSize, int passLevel) where T : Mugen.Core.Node
+        private static bool IsValidPosition<T>(Grid2D<T> grid, Point position, Point unitSize, int passLevel, int indexToIgnore) where T : Mugen.Core.Node
         {
             int x = position.X;
             int y = position.Y;
@@ -119,8 +164,13 @@ namespace DungeonsMatch3
                     var cell = grid.Get(x + i, y + j);
                     if (cell != null)
                     {
+                        if (indexToIgnore == cell._index)
+                            continue;
+
                         if (passLevel < cell._passLevel) // Obstacle
+                        {
                             return false;
+                        }
                     }
                 }
             }
@@ -140,6 +190,5 @@ namespace DungeonsMatch3
             path.Reverse();
             return path;
         }
-
     }
 }

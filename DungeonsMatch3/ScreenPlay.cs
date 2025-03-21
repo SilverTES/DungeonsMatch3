@@ -218,7 +218,7 @@ namespace DungeonsMatch3
                 if (_wave <= _maxWave)
                 {
                     _battlefield.AddRandomEnemy(4);
-                    _arena.MaxTurns++;
+                    //_arena.MaxTurns++;
                 }
             }
 

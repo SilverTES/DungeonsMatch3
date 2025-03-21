@@ -56,6 +56,7 @@ namespace DungeonsMatch3
         public RectangleF Rect => _rect;
 
         Grid2D<Gem> _grid;
+        public Grid2D<Gem> Grid => _grid;
 
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;

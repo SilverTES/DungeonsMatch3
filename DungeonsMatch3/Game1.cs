@@ -199,16 +199,6 @@ public class Game1 : Game
             (int)Layers.Debug,
             ]);
 
-        //ScreenManager.SetLayersOrder([
-
-        //    (int)Layers.BackFX,
-        //    (int)Layers.Main,
-        //    (int)Layers.HUD,
-        //    (int)Layers.FrontFX,
-        //    (int)Layers.Debug,
-
-        //]);
-
         Console.WriteLine($" NB Layers = { ScreenManager.NbLayers }");
 
         var layerOrder = ScreenManager.GetLayersOrder();
@@ -217,25 +207,6 @@ public class Game1 : Game
         {
             Console.WriteLine((Layers)layerOrder[i]);
         }
-
-        Grid2D<int> test = new Grid2D<int>(5, 5);
-
-        Misc.Log(test.ToString());
-
-        for (int i = 1; i < 4; i++)
-        {
-            for (int j = 1; j < 4; j++)
-            {
-                test.Set(i , j, 8);
-            }
-        }
-
-        Misc.Log(test.ToString());
-
-        test.Resize(6, 6, 3, 3);
-
-        Misc.Log(test.ToString());
-
 
     }
 

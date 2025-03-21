@@ -18,6 +18,7 @@ namespace DungeonsMatch3
         public enum Timers
         {
             None,
+            EnemyAction,
             Damage,
         }
         TimerEvent _timer;
@@ -35,6 +36,7 @@ namespace DungeonsMatch3
         public Vector2 CellSize;
 
         Grid2D<Node> _grid;
+        public Grid2D<Node> Grid => _grid;
 
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
@@ -66,6 +68,8 @@ namespace DungeonsMatch3
 
             _timer = new TimerEvent(Enums.Count<Timers>());
             _timer.SetTimer((int)Timers.Damage, TimerEvent.Time(0, 0, 1));
+            _timer.SetTimer((int)Timers.EnemyAction, TimerEvent.Time(0, 0, .5f), true);
+            _timer.StartTimer((int)Timers.EnemyAction);
 
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0, -2f, 2f, .5f, Mugen.Animation.Loops.PINGPONG);
@@ -109,12 +113,13 @@ namespace DungeonsMatch3
 
             KillAll(UID.Get<Unit>());
         }
-        public void AddRandomEnemy(int nbEnemy = 3)
+        public void AddRandomEnemy(int nbEnemy = 5)
         {
             for (int i = 0; i < nbEnemy; i++)
             {
                 int x, y;
                 Point size;
+                int nbTurns = 2; // size.X * size.Y
 
                 do
                 {
@@ -123,7 +128,7 @@ namespace DungeonsMatch3
 
                     size = Unit.Sizes[Misc.Rng.Next(0, Unit.Sizes.Length)];                
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, size.X * size.Y, size.X * size.Y * 16, TimerEvent.Time(0, 0, .05f * i * 4))));
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 16, TimerEvent.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -171,7 +176,12 @@ namespace DungeonsMatch3
             {
                 case States.Play:
 
-
+                    // Debug
+                    if (_timer.OnTimer((int)Timers.EnemyAction))
+                    {
+                        DoAction();
+                        //_arena.NbTurns++;   
+                    }
 
                     if (!IsInGrid(_mousePos))
                         break;
@@ -198,6 +208,11 @@ namespace DungeonsMatch3
                         }
 
                         Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
+                    }
+                    
+                    if (ButtonControl.OnePress("AddRandomEnemy", _key.IsKeyDown(Keys.Space)))
+                    {
+                        AddRandomEnemy();
                     }
 
 
@@ -263,6 +278,7 @@ namespace DungeonsMatch3
                 enemy.TicTurn();
             }
 
+            //_timer.StartTimer((int)Timers.EnemyAction);
             
         }
         public bool AttackEnemy(Arena arena, Point mapPosition)
@@ -300,55 +316,69 @@ namespace DungeonsMatch3
             return false;
 
         }
-        public bool AddInGrid(Unit enemy)
+        public bool AddInGrid(Unit unit)
         {
             //if (!IsNull(enemy.MapPosition))
             //    return false;
-            if (!CanAddInGrid(enemy))
+            if (!CanAddInGrid(unit))
                 return false;
 
             //_grid.Put(enemy.MapPosition.X, enemy.MapPosition.Y, enemy);
-            SetInGrid(enemy);
+            SetInGrid(unit);
 
-            enemy.SetPosition(MapPositionToVector2(enemy.MapPosition));
-            enemy.AppendTo(this);
+            unit.SetPosition(MapPositionToVector2(unit.MapPosition));
+            unit.AppendTo(this);
 
             return true;
         }
-        public bool CanAddInGrid(Unit enemy)
+        public bool CanAddInGrid(Unit unit)
         {
-            for (int i = 0; i < enemy.Size.X; i++)
+            for (int i = 0; i < unit.Size.X; i++)
             {
-                for (int j = 0; j < enemy.Size.Y; j++)
+                for (int j = 0; j < unit.Size.Y; j++)
                 {
-                    if (!IsNull(enemy.MapPosition + new Point(i, j)))
+                    if (!IsNull(unit.MapPosition + new Point(i, j)))
                         return false;
                 }
             }
 
             return true;
         }
-        public void SetInGrid(Unit enemy)
+        public void SetInGrid(Unit unit)
         {
-            if (!CanSetInGrid(enemy)) 
+            if (!CanSetInGrid(unit)) 
                 return;
 
-            for (int i = 0; i < enemy.Size.X; i++)
+            for (int i = 0; i < unit.Size.X; i++)
             {
-                for (int j = 0; j < enemy.Size.Y; j++)
+                for (int j = 0; j < unit.Size.Y; j++)
                 {
-                    _grid.Set(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, enemy);
+                    _grid.Set(unit.MapPosition.X + i, unit.MapPosition.Y + j, unit);
                 }
             }
 
         }
-        public void DeleteInGrid(Unit enemy)
+        public void SetInGrid(Unit unit, Point nextMapPosition)
         {
-            for (int i = 0; i < enemy.Size.X; i++)
+            if (!CanSetInGrid(unit))
+                return;
+
+            for (int i = 0; i < unit.Size.X; i++)
             {
-                for (int j = 0; j < enemy.Size.Y; j++)
+                for (int j = 0; j < unit.Size.Y; j++)
                 {
-                    _grid.Set(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, null);
+                    _grid.Set(nextMapPosition.X + i, nextMapPosition.Y + j, unit);
+                }
+            }
+
+        }
+        public void DeleteInGrid(Unit unit)
+        {
+            for (int i = 0; i < unit.Size.X; i++)
+            {
+                for (int j = 0; j < unit.Size.Y; j++)
+                {
+                    _grid.Set(unit.MapPosition.X + i, unit.MapPosition.Y + j, null);
                 }
             }
         }
@@ -356,13 +386,13 @@ namespace DungeonsMatch3
         {
             _grid.Set(mapPosition.X, mapPosition.Y, null);
         }
-        public bool CanSetInGrid(Unit enemy)
+        public bool CanSetInGrid(Unit unit)
         {
-            for (int i = 0; i < enemy.Size.X; i++)
+            for (int i = 0; i < unit.Size.X; i++)
             {
-                for (int j = 0; j < enemy.Size.Y; j++)
+                for (int j = 0; j < unit.Size.Y; j++)
                 {
-                    if (!IsInGrid(enemy.MapPosition + new Point(i, j)))
+                    if (!IsInGrid(unit.MapPosition + new Point(i, j)))
                         return false;
                 }
             }
@@ -391,10 +421,10 @@ namespace DungeonsMatch3
         {
             return (T)_grid.Get(mapPosition.X, mapPosition.Y);
         }
-        public Vector2 MapPositionToVector2(Unit enemy)
+        public Vector2 MapPositionToVector2(Unit unit)
         {
 
-            return enemy.MapPosition.ToVector2() * CellSize;
+            return unit.MapPosition.ToVector2() * CellSize;
         }
         public Vector2 MapPositionToVector2(Point mapPosition)
         {
@@ -463,7 +493,8 @@ namespace DungeonsMatch3
                         if (node != null)
                         {
                             //batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
-                            //batch.CenterStringXY(Game1._fontMain, $"{ node._passLevel }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
+                            batch.CenterStringXY(Game1._fontMain, $"{ node._passLevel }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
+                            //batch.CenterStringXY(Game1._fontMain, $"{ node._index }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
                         }
                     }
                 }
@@ -472,23 +503,7 @@ namespace DungeonsMatch3
 
                 batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.TopCenter, Color.Cyan);
 
-                var path = PathFinding.FindPath(_grid, new Point(0, 0), _mapPositionOver, new Point(2, 2), 1);
-
-                if (path != null)
-                {
-                    var offSet = AbsXY + CellSize / 2;
-                    //var pos = path[0].ToVector2() * CellSize + offSet;
-                    //batch.Line(MapPositionToVector2(new Point(1,1)) + AbsXY, pos, Color.Red, 5f);
-
-                    for (int i = 0;i < path.Count - 1; i++)
-                    { 
-                        var posA = path[i].ToVector2() * CellSize + offSet;
-                        var posB = path[i+1].ToVector2() * CellSize + offSet;
-
-                        batch.Line(posA, posB, Color.Yellow, 5f);
-                        batch.Point(posB , 5, Color.Yellow);
-                    }
-                }
+                //DrawPath(batch, new Point(0, 0), _mapPositionOver, new Point(1,1), 1);
 
                 //batch.Line(AbsXY + CellSize / 2, (_mapPositionOver.ToVector2() * CellSize) + AbsXY + CellSize / 2, Color.Red, 3f);
 
@@ -503,6 +518,25 @@ namespace DungeonsMatch3
             DrawChilds(batch, gameTime, indexLayer);
 
             return base.Draw(batch, gameTime, indexLayer);
+        }
+
+        public void DrawPath(SpriteBatch batch, Point start, Point goal, Point size, int passLevel, int indexToIgnore, Color color)
+        {
+            var path = PathFinding.FindPath(_grid, start, goal, size, passLevel, indexToIgnore);
+
+            if (path != null)
+            {
+                var offSet = AbsXY + CellSize / 2;
+
+                for (int i = 0; i < path.Count - 1; i++)
+                {
+                    var posA = path[i].ToVector2() * CellSize + offSet;
+                    var posB = path[i + 1].ToVector2() * CellSize + offSet;
+
+                    batch.Line(posA, posB, color, 5f);
+                    batch.Point(posB, 5, color);
+                }
+            }
         }
     }
 }

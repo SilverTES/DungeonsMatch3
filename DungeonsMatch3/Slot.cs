@@ -49,7 +49,7 @@ namespace DungeonsMatch3
                 _points += _arena.TotalAttack;
 
                 _arena.ChangeState((int)Arena.States.FinishTurn);
-                _battleField.DoAction();
+                //_battleField.DoAction();
 
                 Game1._soundBlockHit.Play(.8f * Game1._volumeMaster, .1f, 0f);
 

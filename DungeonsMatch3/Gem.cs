@@ -22,7 +22,7 @@ namespace DungeonsMatch3
             Color.DodgerBlue,
             Color.ForestGreen,
             //Color.DarkOrange,
-            Color.BlueViolet,
+            //Color.BlueViolet,
             Color.Gold,
             //Color.Gray, // Gem do nothing !
             //Color.HotPink,

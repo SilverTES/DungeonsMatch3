@@ -5,35 +5,28 @@ using Mugen.Core;
 using Mugen.Event;
 using Mugen.GFX;
 using Mugen.Physics;
+using System.Collections.Generic;
 using static Mugen.Core.Addon;
 
 namespace DungeonsMatch3
 {
     class Unit : Node
     {
-        static Point _size1x1 = new Point(1, 1);
-        static Point _size1x2 = new Point(1, 2);
-        static Point _size2x1 = new Point(2, 1);
-        static Point _size2x2 = new Point(2, 2);
-        static Point _size2x3 = new Point(2, 3);
-        static Point _size3x2 = new Point(3, 3);
-        static Point _size3x3 = new Point(3, 3);
+        public static Point Size1x1 { get; private set; } = new Point(1, 1);
+        public static Point Size1x2 { get; private set; } = new Point(1, 2);
+        public static Point Size2x1 { get; private set; } = new Point(2, 1);
+        public static Point Size2x2 { get; private set; } = new Point(2, 2);
+        public static Point Size2x3 { get; private set; } = new Point(2, 3);
+        public static Point Size3x2 { get; private set; } = new Point(3, 2);
+        public static Point Size3x3 { get; private set; } = new Point(3, 3);
 
         public static Point[] Sizes =
         [
-            _size1x1, 
-            _size2x2,
-            _size2x3, 
-            _size3x3
+            Size1x1, 
+            Size2x2,
+            Size2x3,
+            Size3x3,
         ];
-
-        public static Point Size1x1 => _size1x1;
-        public static Point Size1x2 => _size1x2;
-        public static Point Size2x1 => _size2x1;
-        public static Point Size2x2 => _size2x2;
-        public static Point Size2x3 => _size2x3;
-        public static Point Size3x2 => _size3x2;
-        public static Point Size3x3 => _size3x3;
 
         public enum Timers
         {
@@ -43,7 +36,7 @@ namespace DungeonsMatch3
             Spawn,
             Count,
         }
-        TimerEvent _timer;
+        protected TimerEvent _timer;
         public enum States
         {
             None,
@@ -55,9 +48,8 @@ namespace DungeonsMatch3
         }
 
         protected Specs _specs = new();
-        protected Point _size = new();
-        public Point Size => _size;
-        public Vector2 SizeVector2 => _size.ToVector2() * _battleField.CellSize;
+        public Point Size { get; private set; } = new();
+        public Vector2 SizeVector2 => Size.ToVector2() * _battleField.CellSize;
         public Point MapPosition;
         public Point GoalPosition;
 
@@ -85,8 +77,8 @@ namespace DungeonsMatch3
             _type = UID.Get<Unit>();
             _battleField = battleField;
 
-            _size = size;
-            SetSize(_size.ToVector2() * _battleField.CellSize);
+            Size = size;
+            SetSize(Size.ToVector2() * _battleField.CellSize);
 
             MapPosition = mapPosition;
             _specs.NbTurn = nbTurn;
@@ -145,11 +137,65 @@ namespace DungeonsMatch3
                 Action();
             }
         }
+        // Vérifier si une position est valide (pas de chevauchement avec autres unités)
+        public bool CanMoveTo<T>(List<T> units, Unit currentUnit, Point goal, int passLevel, int indexToIgnore) where T : Unit
+        {
+            int x = goal.X;
+            int y = goal.Y;
+            int width = Size.X;
+            int height = Size.Y;
+
+            var grid = _battleField.Grid;
+
+            // Vérifier les limites de la grille
+            if (x < 0 || x + width - 1 >= grid.Width || y < 0 || y + height - 1 >= grid.Height)
+                return false;
+
+            // Vérifier les obstacles statiques
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
+                {
+                    var cell = grid.Get(x + i, y + j);
+                    if (cell != null)
+                    {
+                        if (indexToIgnore == cell._index)
+                            continue;
+
+                        if (indexToIgnore != cell._index)
+                            return false;
+
+                        if (passLevel < cell._passLevel)
+                            return false;
+                    }
+                }
+
+            // Vérifier les autres unités
+            foreach (var otherUnit in units)
+            {
+                if (otherUnit == currentUnit) continue; // Ignorer l'unité elle-même
+
+                int otherX = (int)otherUnit.MapPosition.X;
+                int otherY = (int)otherUnit.MapPosition.Y;
+                int otherWidth = (int)otherUnit.Size.X;
+                int otherHeight = (int)otherUnit.Size.Y;
+
+                // Collision AABB (Axis-Aligned Bounding Box)
+                if (x < otherX + otherWidth && x + width > otherX &&
+                    y < otherY + otherHeight && y + height > otherY)
+                {
+                    Misc.Log("collision !!");
+                    return false;
+                }
+            }
+
+            return true;
+        }
         public void MoveTo(Point goalPosition)
         {
             GoalPosition = goalPosition;
 
             _battleField.DeleteInGrid(this);
+            _battleField.SetInGrid(this, goalPosition);
 
             _from = _battleField.MapPositionToVector2(MapPosition);
             _goal = _battleField.MapPositionToVector2(goalPosition);
@@ -213,6 +259,8 @@ namespace DungeonsMatch3
                     if (_ticMove > _tempoMove)
                     {
                         _ticMove = 0;
+
+                        //_battleField.DeleteInGrid(this);
 
                         MapPosition = GoalPosition;
 
