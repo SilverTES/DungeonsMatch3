@@ -52,7 +52,18 @@ namespace DungeonsMatch3
                     return ReconstructPath(currentNode);
 
                 // Explorer les voisins (haut, bas, gauche, droite)
-                Point[] directions = { new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0) };
+                Point[] directions = 
+                { 
+                    new Point(0, -1), 
+                    new Point(0, 1), 
+                    new Point(-1, 0), 
+                    new Point(1, 0),
+                    //new Point(-1, -1),
+                    //new Point(1, -1),
+                    //new Point(1, 1),
+                    //new Point(-1, 1),
+                };
+
                 foreach (var dir in directions)
                 {
                     Point newPos = currentNode.Position + dir;

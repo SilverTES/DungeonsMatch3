@@ -193,8 +193,8 @@ namespace DungeonsMatch3
                         
                         if (node != null)
                         {
+                            DeleteInGrid((Unit)node);
                             node.KillMe();
-                            DeleteInGrid(_mapPositionOver);
                         }
 
                         Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
