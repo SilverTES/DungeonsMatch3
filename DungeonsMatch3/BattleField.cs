@@ -119,14 +119,15 @@ namespace DungeonsMatch3
             {
                 int x, y;
                 Point size;
-                int nbTurns = 2; // size.X * size.Y
+                int nbTurns;
 
                 do
                 {
                     x = Misc.Rng.Next(0, 5);
                     y = Misc.Rng.Next(0, GridSize.Y);
 
-                    size = Unit.Sizes[Misc.Rng.Next(0, Unit.Sizes.Length)];                
+                    size = Unit.Sizes[Misc.Rng.Next(0, Unit.Sizes.Length)];
+                    nbTurns = (size.X * size.Y) / 2;
 
                 } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 16, TimerEvent.Time(0, 0, .05f * i * 4))));
             }
@@ -493,7 +494,7 @@ namespace DungeonsMatch3
                         if (node != null)
                         {
                             //batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
-                            batch.CenterStringXY(Game1._fontMain, $"{ node._passLevel }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
+                            //batch.CenterStringXY(Game1._fontMain, $"{ node._passLevel }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
                             //batch.CenterStringXY(Game1._fontMain, $"{ node._index }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
                         }
                     }
