@@ -81,6 +81,7 @@ namespace DungeonsMatch3
 
         public Unit(BattleField battleField, Point mapPosition, Point size, int nbTurn = 2, int maxEnergy = 32, float tempoBeforeSpawn = 0f)
         {
+            _passLevel = 3;
             _type = UID.Get<Unit>();
             _battleField = battleField;
 

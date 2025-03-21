@@ -34,7 +34,7 @@ namespace DungeonsMatch3
         public Point GridSize;
         public Vector2 CellSize;
 
-        List2D<Node> _grid;
+        Grid2D<Node> _grid;
 
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
@@ -54,7 +54,7 @@ namespace DungeonsMatch3
         public BattleField(Arena arena) 
         {
             _arena = arena;
-            _grid = new List2D<Node>(GridSize.X, GridSize.Y);
+            _grid = new Grid2D<Node>(GridSize.X, GridSize.Y);
 
             SetSize(CellSize.X * GridSize.X, CellSize.Y * GridSize.Y);
 
@@ -83,25 +83,25 @@ namespace DungeonsMatch3
 
             _rectOver = new RectangleF(0, 0, CellSize.X, CellSize.Y);
 
-            _grid.ResizeVecObject2D(GridSize.X, GridSize.Y);
+            _grid.Resize(GridSize.X, GridSize.Y);
 
             CreateGrid();
         }
         public void CreateGrid()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
-                    _grid.Put(i, j, null);
+                    _grid.Set(i, j, null);
                 }
             }
         }
         public void ClearGrid()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
                     DeleteInGrid(new Point(i, j));
                 }
@@ -181,7 +181,21 @@ namespace DungeonsMatch3
                     if(ButtonControl.OnePress("AddUnit", _mouse.LeftButton == ButtonState.Pressed && _key.IsKeyDown(Keys.LeftShift)))
                     {
                         Misc.Log("Add Unit");
-                        AddInGrid(new Unit(this, _mapPositionOver, new Point(2,2), 1, 64, TimerEvent.Time(0, 0, .05f)));
+                        AddInGrid(new Unit(this, _mapPositionOver, new Point(1,1), 1, 64, TimerEvent.Time(0, 0, .05f)));
+
+                        Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
+                    }
+                    if (ButtonControl.OnePress("DeleteUnit", _mouse.LeftButton == ButtonState.Pressed && _key.IsKeyDown(Keys.LeftAlt)))
+                    {
+                        Misc.Log("Delete Unit");
+
+                        var node = _grid.Get(_mapPositionOver.X, _mapPositionOver.Y);
+                        
+                        if (node != null)
+                        {
+                            node.KillMe();
+                            DeleteInGrid(_mapPositionOver);
+                        }
 
                         Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
                     }
@@ -323,7 +337,7 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < enemy.Size.Y; j++)
                 {
-                    _grid.Put(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, enemy);
+                    _grid.Set(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, enemy);
                 }
             }
 
@@ -334,13 +348,13 @@ namespace DungeonsMatch3
             {
                 for (int j = 0; j < enemy.Size.Y; j++)
                 {
-                    _grid.Put(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, null);
+                    _grid.Set(enemy.MapPosition.X + i, enemy.MapPosition.Y + j, null);
                 }
             }
         }
         public void DeleteInGrid(Point mapPosition)
         {
-            _grid.Put(mapPosition.X, mapPosition.Y, null);
+            _grid.Set(mapPosition.X, mapPosition.Y, null);
         }
         public bool CanSetInGrid(Unit enemy)
         {
@@ -361,7 +375,7 @@ namespace DungeonsMatch3
         }
         public bool IsInGrid(Point mapPosition)
         {
-            if (mapPosition.X < 0 || mapPosition.X >= _grid._width || mapPosition.Y < 0 || mapPosition.Y >= _grid._height)
+            if (mapPosition.X < 0 || mapPosition.X >= _grid.Width || mapPosition.Y < 0 || mapPosition.Y >= _grid.Height)
                 return false;
 
             return true;
@@ -441,14 +455,15 @@ namespace DungeonsMatch3
                 //batch.LeftTopString(Game1._fontMain, $"{(States)_state}", Vector2.One * 20 + Vector2.UnitY * 80, Color.Cyan);
                 //batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
-                for (int i = 0; i < _grid._width; i++)
+                for (int i = 0; i < _grid.Width; i++)
                 {
-                    for (int j = 0; j < _grid._height; j++)
+                    for (int j = 0; j < _grid.Height; j++)
                     {
                         var node = _grid.Get(i, j);
                         if (node != null)
                         {
                             //batch.CenterStringXY(Game1._fontMain, $"{ node._type }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
+                            //batch.CenterStringXY(Game1._fontMain, $"{ node._passLevel }", AbsXY + MapPositionToVector2(i, j) + CellSize / 2, Color.White * .75f);
                         }
                     }
                 }
@@ -456,6 +471,26 @@ namespace DungeonsMatch3
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
 
                 batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.TopCenter, Color.Cyan);
+
+                var path = PathFinding.FindPath(_grid, new Point(0, 0), _mapPositionOver, new Point(2, 2), 1);
+
+                if (path != null)
+                {
+                    var offSet = AbsXY + CellSize / 2;
+                    //var pos = path[0].ToVector2() * CellSize + offSet;
+                    //batch.Line(MapPositionToVector2(new Point(1,1)) + AbsXY, pos, Color.Red, 5f);
+
+                    for (int i = 0;i < path.Count - 1; i++)
+                    { 
+                        var posA = path[i].ToVector2() * CellSize + offSet;
+                        var posB = path[i+1].ToVector2() * CellSize + offSet;
+
+                        batch.Line(posA, posB, Color.Yellow, 5f);
+                        batch.Point(posB , 5, Color.Yellow);
+                    }
+                }
+
+                //batch.Line(AbsXY + CellSize / 2, (_mapPositionOver.ToVector2() * CellSize) + AbsXY + CellSize / 2, Color.Red, 3f);
 
             }
 

@@ -75,7 +75,7 @@ namespace DungeonsMatch3
             //_sprite.Color = Color.White * .95f;
 
             _arena = (Arena)new Arena().AppendTo(this);
-            _arena.Setup(new SizeTab(8, 8, 64, 64));
+            _arena.Setup(new SizeTab(8, 6, 64, 64));
             _arena.InitGrid();
 
             _loop = new Addon.Loop(this);
@@ -83,7 +83,7 @@ namespace DungeonsMatch3
             _loop.Start();
 
             _battlefield = (BattleField)new BattleField(_arena).AppendTo(this);
-            _battlefield.Setup(new SizeTab(24, 8, 64, 64));
+            _battlefield.Setup(new SizeTab(24, 10, 64, 64));
 
             _battlefield.AddRandomEnemy();
 

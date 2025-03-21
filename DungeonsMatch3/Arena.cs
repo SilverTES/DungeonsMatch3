@@ -55,7 +55,7 @@ namespace DungeonsMatch3
         public bool OnFinishTurn = false;
         public RectangleF Rect => _rect;
 
-        List2D<Gem> _grid;
+        Grid2D<Gem> _grid;
 
         Vector2 _mousePos = new Vector2();
         RectangleF _rectOver;
@@ -84,7 +84,7 @@ namespace DungeonsMatch3
         public Arena(BattleField battleField = null)
         {
             _battleField = battleField;
-            _grid = new List2D<Gem>(GridSize.X, GridSize.Y);
+            _grid = new Grid2D<Gem>(GridSize.X, GridSize.Y);
 
             SetState((int)States.Play);
 
@@ -112,18 +112,18 @@ namespace DungeonsMatch3
 
             _rectOver = new RectangleF(0, 0, CellSize.X, CellSize.Y);
 
-            _grid.ResizeVecObject2D(GridSize.X, GridSize.Y);
+            _grid.Resize(GridSize.X, GridSize.Y);
 
             CreateGrid();
         }
         public void CreateGrid()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
                     var gem = new Gem();
-                    _grid.Put(i, j, gem);
+                    _grid.Set(i, j, gem);
                 }
             }
         }
@@ -315,9 +315,9 @@ namespace DungeonsMatch3
         }
         public void ResetGridGemsAsSameColor()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
                     var gem = _grid.Get(i, j);
 
@@ -333,9 +333,9 @@ namespace DungeonsMatch3
         {
             List<Gem> result = [];
 
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
                     var gem = _grid.Get(i, j);
 
@@ -454,9 +454,9 @@ namespace DungeonsMatch3
         }
         public void PushGemsToDown()
         {
-            for (int row = _grid._height; row >= 0; row--)
+            for (int row = _grid.Height; row >= 0; row--)
             {
-                for (int col = 0; col < _grid._width; col++)
+                for (int col = 0; col < _grid.Width; col++)
                 {
                     var gem = _grid.Get(col, row);
 
@@ -464,7 +464,7 @@ namespace DungeonsMatch3
                     {
                         gem.IsFall = false;
                         // scan vertical
-                        for (int scanY = row + 1; scanY < _grid._height; scanY++)
+                        for (int scanY = row + 1; scanY < _grid.Height; scanY++)
                         {
                             if (_grid.Get(col, scanY) == null)
                             {
@@ -514,9 +514,9 @@ namespace DungeonsMatch3
         //}
         public void AddNewGemsToDown()
         {
-            for (int row = _grid._height - 1; row >= 0; row--)
+            for (int row = _grid.Height - 1; row >= 0; row--)
             {
-                for (int col = 0; col < _grid._width; col++)
+                for (int col = 0; col < _grid.Width; col++)
                 {
                     if (_grid.Get(col, row) == null)
                         AddInGrid(new Gem(this, RandomColor(), new Point(col, -1))).MoveTo(new Point(col, row));
@@ -572,9 +572,9 @@ namespace DungeonsMatch3
         }
         public void InitGrid()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
                     AddInGrid(new Gem(this, RandomColor(), new Point(i, j)));
                 }
@@ -582,9 +582,9 @@ namespace DungeonsMatch3
         }
         public void ClearGrid()
         {
-            for (int i = 0; i < _grid._width; i++)
+            for (int i = 0; i < _grid.Width; i++)
             {
-                for (int j = 0; j < _grid._height; j++)
+                for (int j = 0; j < _grid.Height; j++)
                 {
                     DeleteInGrid(new Point(i, j));
                 }
@@ -602,25 +602,25 @@ namespace DungeonsMatch3
         }
         public Gem SetInGrid(Gem gem, Point mapPosition)
         {
-            _grid.Put(mapPosition.X, mapPosition.Y, gem);
+            _grid.Set(mapPosition.X, mapPosition.Y, gem);
 
             return gem;
         }
         public Gem SetInGrid(Gem gem)
         {
-            _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, gem);
+            _grid.Set(gem.MapPosition.X, gem.MapPosition.Y, gem);
 
             return gem;
         }
         public Gem DeleteInGrid(Gem gem)
         {
-            _grid.Put(gem.MapPosition.X, gem.MapPosition.Y, null);
+            _grid.Set(gem.MapPosition.X, gem.MapPosition.Y, null);
 
             return gem;
         }
         public void DeleteInGrid(Point mapPosition)
         {
-            _grid.Put(mapPosition.X, mapPosition.Y, null);
+            _grid.Set(mapPosition.X, mapPosition.Y, null);
         }
         public bool IsClose(Point A, Point B)
         {
@@ -638,7 +638,7 @@ namespace DungeonsMatch3
         }
         public bool IsInGrid(Point mapPosition)
         {
-            if (mapPosition.X < 0 || mapPosition.X >= _grid._width || mapPosition.Y < 0 || mapPosition.Y >= _grid._height)
+            if (mapPosition.X < 0 || mapPosition.X >= _grid.Width || mapPosition.Y < 0 || mapPosition.Y >= _grid.Height)
                 return false;
 
             return true;

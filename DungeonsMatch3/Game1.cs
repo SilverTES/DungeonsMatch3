@@ -218,6 +218,25 @@ public class Game1 : Game
             Console.WriteLine((Layers)layerOrder[i]);
         }
 
+        Grid2D<int> test = new Grid2D<int>(5, 5);
+
+        Misc.Log(test.ToString());
+
+        for (int i = 1; i < 4; i++)
+        {
+            for (int j = 1; j < 4; j++)
+            {
+                test.Set(i , j, 8);
+            }
+        }
+
+        Misc.Log(test.ToString());
+
+        test.Resize(6, 6, 3, 3);
+
+        Misc.Log(test.ToString());
+
+
     }
 
     protected override void LoadContent()
