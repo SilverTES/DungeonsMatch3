@@ -9,6 +9,7 @@ using Mugen.GFX;
 using Mugen.Input;
 using Mugen.Physics;
 using System;
+using System.Net.Http.Headers;
 
 namespace DungeonsMatch3;
 
@@ -69,6 +70,10 @@ public class Game1 : Game
     static public MouseCursor CursorA;
     static public MouseCursor CursorB;
 
+    static public Texture2D _texCircle;
+    static public Texture2D _texLine;
+
+
     public Game1()
     {
         WindowManager.Init(this, ScreenW, ScreenH);
@@ -76,113 +81,6 @@ public class Game1 : Game
         Window.AllowUserResizing = true;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-    }
-    /// <summary>
-    /// Dessine un effet électrique entre pointA et pointB.
-    /// </summary>
-    /// <param name="spriteBatch">Le SpriteBatch pour dessiner.</param>
-    /// <param name="pixel">Texture d'un pixel pour le rendu.</param>
-    /// <param name="pointA">Point de départ.</param>
-    /// <param name="pointB">Point d'arrivée.</param>
-    /// <param name="color">Couleur de l'effet.</param>
-    /// <param name="segments">Nombre de segments pour la ligne.</param>
-    /// <param name="maxOffset">Amplitude maximale du décalage aléatoire.</param>
-    /// <param name="time">Temps pour l'animation.</param>
-    public static void DrawElectricEffect(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Color color, int segments, float maxOffset, float time, float thickness = 2f)
-    {
-        Vector2[] points = new Vector2[segments + 1];
-
-        points[0] = pointA; // Premier point
-        points[segments] = pointB; // Dernier point
-
-        // Calculer la direction de la ligne
-        Vector2 direction = pointB - pointA;
-        float length = direction.Length();
-        Vector2 normalizedDirection = Vector2.Normalize(direction);
-        Vector2 perpendicular = new Vector2(-normalizedDirection.Y, normalizedDirection.X); // Vecteur perpendiculaire
-
-        // Générer les points intermédiaires avec décalage aléatoire
-        for (int i = 1; i < segments; i++)
-        {
-            float t = i / (float)segments;
-            Vector2 basePoint = pointA + direction * t;
-
-            // Ajouter un décalage aléatoire avec animation
-            float offset = (float)(Misc.Rng.NextDouble() - 0.5) * maxOffset * (float)Math.Sin(time * 5 + i);
-            points[i] = basePoint + perpendicular * offset;
-        }
-
-        // Dessiner les segments entre les points
-        for (int i = 0; i < segments; i++)
-        {
-            Vector2 start = points[i];
-            Vector2 end = points[i + 1];
-
-            float distance = Vector2.Distance(start, end);
-            float angle = (float)Math.Atan2(end.Y - start.Y, end.X - start.X);
-
-            spriteBatch.Draw(
-                pixel,
-                start,
-                null,
-                color * (0.8f + (float)Misc.Rng.NextDouble() * 0.2f), // Variation légère de l'opacité
-                angle,
-                Vector2.Zero,
-                new Vector2(distance, thickness), // Épaisseur de 2 pixels
-                SpriteEffects.None,
-                0f
-            );
-        }
-    }
-
-
-    /// <summary>
-    /// Dessine une ligne incurvée entre pointA et pointB avec un point de contrôle pointC.
-    /// </summary>
-    /// <param name="spriteBatch">Le SpriteBatch pour dessiner.</param>
-    /// <param name="pixel">Texture d'un pixel pour le rendu.</param>
-    /// <param name="pointA">Point de départ.</param>
-    /// <param name="pointB">Point d'arrivée.</param>
-    /// <param name="pointC">Point de contrôle pour la courbure.</param>
-    /// <param name="color">Couleur de la ligne.</param>
-    public static void DrawCurvedLine(SpriteBatch spriteBatch, Texture2D pixel, Vector2 pointA, Vector2 pointB, Vector2 pointC, Color colorA, Color colorB, float thickness = 1f, int nbSegments = 200)
-    {
-        int segments = nbSegments; // Nombre de segments pour la courbe
-        Vector2 previousPoint = pointA;
-
-        for (int i = 1; i <= segments; i++)
-        {
-            float t = i / (float)segments;
-
-            // Calculer le point sur la courbe de Bézier quadratique
-            float tSquared = t * t;
-            float oneMinusT = 1 - t;
-            float oneMinusTSquared = oneMinusT * oneMinusT;
-            Vector2 currentPoint = oneMinusTSquared * pointA + 2 * oneMinusT * t * pointC + tSquared * pointB;
-
-            // Dessiner un segment entre previousPoint et currentPoint
-            float distance = Vector2.Distance(previousPoint, currentPoint);
-            float angle = (float)Math.Atan2(currentPoint.Y - previousPoint.Y, currentPoint.X - previousPoint.X);
-
-            //spriteBatch.Draw(
-            //    pixel,
-            //    previousPoint,
-            //    null,
-            //    Color.Lerp(colorA, colorB, (float)i / (float)segments),
-            //    angle,
-            //    Vector2.Zero,
-            //    new Vector2(distance, thickness), // Étirer le pixel pour former une ligne
-            //    SpriteEffects.None,
-            //    0f
-            //);
-
-            //spriteBatch.Point(previousPoint, thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments));
-            //spriteBatch.FillRectangleCentered(previousPoint, Vector2.One * thickness, Color.Lerp(colorA, colorB, (float)i / (float)segments), Geo.RAD_45);
-
-            GFX.Draw(spriteBatch, Game1._texGlow, Color.Lerp(colorA, colorB, (float)i / (float)segments), 0, previousPoint, Position.CENTER, Vector2.One * .2f);
-
-            previousPoint = currentPoint;
-        }
     }
 
     protected override void Initialize()
@@ -212,6 +110,9 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
+        _texCircle = GFX.CreateCircleTextureAA(GraphicsDevice, 400, 1f);
+        _texLine = GFX.CreateLineTextureAA(GraphicsDevice, 40, 7, 5f);
+
         _fontMain = Content.Load<SpriteFont>("Fonts/fontMain");
         _fontMain2 = Content.Load<SpriteFont>("Fonts/fontMain2");
         _fontMedium = Content.Load<SpriteFont>("Fonts/fontMedium");
@@ -273,5 +174,57 @@ public class Game1 : Game
         ScreenManager.ShowScreen(gameTime, SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap);
 
         base.Draw(gameTime);
+    }
+
+    // Méthode pour dessiner une décharge électrique
+    public static void DrawElectricEffect(SpriteBatch spriteBatch, Texture2D texLine, Vector2 start, Vector2 end, float time, float thicknessA, float thicknessB, Color colorA, Color colorB, float noiseIntensity = 10f)
+    {
+        Vector2 direction = end - start;
+        float totalLength = direction.Length();
+        direction.Normalize();
+        Vector2 perpendicular = new Vector2(-direction.Y, direction.X); // Vecteur perpendiculaire
+
+        int segments = (int)(totalLength / texLine.Width) + 1;
+        Vector2[] points = new Vector2[segments + 1];
+        points[0] = start;
+        points[segments] = end;
+
+        // Générer des points intermédiaires avec bruit
+        for (int i = 1; i < segments; i++)
+        {
+            float t = i / (float)segments;
+            Vector2 basePos = Vector2.Lerp(start, end, t);
+            float noise = (float)(Misc.Rng.NextDouble() - 0.5) * noiseIntensity * (float)Math.Sin(time * 5f);
+            points[i] = basePos + perpendicular * noise;
+        }
+
+        
+        float amount = 0;
+        float diff = thicknessB - thicknessA;
+
+        for (float thickness = thicknessA; thickness <= thicknessB; thickness++)
+        {
+            // Dessiner chaque segment
+            for (int i = 0; i < segments; i++)
+            {
+                Vector2 segmentStart = points[i];
+                Vector2 segmentEnd = points[i + 1];
+                Vector2 delta = segmentEnd - segmentStart;
+                float length = delta.Length();
+                float rotation = (float)Math.Atan2(delta.Y, delta.X);
+
+                spriteBatch.Draw(
+                    texLine,
+                    segmentStart,
+                    null,
+                    Color.Lerp(colorA, colorB, amount / diff),
+                    rotation,
+                    new Vector2(0, texLine.Height / 2f),
+                    new Vector2(length / texLine.Width, thickness / texLine.Height),
+                    SpriteEffects.None,
+                    0f);
+            }
+            amount += .5f;
+        }
     }
 }

@@ -26,6 +26,8 @@ namespace DungeonsMatch3
             {
                 case States.None:
 
+                    //PathFinding.Neighbours(_battleField.Grid, MapPosition, Size, out top, out bottom, out left, out right);
+
                     break;
                 case States.IsNull:
                     break;
@@ -190,9 +192,8 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.Debug)
             {
-                batch.CenterBorderedStringXY(Game1._fontMain, $"{(States)_state}", Shake.GetVector2() + AbsRectF.BottomCenter, Color.Yellow, Color.Black);
-
-                batch.CenterBorderedStringXY(Game1._fontMain, $"{_passLevel}", Shake.GetVector2() + AbsRectF.TopRight, Color.Cyan, Color.Black);
+                //batch.CenterBorderedStringXY(Game1._fontMain, $"{(States)_state}", Shake.GetVector2() + AbsRectF.BottomCenter, Color.Yellow, Color.Black);
+                //batch.CenterBorderedStringXY(Game1._fontMain, $"{_passLevel}", Shake.GetVector2() + AbsRectF.TopRight, Color.Cyan, Color.Black);
 
                 //_battleField.DrawPath(batch, MapPosition, new Point(_battleField.Grid.Width - Size.X, 0), Size, 2, _index, Color.Red * .1f);
 

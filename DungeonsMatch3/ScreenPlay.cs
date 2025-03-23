@@ -39,6 +39,7 @@ namespace DungeonsMatch3
         //    ];
 
         KeyboardState _key;
+
         Addon.Loop _loop;
 
         Hero[] _hero = new Hero[3];
@@ -257,20 +258,23 @@ namespace DungeonsMatch3
                 //_battleContainer.DrawDebug(batch, Color.Red);
                 // Exemple d'appel pour un effet électrique
 
-                //Game1.DrawElectricEffect(
-                //    batch,
-                //    GFX._whitePixel,
-                //    new Vector2(100, 300),  // Point A
-                //    new Vector2(700, 400),  // Point B
-                //    Color.Cyan,             // Couleur de l'éclair
-                //    40,                     // Nombre de segments
-                //    80f,                    // Amplitude maximale du décalage
-                //    (float)gameTime.TotalGameTime.TotalSeconds // Pour l'animation
-                //);
-
                 //batch.Draw(Game1._texTrail, new Rectangle(500, 50, 128, 128), Color.White);
 
                 //batch.Draw(_sprite, Game1._mousePos);
+
+                //Game1.DrawFilledCircle(batch, new Vector2(400, 200), 40, Color.Gold * .5f);
+                //batch.Draw(Game1._texCircle, new Rectangle(800, 20, 1500, 1500), Color.Red * .5f);
+
+                //Game1.DrawElectricEffect(batch, Game1._texLine, Vector2.One * 100, Game1._mousePos, (float)gameTime.TotalGameTime.TotalSeconds, 3f, 5f, Color.White, Color.Blue *.5f, 80f);
+
+                //batch.FilledCircle(Game1._texCircle, Game1._mousePos, new Vector2(40, 30), _arena.CurrentColor * .5f);
+                
+                //batch.Point(Game1._mousePos, 3, Color.Black);
+
+                //batch.LineTexture(Game1._texLine, Game1._mousePos, Vector2.Zero, 7, Color.Yellow);
+                //Game1.DrawLine(batch, Game1._texLine, Game1._mousePos, Vector2.Zero, 3, Color.Red);
+
+                //batch.CurvedLine(Vector2.One * 40, Game1._mousePos, Vector2.UnitX * Game1._mousePos.X, Color.Yellow, Color.Red, 4);
             }
 
             if (indexLayer == (int)Game1.Layers.BackFX)

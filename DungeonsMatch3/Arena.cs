@@ -743,8 +743,8 @@ namespace DungeonsMatch3
         }
         public void DrawCurve(SpriteBatch batch, Vector2 A, Vector2 B)
         {
-            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.Transparent, _currentColor * 1f, 9f);
-            Game1.DrawCurvedLine(batch, GFX._whitePixel, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * .5f, 3f);
+            batch.CurvedLine(Game1._texGlow, A, B, new Vector2(B.X, A.Y), Color.Transparent, _currentColor * 1f, 0.9f);
+            batch.CurvedLine(Game1._texGlow, A, B, new Vector2(B.X, A.Y), Color.White * 0f, Color.White * .5f, 0.3f);
         }
         public void DrawAttack(SpriteBatch batch, Vector2 position)
         {

@@ -113,7 +113,7 @@ namespace DungeonsMatch3
 
             KillAll(UID.Get<Unit>());
         }
-        public void AddRandomEnemy(int nbEnemy = 5)
+        public void AddRandomEnemy(int nbEnemy = 3)
         {
             for (int i = 0; i < nbEnemy; i++)
             {
@@ -178,7 +178,8 @@ namespace DungeonsMatch3
                 case States.Play:
 
                     // Debug
-                    if (_timer.OnTimer((int)Timers.EnemyAction))
+                    //if (_timer.OnTimer((int)Timers.EnemyAction)) 
+                    if (ButtonControl.OnePress("DoAction", _key.IsKeyDown(Keys.Space)))
                     {
                         DoAction();
                         //_arena.NbTurns++;   
@@ -211,7 +212,7 @@ namespace DungeonsMatch3
                         Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
                     }
                     
-                    if (ButtonControl.OnePress("AddRandomEnemy", _key.IsKeyDown(Keys.Space)))
+                    if (ButtonControl.OnePress("AddRandomEnemy", _key.IsKeyDown(Keys.Insert)))
                     {
                         AddRandomEnemy();
                     }
@@ -303,7 +304,7 @@ namespace DungeonsMatch3
 
                     new PopInfo(str, Color.White, _arena.CurrentColor, 0, 16, 32).SetPosition(enemy.AbsRectF.TopCenter).AppendTo(_parent);
 
-                    new FxExplose(enemy.AbsRectF.Center, _arena.CurrentColor, 17, 20).AppendTo(_parent);
+                    new FxExplose(enemy.AbsRectF.Center, _arena.CurrentColor, 21, 20, 80).AppendTo(_parent);
 
                     arena.ChangeState((int)Arena.States.FinishTurn);
 

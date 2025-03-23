@@ -30,7 +30,7 @@ namespace DungeonsMatch3
 
         public Color Color;
 
-        float _angle = (float)Geo.DegToRad(0);
+        float _angle = (float)Geo.DegToRad(25);
 
         public bool IsSelected = false;
         public bool IsSameColor = false;    // true if found some close gems with same color
@@ -170,8 +170,7 @@ namespace DungeonsMatch3
                 //batch.Circle(AbsXY + shake, _radius, 8, Color.Black, 2, _angle);
 
 
-                GFX.Draw(batch, Game1._texGem, Color, 0, AbsXY + shake, Position.CENTER, Vector2.One * .5f);
-
+                GFX.Draw(batch, Game1._texGem, Color, _angle, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
 
             }
 
@@ -180,7 +179,7 @@ namespace DungeonsMatch3
                 var shake = Shake.GetVector2();
 
                 if (IsSameColor && NbSameColor > 2 && _arena.GetState() == (int)Arena.States.SelectGems)
-                    GFX.Draw(batch, Game1._texGemLight, Color.White, 0, AbsXY + shake, Position.CENTER, Vector2.One * .5f);
+                    GFX.Draw(batch, Game1._texGemLight, Color.White, _angle, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
                     //batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
 
                 if (IsSelected)

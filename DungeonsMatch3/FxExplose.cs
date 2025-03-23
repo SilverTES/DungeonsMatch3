@@ -37,9 +37,13 @@ namespace DungeonsMatch3
         }
         public void Draw(SpriteBatch batch, GameTime gameTime, int indexLayer)
         {
-            batch.Point(_position, _size, _color * _alpha);
-            batch.Point(_position, _size / 2, Color.LightYellow * _alpha);
-            batch.Point(_position, _size / 4, Color.White * _alpha);
+            //batch.Point(_position, _size, _color * _alpha);
+            //batch.Point(_position, _size / 2, Color.LightYellow * _alpha);
+            //batch.Point(_position, _size / 4, Color.White * _alpha);
+
+            batch.FilledCircle(Game1._texCircle, _position, _size, _color * _alpha);
+            batch.FilledCircle(Game1._texCircle, _position, _size/2, Color.LightYellow * _alpha);
+            batch.FilledCircle(Game1._texCircle, _position, _size/4, Color.White * _alpha);
         }
 
     }
