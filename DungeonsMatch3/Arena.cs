@@ -69,7 +69,7 @@ namespace DungeonsMatch3
 
         List<Gem> _gemSelecteds = [];
 
-        public static float RadiusGemOver = Gem.Radius - 10;
+        public static float RadiusGemOver = Gem.Radius - 8;
 
         MouseState _mouse;
 

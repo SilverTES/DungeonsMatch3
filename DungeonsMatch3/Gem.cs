@@ -178,7 +178,7 @@ namespace DungeonsMatch3
             {
                 var shake = Shake.GetVector2();
 
-                if (IsSameColor && NbSameColor > 2 && _arena.GetState() == (int)Arena.States.SelectGems)
+                if (IsSameColor && NbSameColor > 2)// && _arena.GetState() == (int)Arena.States.SelectGems)
                     GFX.Draw(batch, Game1._texGemLight, Color.White, _angle, AbsXY + shake, Position.CENTER, Vector2.One * .4f);
                     //batch.Circle(AbsXY + shake, _radius + 2, 8, Color.White * 1f, 2f);
 
