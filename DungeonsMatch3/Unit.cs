@@ -6,27 +6,31 @@ using Mugen.Event;
 using Mugen.GFX;
 using Mugen.Physics;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using static Mugen.Core.Addon;
 
 namespace DungeonsMatch3
 {
     class Unit : Node
     {
-        public static Point Size1x1 { get; private set; } = new Point(1, 1);
-        public static Point Size1x2 { get; private set; } = new Point(1, 2);
-        public static Point Size2x1 { get; private set; } = new Point(2, 1);
-        public static Point Size2x2 { get; private set; } = new Point(2, 2);
-        public static Point Size2x3 { get; private set; } = new Point(2, 3);
-        public static Point Size3x2 { get; private set; } = new Point(3, 2);
-        public static Point Size3x3 { get; private set; } = new Point(3, 3);
+        public enum BodySize
+        {
+            _1x1,
+            _2x2,
+            _2x3,
+            _3x3,
+
+        }
 
         public static Point[] Sizes =
         [
-            Size1x1, 
-            Size2x2,
-            Size2x3,
-            Size3x3,
+            new Point(1 * 2, 1 * 2),
+            new Point(2 * 2, 2 * 2),
+            new Point(2 * 2, 3 * 2),
+            new Point(3 * 2, 3 * 2),
         ];
+
+        public static Point GetSize(BodySize size) => Sizes[(int)size];
 
         public enum Timers
         {
@@ -356,11 +360,12 @@ namespace DungeonsMatch3
                 bg = Color.Red;
             }
 
-            GFX.Bar(batch, canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 8, Color.Red * _alphaSpawn);
-            GFX.Bar(batch, canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.Energy, 8, fg * _alphaSpawn);
-            GFX.BarLines(batch, canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 8, Color.Black * _alphaSpawn, 2);
+            Vector2 pos = canvas.TopCenter + Vector2.UnitY * 2 - Vector2.UnitX * (_specs.MaxEnergy / 4) + shake * .5f;
 
-            GFX.Bar(batch, canvas.TopCenter + (Vector2.UnitY * -0.25f) - Vector2.UnitX * (_specs.MaxEnergy / 2) + shake * .5f, _specs.MaxEnergy, 2, Color.White * .5f * _alphaSpawn);
+            GFX.Bar(batch, pos, _specs.MaxEnergy / 2, 8, Color.Red * _alphaSpawn);
+            GFX.Bar(batch, pos, _specs.Energy / 2, 8, fg * _alphaSpawn);
+            GFX.BarLines(batch, pos, _specs.MaxEnergy / 2, 8, Color.Black * _alphaSpawn, 2);
+            GFX.Bar(batch, pos - Vector2.UnitY * 2f, _specs.MaxEnergy / 2, 2, Color.White * .5f * _alphaSpawn);
 
             batch.CenterBorderedStringXY(Game1._fontMain, $"{_specs.Energy}", canvas.TopLeft + Vector2.One * 10 + shake * .5f, fg * _alphaSpawn, bg * _alphaSpawn);
         }

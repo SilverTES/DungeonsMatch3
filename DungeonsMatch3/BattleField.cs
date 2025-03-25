@@ -125,9 +125,10 @@ namespace DungeonsMatch3
                     y = Misc.Rng.Next(0, GridSize.Y);
 
                     size = Unit.Sizes[Misc.Rng.Next(0, Unit.Sizes.Length)];
-                    nbTurns = (size.X * size.Y) / 2;
+                    //nbTurns = (size.X * size.Y) / 2;
+                    nbTurns = 1;
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 16, TimerEvent.Time(0, 0, .05f * i * 4))));
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 6, TimerEvent.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -176,7 +177,7 @@ namespace DungeonsMatch3
                 case States.Play:
 
                     // Debug
-                    //if (_timer.OnTimer((int)Timers.EnemyAction)) 
+                    //if (_timer.OnTimer((int)Timers.EnemyAction))
                     if (ButtonControl.OnePress("DoAction", _key.IsKeyDown(Keys.Space)))
                     {
                         DoAction();
@@ -191,7 +192,7 @@ namespace DungeonsMatch3
                     if(ButtonControl.OnePress("AddUnit", _mouse.LeftButton == ButtonState.Pressed && _key.IsKeyDown(Keys.LeftShift)))
                     {
                         Misc.Log("Add Unit");
-                        AddInGrid(new Unit(this, _mapPositionOver, new Point(1,1), 1, 64, TimerEvent.Time(0, 0, .05f)));
+                        AddInGrid(new Unit(this, _mapPositionOver, new Point(2,2), 1, 64, TimerEvent.Time(0, 0, .05f)));
 
                         Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
                     }

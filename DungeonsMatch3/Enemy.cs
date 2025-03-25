@@ -155,7 +155,7 @@ namespace DungeonsMatch3
                 //if (_battleField.IsInGrid(goalPosition) && canMove)
                 {
                     MoveTo(goalPosition);
-                    Game1._soundRockSlide.Play(.1f * Game1._volumeMaster, .5f, 0f);
+                    //Game1._soundRockSlide.Play(.1f * Game1._volumeMaster, .5f, 0f);
                 }
             }
 
@@ -176,15 +176,15 @@ namespace DungeonsMatch3
 
                 Texture2D tex = null;
 
-                if (Size == Size1x1) tex = Game1._texAvatar1x1;
-                if (Size == Size2x2) tex = Game1._texAvatar2x2;
-                if (Size == Size2x3) tex = Game1._texAvatar2x3;
-                if (Size == Size3x3) tex = Game1._texAvatar3x3;
+                if (Size == GetSize(BodySize._1x1)) tex = Game1._texAvatar1x1;
+                if (Size == GetSize(BodySize._2x2)) tex = Game1._texAvatar2x2;
+                if (Size == GetSize(BodySize._2x3)) tex = Game1._texAvatar2x3;
+                if (Size == GetSize(BodySize._3x3)) tex = Game1._texAvatar3x3;
 
                 if (tex != null)
                 {
                     //GFX.Draw(batch, tex, Color.Black * .5f * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 2) + Shake.GetVector2() + Vector2.One * 4, Position.CENTER, Vector2.One * _scaleSpawn);
-                    
+
                     GFX.Draw(batch, tex, color * (_battleField.IsInGrid(MapPosition) ? 1f : .75f) * _alphaSpawn, _loop._current, AbsXY + (tex.Bounds.Size.ToVector2() / 2) + Shake.GetVector2(), Position.CENTER, Vector2.One * _scaleSpawn);
                 }
 
@@ -197,10 +197,10 @@ namespace DungeonsMatch3
 
                 //_battleField.DrawPath(batch, MapPosition, new Point(_battleField.Grid.Width - Size.X, 0), Size, 2, _index, Color.Red * .1f);
 
-                if (top) batch.Point(AbsRectF.TopCenter + Vector2.UnitY * 4, 3, Color.Yellow);
-                if (bottom) batch.Point(AbsRectF.BottomCenter - Vector2.UnitY * 4, 3, Color.Yellow);
-                if (left) batch.Point(AbsRectF.LeftMiddle + Vector2.UnitY * 4, 3, Color.Yellow);
-                if (right) batch.Point(AbsRectF.RightMiddle - Vector2.UnitY * 4, 3, Color.Yellow);
+                //if (top) batch.Point(AbsRectF.TopCenter + Vector2.UnitY * 4, 3, Color.Yellow);
+                //if (bottom) batch.Point(AbsRectF.BottomCenter - Vector2.UnitY * 4, 3, Color.Yellow);
+                //if (left) batch.Point(AbsRectF.LeftMiddle + Vector2.UnitY * 4, 3, Color.Yellow);
+                //if (right) batch.Point(AbsRectF.RightMiddle - Vector2.UnitY * 4, 3, Color.Yellow);
             }
 
             return this;  
