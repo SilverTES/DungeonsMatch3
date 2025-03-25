@@ -74,7 +74,7 @@ namespace DungeonsMatch3
         MouseState _mouse;
 
         public int Multiplier = 0;
-        public int Attack = 2;
+        public int Attack = 3;
 
         public int TotalAttack = 0;
 

@@ -88,16 +88,9 @@ public class Game1 : Game
         base.Initialize();
 
         _screenPlay = new ScreenPlay();
-        ScreenManager.Init(_screenPlay, Enums.Count<Layers>(), 
-            [
-            (int)Layers.BackFX,
-            (int)Layers.Main, 
-            (int)Layers.FrontFX, 
-            (int)Layers.HUD, 
-            (int)Layers.Debug,
-            ]);
+        ScreenManager.Init(_screenPlay, Enums.GetList<Layers>());
 
-        Console.WriteLine($" NB Layers = { ScreenManager.NbLayers }");
+        Misc.Log($" NB Layers = { ScreenManager.NbLayers }");
 
         var layerOrder = ScreenManager.GetLayersOrder();
 
