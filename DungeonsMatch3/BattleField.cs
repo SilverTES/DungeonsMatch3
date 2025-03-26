@@ -125,8 +125,8 @@ namespace DungeonsMatch3
                     y = Misc.Rng.Next(0, GridSize.Y);
 
                     size = Unit.Sizes[Misc.Rng.Next(0, Unit.Sizes.Length)];
-                    //nbTurns = (size.X * size.Y) / 2;
-                    nbTurns = 1;
+                    nbTurns = (size.X * size.Y) / 6;
+                    //nbTurns = 1;
 
                 } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 6, TimerEvent.Time(0, 0, .05f * i * 4))));
             }

@@ -99,6 +99,10 @@ public class Game1 : Game
             Console.WriteLine((Layers)layerOrder[i]);
         }
 
+        ScreenManager.SetLayerParameter((int)Layers.Main, blendState: BlendState.AlphaBlend, samplerState: SamplerState.LinearWrap);
+        ScreenManager.SetLayerParameter((int)Layers.BackFX, blendState: BlendState.Additive, samplerState: SamplerState.LinearWrap);
+        ScreenManager.SetLayerParameter((int)Layers.FrontFX, blendState: BlendState.Additive, samplerState: SamplerState.LinearWrap);
+
     }
 
     protected override void LoadContent()
@@ -163,7 +167,7 @@ public class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        ScreenManager.DrawScreen(gameTime, SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap);
+        ScreenManager.DrawScreen(gameTime);
         ScreenManager.ShowScreen(gameTime, SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap);
 
         base.Draw(gameTime);
