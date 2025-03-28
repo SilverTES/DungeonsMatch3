@@ -22,7 +22,7 @@ namespace DungeonsMatch3
         {
             base.RunState(gameTime);
 
-            switch ((States)_state)
+            switch (State.CurState)
             {
                 case States.None:
 
@@ -57,7 +57,7 @@ namespace DungeonsMatch3
         }
         public override void Action()
         {
-            if (_state == (int)States.None)
+            if (State.CurState == States.None)
             {
 
                 int passLevel = 2;
@@ -168,10 +168,10 @@ namespace DungeonsMatch3
             {
                 Color color = Color.White;
 
-                if (_state == (int)States.Damage)
+                if (State.CurState == States.Damage)
                     color = Color.IndianRed * 1f;
 
-                if (_state == (int)States.Dead)
+                if (State.CurState == States.Dead)
                     color = Color.Red;
 
                 Texture2D tex = null;

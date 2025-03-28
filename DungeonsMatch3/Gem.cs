@@ -15,6 +15,7 @@ namespace DungeonsMatch3
             Move,
             Dead,
         }
+        public State<States> State { get; private set; } = new State<States>(States.None);
 
         static public Color[] Colors =
         [
@@ -76,7 +77,7 @@ namespace DungeonsMatch3
             Color = color;
             MapPosition = mapPosition;
 
-            ChangeState((int)States.None);
+            State.Change(States.None);
 
             _radius = Radius;
 
@@ -86,7 +87,7 @@ namespace DungeonsMatch3
             new FxExplose(AbsXY, Color, 10, 40).AppendTo(_parent);
             new PopInfo(NbSameColor.ToString(), Color.White, Color, 0, 32, 32).SetPosition(XY).AppendTo(_parent);
 
-            ChangeState((int)States.Dead);
+            State.Change(States.Dead);
         }
         public void MoveTo(Point goalPosition)
         {
@@ -96,12 +97,12 @@ namespace DungeonsMatch3
             _from = _arena.MapPositionToVector2(MapPosition);
             _goal = _arena.MapPositionToVector2(goalPosition);
 
-            ChangeState((int)States.Move);
+            State.Change(States.Move);
             //Console.WriteLine("Gem Move Down");
         }
-        protected override void RunState(GameTime gameTime)
+        private void RunState(GameTime gameTime)
         {
-            switch ((States)_state)
+            switch (State.CurState)
             {
                 case States.None:
 
@@ -124,7 +125,7 @@ namespace DungeonsMatch3
 
                         MapPosition = GoalPosition;
 
-                        ChangeState((int)States.None);
+                        State.Change(States.None);
 
                     }
 

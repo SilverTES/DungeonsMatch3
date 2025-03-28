@@ -26,15 +26,14 @@ namespace DungeonsMatch3
             //PushGemsToUp,
             //AddNewGemsToUp,
         }
-
-        public States State => (States)_state;
+        public State<States> State { get; private set; } = new State<States>(States.Play);
 
         public enum Timers
         {
             None,
             Help,
         }
-        TimerEvent _timers;
+        Timer<Timers> _timers = new();
 
         public Point[] ClosePoints = [
             new Point(0, -1),
@@ -87,12 +86,8 @@ namespace DungeonsMatch3
             _battleField = battleField;
             _grid = new Grid2D<Gem>(GridSize.X, GridSize.Y);
 
-            SetState((int)States.Play);
-
-            _timers = new TimerEvent(Enums.Count<Timers>());
-
-            _timers.SetTimer((int)Timers.Help, TimerEvent.Time(0, 0, 3), true);
-            _timers.StartTimer((int)Timers.Help);
+            _timers.Set(Timers.Help, Timer.Time(0, 0, 3), true);
+            _timers.Start(Timers.Help);
 
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0, -2f, 2f, .5f, Mugen.Animation.Loops.PINGPONG);
@@ -128,9 +123,9 @@ namespace DungeonsMatch3
                 }
             }
         }
-        protected override void RunState(GameTime gameTime)
+        private void RunState(GameTime gameTime)
         {
-            switch ((States)_state)
+            switch (State.CurState)
             {
                 case States.Play:
                     OnFinishTurn = false;
@@ -163,16 +158,16 @@ namespace DungeonsMatch3
                     //if (pushDirection > 5)
                     //    ChangeState((int)States.PushGemsToUp);
                     //else 
-                        ChangeState((int)States.PushGemsToDown);
+                        State.Change(States.PushGemsToDown);
 
-                    _timers.StartTimer((int)Timers.Help);
+                    _timers.Start(Timers.Help);
 
                     break;
 
                 case States.PushGemsToDown:
 
                     PushGemsToDown();
-                    ChangeState((int)States.AddNewGemsToDown);
+                    State.Change(States.AddNewGemsToDown);
 
                     break;
 
@@ -186,7 +181,7 @@ namespace DungeonsMatch3
                 case States.AddNewGemsToDown:
 
                     AddNewGemsToDown();
-                    ChangeState((int)States.Action);
+                    State.Change(States.Action);
 
                     break;
 
@@ -219,7 +214,7 @@ namespace DungeonsMatch3
 
                     NbTurns++;
 
-                    ChangeState((int)States.Play);
+                    State.Change(States.Play);
 
                     break;
 
@@ -227,14 +222,6 @@ namespace DungeonsMatch3
                     break;
             }
         }
-        //private bool IsPointInCircle(Vector2 point, Vector2 circleCenter, float radius)
-        //{
-        //    float dx = point.X - circleCenter.X;
-        //    float dy = point.Y - circleCenter.Y;
-        //    float distanceSquared = dx * dx + dy * dy;
-        //    float radiusSquared = radius * radius;
-        //    return distanceSquared <= radiusSquared;
-        //}
         public override Node Update(GameTime gameTime)
         {
             _timers.Update();
@@ -288,7 +275,7 @@ namespace DungeonsMatch3
                         {
                             _currentColor = gemOver.Color;
                             SelectGem(gemOver);
-                            ChangeState((int)States.SelectGems);
+                            State.Change(States.SelectGems);
 
                             Game1._soundClock.Play(.5f * Game1._volumeMaster, 1.0f, 0.0f);
                         }
@@ -299,7 +286,7 @@ namespace DungeonsMatch3
                 }
             }
             
-            if (_timers.OnTimer((int)Timers.Help))
+            if (_timers.On(Timers.Help))
             {
 
                 //Console.WriteLine("Help Help");
@@ -412,14 +399,14 @@ namespace DungeonsMatch3
             {
                 if (_gemSelecteds.Count >= 3)
                 {
-                    ChangeState((int)States.ExploseSelectedGems);
+                    State.Change(States.ExploseSelectedGems);
 
                     //NbTurns++;
                 }
                 else
                 {
                     DeSelectAllGems();
-                    ChangeState((int)States.Play);
+                    State.Change(States.Play);
                 }
 
             }
@@ -669,7 +656,7 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.FrontFX)
             {
-                if (_state == (int)States.Action)
+                if (State.CurState == States.Action)
                 {
                     batch.FillRectangle(AbsRectF, Color.Black * .25f);
 
@@ -707,7 +694,7 @@ namespace DungeonsMatch3
 
             if (indexLayer == (int)Game1.Layers.HUD)
             {
-                if (_state == (int)States.SelectGems || _state == (int)States.Action)
+                if (State.CurState == States.SelectGems || State.CurState == States.Action)
                     DrawAttack(batch, AbsXY + _mousePos - Vector2.UnitY * 40 + Vector2.UnitX * 40);
             }
 
@@ -715,7 +702,7 @@ namespace DungeonsMatch3
             {
                 //batch.LeftTopString(Game1._fontMain, $"NB close Gems = {FindSameGems(_currentGemOver).Count}", Vector2.UnitX * 20 + Vector2.UnitY * 120, Color.Yellow);
                 //batch.LeftTopString(Game1._fontMain, $"{_mousePos}", Vector2.One * 20, Color.Yellow);
-                batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.BottomCenter - Vector2.UnitY * 20, Color.Cyan);
+                batch.CenterStringXY(Game1._fontMain, $"{State.CurState}", AbsRectF.BottomCenter - Vector2.UnitY * 20, Color.Cyan);
                 //batch.LeftTopString(Game1._fontMain, $"{_currentColor} {_gemSelecteds.Count}", Vector2.One * 20 + Vector2.UnitY * 120, _currentColor);
 
                 //for (int i = 0; i < _grid._width; i++)
@@ -791,7 +778,7 @@ namespace DungeonsMatch3
                 //);
             }
 
-            if (_state == (int)States.SelectGems && _gemSelecteds.Count > 0)
+            if (State.CurState == States.SelectGems && _gemSelecteds.Count > 0)
             {
                 var p1 = AbsXY + MapPositionToVector2(_gemSelecteds.Last().MapPosition);
                 var p2 = AbsXY + _mousePos;

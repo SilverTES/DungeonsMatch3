@@ -42,13 +42,13 @@ namespace DungeonsMatch3
 
             UpdateRect();
 
-            if (Misc.PointInRect(_mousePos, AbsRect) && ButtonControl.OnePress("OnClick", _mouse.LeftButton == ButtonState.Pressed) && _arena.GetState() == (int)Arena.States.Action)
+            if (Misc.PointInRect(_mousePos, AbsRect) && ButtonControl.OnePress("OnClick", _mouse.LeftButton == ButtonState.Pressed) && _arena.State.CurState == Arena.States.Action)
             {
                 //Misc.Log($"Coucou {_index}");
 
                 _points += _arena.TotalAttack;
 
-                _arena.ChangeState((int)Arena.States.FinishTurn);
+                _arena.State.Change(Arena.States.FinishTurn);
                 //_battleField.DoAction();
 
                 Game1._soundBlockHit.Play(.8f * Game1._volumeMaster, .1f, 0f);

@@ -19,7 +19,7 @@ namespace DungeonsMatch3
             EnemyAction,
             Damage,
         }
-        TimerEvent _timer;
+        Timer<Timers> _timer;
         public enum States
         {
             Play,
@@ -27,7 +27,7 @@ namespace DungeonsMatch3
             DoAction,
 
         }
-
+        public State<States> State { get; private set; } = new State<States>(States.Play);
         //public Point Target = new Point();
 
         public Point GridSize;
@@ -62,12 +62,10 @@ namespace DungeonsMatch3
 
             CreateGrid();
 
-            ChangeState((int)States.Play);
-
-            _timer = new TimerEvent(Enums.Count<Timers>());
-            _timer.SetTimer((int)Timers.Damage, TimerEvent.Time(0, 0, 1));
-            _timer.SetTimer((int)Timers.EnemyAction, TimerEvent.Time(0, 0, .5f), true);
-            _timer.StartTimer((int)Timers.EnemyAction);
+            _timer = new Timer<Timers>();
+            _timer.Set(Timers.Damage, Timer.Time(0, 0, 1));
+            _timer.Set(Timers.EnemyAction, Timer.Time(0, 0, .5f), true);
+            _timer.Start(Timers.EnemyAction);
 
             _loop = new Addon.Loop(this);
             _loop.SetLoop(0, -2f, 2f, .5f, Mugen.Animation.Loops.PINGPONG);
@@ -128,7 +126,7 @@ namespace DungeonsMatch3
                     nbTurns = (size.X * size.Y) / 6;
                     //nbTurns = 1;
 
-                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 6, TimerEvent.Time(0, 0, .05f * i * 4))));
+                } while (!AddInGrid(new Enemy(this, new Point(x, y), size, nbTurns, size.X * size.Y * 6, Timer.Time(0, 0, .05f * i * 4))));
             }
         }
         public Enemy FindClosestEnemy()
@@ -170,9 +168,9 @@ namespace DungeonsMatch3
 
             return base.Update(gameTime);
         }
-        protected override void RunState(GameTime gameTime)
+        private void RunState(GameTime gameTime)
         {
-            switch ((States)_state)
+            switch (State.CurState)
             {
                 case States.Play:
 
@@ -192,7 +190,7 @@ namespace DungeonsMatch3
                     if(ButtonControl.OnePress("AddUnit", _mouse.LeftButton == ButtonState.Pressed && _key.IsKeyDown(Keys.LeftShift)))
                     {
                         Misc.Log("Add Unit");
-                        AddInGrid(new Unit(this, _mapPositionOver, new Point(2,2), 1, 64, TimerEvent.Time(0, 0, .05f)));
+                        AddInGrid(new Unit(this, _mapPositionOver, new Point(2,2), 1, 64, Timer.Time(0, 0, .05f)));
 
                         Game1._soundClock.Play(.2f * Game1._volumeMaster, .5f, 0f);
                     }
@@ -217,7 +215,7 @@ namespace DungeonsMatch3
                     }
 
 
-                    if (ButtonControl.OnePress("Attack", _mouse.LeftButton == ButtonState.Pressed) && _arena.State == Arena.States.Action)
+                    if (ButtonControl.OnePress("Attack", _mouse.LeftButton == ButtonState.Pressed) && _arena.State.CurState == Arena.States.Action)
                     {
                         if (AttackEnemy(_arena, _mapPositionOver))
                         {
@@ -246,18 +244,18 @@ namespace DungeonsMatch3
 
                 case States.DoAction:
 
-                    ChangeState((int)States.Play);
+                    State.Change(States.Play);
 
                     break;
 
                 case States.DoDamage:
 
-                    if (_timer.OnTimer((int)Timers.Damage))
+                    if (_timer.On(Timers.Damage))
                     {
                         //Console.WriteLine("Dherhdesrhjerj");
-                        _timer.StopTimer((int)Timers.Damage);
+                        _timer.Stop(Timers.Damage);
                         DoAction();
-                        ChangeState((int)States.DoAction);
+                        State.Change(States.DoAction);
                     }
 
                     break;
@@ -265,8 +263,6 @@ namespace DungeonsMatch3
                 default:
                     break;
             }
-
-            base.RunState(gameTime);
         }
         public void DoAction()
         {
@@ -305,10 +301,10 @@ namespace DungeonsMatch3
 
                     new FxExplose(enemy.AbsRectF.Center, _arena.CurrentColor, 21, 20, 80).AppendTo(_parent);
 
-                    arena.ChangeState((int)Arena.States.FinishTurn);
+                    arena.State.Change(Arena.States.FinishTurn);
 
-                    _timer.StartTimer((int)Timers.Damage);
-                    ChangeState((int)States.DoDamage);
+                    _timer.Start(Timers.Damage);
+                    State.Change(States.DoDamage);
 
                     return true;
                 }
@@ -460,7 +456,7 @@ namespace DungeonsMatch3
             if (indexLayer == (int)Game1.Layers.FrontFX)
             {
                 var enemy = FindClosestEnemy();
-                if (enemy != null && !IsInGrid(_mapPositionOver) && _arena.GetState() == (int)Arena.States.Action)
+                if (enemy != null && !IsInGrid(_mapPositionOver) && _arena.State.CurState == Arena.States.Action)
                 {
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 8), Vector2.One * 4, Color.OrangeRed * .5f, 3f);
                     batch.BevelledRectangle(enemy.AbsRectF.Extend(_loop._current + 4), Vector2.One * 4, Color.Red * 1f, 3f);
@@ -502,7 +498,7 @@ namespace DungeonsMatch3
 
                 //batch.Point(_mapMouseOver, 4, Color.OrangeRed);
 
-                batch.CenterStringXY(Game1._fontMain, $"{(States)_state}", AbsRectF.TopCenter, Color.Cyan);
+                batch.CenterStringXY(Game1._fontMain, $"{State.CurState}", AbsRectF.TopCenter, Color.Cyan);
 
                 //DrawPath(batch, new Point(0, 0), _mapPositionOver, new Point(1,1), 1);
 

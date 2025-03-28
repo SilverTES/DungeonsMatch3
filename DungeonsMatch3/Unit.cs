@@ -38,9 +38,8 @@ namespace DungeonsMatch3
             Trail,
             Death,
             Spawn,
-            Count,
         }
-        protected TimerEvent _timer;
+        protected Timer<Timers> _timer = new();
         public enum States
         {
             None,
@@ -50,6 +49,7 @@ namespace DungeonsMatch3
             Move,
             Dead,
         }
+        public State<States> State { get; private set; } = new State<States>(States.IsNull);
 
         protected Specs _specs = new();
         public Point Size { get; private set; } = new();
@@ -95,19 +95,16 @@ namespace DungeonsMatch3
             _loop.Start();
             AddAddon(_loop);
 
-            _timer = new TimerEvent((int)Timers.Count);
-            _timer.SetTimer((int)Timers.Trail, TimerEvent.Time(0, 0, .001f));
-            _timer.SetTimer((int)Timers.Death, TimerEvent.Time(0, 0, .5f));
-            _timer.SetTimer((int)Timers.Spawn, TimerEvent.Time(0, 1.5f, 0));
-            _timer.SetTimer((int)Timers.BeforeSpawn, tempoBeforeSpawn);
+            _timer.Set(Timers.Trail, Timer.Time(0, 0, .001f));
+            _timer.Set(Timers.Death, Timer.Time(0, 0, .5f));
+            _timer.Set(Timers.Spawn, Timer.Time(0, 1.5f, 0));
+            _timer.Set(Timers.BeforeSpawn, tempoBeforeSpawn);
 
-            _timer.StartTimer((int)Timers.BeforeSpawn);
-            _timer.StartTimer((int)Timers.Trail);
-
-            SetState((int)States.IsNull);
+            _timer.Start(Timers.BeforeSpawn);
+            _timer.Start(Timers.Trail);
 
             if (tempoBeforeSpawn == 0)
-                ChangeState((int)States.IsSpawn);
+                State.Change(States.IsSpawn);
 
             Init();
         }
@@ -204,7 +201,7 @@ namespace DungeonsMatch3
             _from = _battleField.MapPositionToVector2(MapPosition);
             _goal = _battleField.MapPositionToVector2(goalPosition);
 
-            ChangeState((int)States.Move);
+            State.Change(States.Move);
         }
         public virtual void Action()
         {
@@ -239,9 +236,9 @@ namespace DungeonsMatch3
 
             return base.Update(gameTime);
         }
-        protected override void RunState(GameTime gameTime)
+        protected virtual void RunState(GameTime gameTime)
         {
-            switch ((States)_state)
+            switch (State.CurState)
             {
                 case States.None:
 
@@ -252,7 +249,7 @@ namespace DungeonsMatch3
 
                 case States.Move:
 
-                    if (_timer.OnTimer((int)Timers.Trail))
+                    if (_timer.On(Timers.Trail))
                         new Trail(AbsRect, .025f, Color.WhiteSmoke).AppendTo(_parent);
 
                     _x = Easing.GetValue(Easing.QuarticEaseOut, _ticMove, _from.X, _goal.X, _tempoMove);
@@ -270,7 +267,7 @@ namespace DungeonsMatch3
 
                         _battleField.SetInGrid(this);
 
-                        ChangeState((int)States.None);
+                        State.Change(States.None);
 
                         Game1._soundClock.Play(.1f * Game1._volumeMaster, .5f, 0f);
                     }
@@ -298,14 +295,12 @@ namespace DungeonsMatch3
                 default:
                     break;
             }
-
-            base.RunState(gameTime);
         }
         void IsNull(GameTime gameTime)
         {
-            if (_timer.OnTimer((int)Timers.BeforeSpawn))
+            if (_timer.On(Timers.BeforeSpawn))
             {
-                ChangeState((int)States.IsSpawn);
+                State.Change(States.IsSpawn);
                 _ticScale = 0f;
 
                 Game1._soundSword.Play(.2f * Game1._volumeMaster, .5f, 0f);
@@ -321,7 +316,7 @@ namespace DungeonsMatch3
             {
                 _scaleSpawn = 1;
 
-                ChangeState((int)States.None);
+                State.Change(States.None);
             }
         }
         public override Node Draw(SpriteBatch batch, GameTime gameTime, int indexLayer)

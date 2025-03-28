@@ -3,7 +3,7 @@ using System;
 
 namespace DungeonsMatch3
 {
-    public class Timer
+    public class TimerAI
     {
         // Propriétés principales
         public float Duration { get; private set; } // Durée totale en secondes
@@ -21,7 +21,7 @@ namespace DungeonsMatch3
         public event Action OnTimerStarted; // Quand le timer démarre (nouvelle amélioration)
 
         // Constructeur
-        public Timer(float duration, bool loops = false)
+        public TimerAI(float duration, bool loops = false)
         {
             if (duration <= 0) throw new ArgumentException("Duration must be greater than 0");
             Duration = duration;
